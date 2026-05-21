@@ -1,3 +1,27 @@
+[data-theme="light"],
+[data-theme="black"],
+:root {
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "PingFang SC",
+        "Hiragino Sans GB",
+        "Microsoft YaHei UI",
+        "Microsoft YaHei",
+        "Noto Sans CJK SC",
+        "Source Han Sans SC",
+        sans-serif;
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+}
+
+[data-theme="light"],
+[data-theme="black"] {
+    /* DaisyUI button radius token: keep buttons nearly square across themes. */
+    --rounded-btn: 0.2rem;
+}
+
 .time-line-container>div:last-child .education__time>.education__line {
     display: none;
 }

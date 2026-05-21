@@ -5,14 +5,14 @@ import SideBarMenu from "./SideBarMenu.astro";
 const { sideBarActiveItemID } = Astro.props;
 ---
 
-<div class="drawer-side z-40">
+<div class="drawer-side z-40 lg:col-start-1 lg:row-start-1">
   <label for="my-drawer" class="drawer-overlay"></label>
-  <aside class="px-2 pt-2 h-auto min-h-full w-[19rem] bg-base-200 text-base-content flex flex-col">
-    <div class="w-fit mx-auto mt-5 mb-6">
+  <aside class="flex h-auto min-h-full w-[19rem] flex-col bg-base-200 px-4 pt-4 text-base-content lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-base-300/60">
+    <div class="mx-auto mb-8 mt-6 w-fit">
       <a href="/">
         <div class="avatar transition ease-in-out hover:scale-[102%] block m-auto">
           <div class="w-[8.5rem]">
-            <Image class="mask mask-circle" format="webp" width={300} height={300} src="/profile.webp" alt="Profile image" />
+            <Image class="mask mask-circle" format="webp" width={300} height={300} src="/profile.jpg" alt="张永鑫头像" />
           </div>
         </div>
       </a>

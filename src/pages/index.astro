@@ -1,78 +1,84 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HorizontalCard from "../components/HorizontalCard.astro";
-import { getCollection } from "astro:content";
-import createSlug from "../lib/createSlug"
 
-const posts = (await getCollection("blog")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-const last_posts = posts.slice(0, 3);
+const interests = [
+  "数据分析",
+  "英语学习",
+  "健身",
+  "独立开发",
+  "增长运营",
+  "产品拆解",
+  "边缘计算",
+];
 ---
 
 <BaseLayout sideBarActiveItemID="home">
-  <div class="pb-12 mt-5">
-    <div class="text-xl py-1">Hey there 👋</div>
-    <div class="text-5xl font-bold">I'm Manuel Ernesto</div>
-    <div class="text-3xl py-3 font-bold">Software Engineer and Entrepreneur</div>
-    <div class="py-2">
-      <text class="text-lg">
-        This is <b>Astrofy</b> a free and open-source template for your Personal Portfolio Website built with Astro and TailwindCSS.
-        Create in minutes a website with Blog, CV, Project Section, Store and RSS Feed. I hope you find
-        it useful!
-      </text>
+  <div class="mt-4 pb-14 lg:mt-6 lg:pb-16">
+    <div class="py-1 text-xl">你好 👋</div>
+    <div class="text-5xl font-bold lg:text-7xl">我是 张永鑫</div>
+    <div class="py-3 text-3xl font-bold lg:text-5xl">Ethan Zhang · 全栈产品开发</div>
+    <div class="max-w-4xl py-2">
+      <p class="text-lg leading-relaxed lg:text-[1.95rem] lg:leading-[1.5]">
+        把想法做成能上线、能验证、能持续迭代的产品。
+      </p>
     </div>
-    <div class="mt-8">
-      <a class="btn" href="https://twitter.com/manuelernestog" target="_blank"> Let's connect!</a>
-      <a href="https://github.com/manuelernestog/astrofy" target="_blank" class="btn btn-outline ml-5">
-        Get This template
+    <div class="mt-10 flex flex-wrap gap-4 lg:mt-12">
+      <a class="btn min-w-[12rem]" href="mailto:hi@itcox.cn" target="_blank">联系我</a>
+      <a href="/cv" class="btn btn-outline min-w-[14rem]">
+        查看简历
       </a>
     </div>
   </div>
 
+  <section class="mb-14">
+    <div class="mb-4 text-3xl font-bold lg:text-5xl">工作方式</div>
+    <div class="grid max-w-4xl gap-2 leading-7 opacity-80">
+      <p>
+        从需求判断、产品拆解到开发上线，我优先跑通最短闭环，再用真实数据推动下一轮迭代。
+      </p>
+      <p>
+        交付不止首版：模块边界、发布流程、日志、灰度、备份和恢复，都要为长期维护服务。
+      </p>
+    </div>
+  </section>
+
+  <section class="mb-14">
+    <div class="mb-4 text-3xl font-bold lg:text-5xl">兴趣方向</div>
+    <div class="flex flex-wrap gap-3">
+      {interests.map((interest) => <span class="badge badge-lg badge-outline px-4 py-4">{interest}</span>)}
+    </div>
+    <div class="mt-5 grid gap-2 leading-7 opacity-80">
+      <p>技术上，我关注能直接提升交付效率的工具、架构和产品方法。</p>
+      <p>生活上，我重视健康管理、营养和训练恢复，保持长期稳定输出。</p>
+    </div>
+  </section>
+
   <div>
-    <div class="text-3xl w-full font-bold mb-2">My last projects {"</>"}</div>
+    <div class="mb-2 w-full text-3xl font-bold lg:text-5xl">近期项目 {"</>"}</div>
   </div>
 
   <HorizontalCard
-    title="Demo Project 1"
+    title="爱设计 AIGC"
     img="/post_img.webp"
-    desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-    url="#"
-    badge="NEW"
+    desc="独立上线 AIGC 聊天与绘画平台，覆盖用户、对话、绘图、作品广场和管理后台。"
+    url="https://aigc.itcox.cn"
+    badge="全栈"
   />
   <div class="divider my-0"></div>
   <HorizontalCard
-    title="Demo Project 2"
+    title="小红书短视频解析服务"
     img="/post_img.webp"
-    desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-    url="#"
+    desc="面向开发者的短视频解析服务，稳定提取内容，GitHub 80+ stars。"
+    url="https://github.com/ethanz-code/short-video-extractor"
+    badge="开源"
   />
   <div class="divider my-0"></div>
   <HorizontalCard
-    title="Demo Project 3"
+    title="物联网竞赛知识库"
     img="/post_img.webp"
-    desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-    url="#"
-    badge="FOSS"
+    desc="持续沉淀竞赛笔记，服务 350+ 相关师生，累计浏览 10 万+。"
+    url="https://www.yuque.com/newlandiot"
+    badge="内容"
   />
-
-  <div>
-    <div class="text-3xl w-full font-bold mb-5 mt-10">Latest from blog</div>
-  </div>
-
-  {
-    last_posts.map((post) => (
-      <>
-        <HorizontalCard
-          title={post.data.title}
-          img={post.data.heroImage}
-          desc={post.data.description}
-          url={"/blog/" + createSlug(post.data.title, post.slug)}
-          target="_self"
-          badge={post.data.badge}
-        />
-        <div class="divider my-0" />
-      </>
-    ))
-  }
 </BaseLayout>

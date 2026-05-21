@@ -1,0 +1,79 @@
+---
+const { mobile = false } = Astro.props;
+
+const options = [
+  { value: "system", label: "跟随系统" },
+  { value: "light", label: "浅色" },
+  { value: "dark", label: "深色" },
+];
+---
+
+<div class="dropdown dropdown-end">
+  <button
+    type="button"
+    tabindex="0"
+    class:list={[
+      mobile ? "btn btn-square btn-ghost" : "btn btn-ghost gap-2 normal-case",
+    ]}
+    aria-label="切换主题"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="h-5 w-5"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M9.813 15.904 9 18l-.813-2.096a4.5 4.5 0 0 0-2.87-2.87L3.25 12l2.067-.813a4.5 4.5 0 0 0 2.87-2.87L9 6.25l.813 2.067a4.5 4.5 0 0 0 2.87 2.87L14.75 12l-2.067.813a4.5 4.5 0 0 0-2.87 2.87ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.456-2.456L14.25 6l1.035-.259a3.375 3.375 0 0 0 2.456-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
+      />
+    </svg>
+    {
+      !mobile && (
+        <>
+          <span>主题</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="h-4 w-4"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+          </svg>
+        </>
+      )
+    }
+  </button>
+
+  <ul
+    tabindex="0"
+    class="menu dropdown-content z-[60] mt-2 w-44 rounded-box border border-base-300 bg-base-100 p-2 shadow"
+  >
+    {
+      options.map((option) => (
+        <li>
+          <button
+            type="button"
+            class="theme-option btn btn-ghost btn-sm justify-between normal-case font-normal"
+            data-theme-option={option.value}
+          >
+            <span>{option.label}</span>
+            <span
+              class="badge badge-outline hidden text-[10px] uppercase tracking-wide"
+              data-theme-selected={option.value}
+            >
+              当前
+            </span>
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+</div>

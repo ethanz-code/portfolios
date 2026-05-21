@@ -3,6 +3,7 @@ import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import SideBar from "../components/SideBar.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
 import { ViewTransitions } from "astro:transitions";
 
 import { SITE_TITLE, SITE_DESCRIPTION, TRANSITION_API } from "../config";
@@ -18,18 +19,50 @@ const {
 ---
 
 <!doctype html>
-<html lang="en" data-theme="lofi">
+<html lang="zh-CN" data-theme="light">
   <head>
+    <script is:inline>
+      (() => {
+        const storageKey = "theme-preference";
+        const getSystemTheme = () =>
+          window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        const getDaisyTheme = (theme) => (theme === "dark" ? "black" : "light");
+        const getColorScheme = (theme) => (theme === "dark" ? "dark" : "light");
+
+        try {
+          const storedTheme = window.localStorage.getItem(storageKey);
+          const theme = storedTheme === "light" || storedTheme === "dark" ? storedTheme : getSystemTheme();
+          document.documentElement.dataset.theme = getDaisyTheme(theme);
+          document.documentElement.style.colorScheme = getColorScheme(theme);
+        } catch {
+          const theme = getSystemTheme();
+          document.documentElement.dataset.theme = getDaisyTheme(theme);
+          document.documentElement.style.colorScheme = getColorScheme(theme);
+        }
+      })();
+    </script>
     <BaseHead title={title} description={description} image={image} , ogType={ogType} />
     {TRANSITION_API && <ViewTransitions />}
   </head>
-  <body>
-    <div class="bg-base-100 drawer lg:drawer-open">
+  <body class="min-h-screen bg-base-100 text-base-content">
+    <div class:list={[
+      "bg-base-100",
+      includeSidebar
+        ? "drawer lg:drawer-open lg:grid lg:h-screen lg:grid-cols-[19rem_minmax(0,1fr)] lg:overflow-hidden"
+        : "min-h-screen",
+    ]}>
       <input id="my-drawer" type="checkbox" class="drawer-toggle" />
-      <div class="drawer-content bg-base-100">
+      <div
+        class:list={[
+          "bg-base-100",
+          includeSidebar
+            ? "drawer-content flex min-h-screen flex-col lg:col-start-2 lg:h-screen lg:overflow-y-auto"
+            : "flex min-h-screen flex-col",
+        ]}
+      >
         <Header title={SITE_TITLE} />
-        <div class="md:flex md:justify-center">
-          <main class="p-6 pt-10 lg:max-w-[900px] max-w-[100vw]">
+        <div class="flex-1">
+          <main class="mx-auto w-full max-w-5xl px-6 pb-12 pt-10 lg:px-12 lg:pb-16 lg:pt-16">
             <slot />
           </main>
         </div>
@@ -37,5 +70,103 @@ const {
       </div>
       {includeSidebar && <SideBar sideBarActiveItemID={sideBarActiveItemID} />}
     </div>
+    <div class="fixed right-6 top-6 z-40 hidden lg:block">
+      <ThemeToggle />
+    </div>
+    <script is:inline>
+      (() => {
+        const storageKey = "theme-preference";
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+        const getSystemTheme = () => (mediaQuery.matches ? "dark" : "light");
+
+        const getStoredTheme = () => {
+          try {
+            const value = window.localStorage.getItem(storageKey);
+            return value === "light" || value === "dark" ? value : null;
+          } catch {
+            return null;
+          }
+        };
+
+        const getDaisyTheme = (theme) => (theme === "dark" ? "black" : "light");
+        const getColorScheme = (theme) => (theme === "dark" ? "dark" : "light");
+
+        const applyTheme = (theme) => {
+          document.documentElement.dataset.theme = getDaisyTheme(theme);
+          document.documentElement.style.colorScheme = getColorScheme(theme);
+          const storedTheme = getStoredTheme();
+
+          document.querySelectorAll("[data-theme-option]").forEach((option) => {
+            if (!(option instanceof HTMLButtonElement)) {
+              return;
+            }
+
+            const optionTheme = option.dataset.themeOption;
+            const isActive = storedTheme
+              ? optionTheme === storedTheme
+              : optionTheme === "system";
+
+            option.classList.toggle("bg-base-200", isActive);
+            option.classList.toggle("font-medium", isActive);
+            option.setAttribute("aria-pressed", isActive ? "true" : "false");
+          });
+
+          document.querySelectorAll("[data-theme-selected]").forEach((badge) => {
+            if (!(badge instanceof HTMLElement)) {
+              return;
+            }
+
+            badge.classList.toggle("hidden", badge.dataset.themeSelected !== (storedTheme ?? "system"));
+          });
+        };
+
+        const bindThemeControls = () => {
+          document.querySelectorAll("[data-theme-option]").forEach((option) => {
+            if (!(option instanceof HTMLButtonElement) || option.dataset.themeBound === "true") {
+              return;
+            }
+
+            option.addEventListener("click", () => {
+              const selectedTheme = option.dataset.themeOption;
+
+              try {
+                if (selectedTheme === "light" || selectedTheme === "dark") {
+                  window.localStorage.setItem(storageKey, selectedTheme);
+                } else {
+                  window.localStorage.removeItem(storageKey);
+                }
+              } catch {
+                // Ignore storage write failures and keep applying the selected theme.
+              }
+
+              const resolvedTheme = selectedTheme === "light" || selectedTheme === "dark"
+                ? selectedTheme
+                : getSystemTheme();
+
+              applyTheme(resolvedTheme);
+              option.blur();
+            });
+
+            option.dataset.themeBound = "true";
+          });
+
+          applyTheme(getStoredTheme() ?? getSystemTheme());
+        };
+
+        if (!window.__themePreferenceBound) {
+          mediaQuery.addEventListener("change", () => {
+            if (!getStoredTheme()) {
+              applyTheme(getSystemTheme());
+            }
+          });
+
+          document.addEventListener("astro:after-swap", bindThemeControls);
+          window.__themePreferenceBound = true;
+        }
+
+        bindThemeControls();
+      })();
+    </script>
   </body>
 </html>
