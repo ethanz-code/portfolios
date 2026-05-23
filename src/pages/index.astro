@@ -6,15 +6,15 @@ import { resolveImageSource } from "../assets/images";
 import { type CollectionEntry, getCollection } from "astro:content";
 
 const workStyle = [
-  "先判断值不值得做，再拆最短闭环，尽快把产品推到可验证状态。",
-  "把开发、上线、日志、备份和恢复一起做完，减少后续维护成本。",
+  "先做市场调研，明确用户需求和痛点，再拆最短闭环，尽快把产品推到可验证状态。",
+  "会在开发中集成日志和监控，确保上线后能及时发现和解决问题，同时上线做好备份和恢复方案，避免数据丢失和服务中断。",
 ];
 
 const deliveryPoints = [
-  "独立完成从需求梳理、开发实现到部署上线。",
-  "把 AI 用进编码、排障、文档和资料整理，直接换交付速度。",
-  "提前处理模块边界、发布流程、日志和备份，避免项目上线后失控。",
-  "能补齐模型接入、Token 中转和算力接入这类工程支持环节。",
+  "能够独立完成从需求梳理、开发实现到部署上线。",
+  "有多人协同开发经验，能够很好的沟通和配合，推动项目进展。",
+  "会用主流 AI 提高开发效率，但同时也会确保实际效果和可持续维护。必要时刻也能够帮助团队搭建 Token 中转服务。",
+  "我并不会造轮子，比如说要我做克隆数字人，我并不会对于模型的开发训练相关技能，我最多只能帮忙去对接现有以及开源的模式去用。",
 ];
 
 type ProjectEntry = CollectionEntry<"projects">;
@@ -55,7 +55,7 @@ const getProjectImageDark = (project: ProjectEntry) =>
 ---
 
 <BaseLayout
-  description="张永鑫的个人作品集，展示全栈产品开发、项目交付、AIGC 工程接入和可持续维护能力。"
+  description="张永鑫的个人作品集，展示全栈产品开发、项目交付、成熟模型接入和可持续维护能力。"
   sideBarActiveItemID="home"
 >
   <div class="mt-2 pb-12 sm:mt-4 sm:pb-14 lg:mt-6 lg:pb-16">
@@ -87,8 +87,17 @@ const getProjectImageDark = (project: ProjectEntry) =>
   <section id="delivery" class="mb-16 scroll-mt-8 lg:scroll-mt-12">
     <div class="max-w-4xl">
       <div class="mb-4 text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">交付能力</div>
-      <div class="mt-5 grid max-w-4xl gap-3 leading-7 opacity-80">
-        {deliveryPoints.map((item) => <p>{item}</p>)}
+      <div class="mt-5 grid max-w-4xl gap-4 leading-7">
+        {
+          deliveryPoints.map((item, index) => (
+            <div class="flex gap-3">
+              <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center bg-base-content text-xs font-bold leading-none text-base-100">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <p class="opacity-80">{item}</p>
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
