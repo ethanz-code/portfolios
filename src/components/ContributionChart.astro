@@ -17,11 +17,11 @@ const intensityClass = [
 ];
 ---
 
-<section class="mb-16">
+<section class="mb-16" data-contribution-chart>
   <div class="mb-4 text-2xl font-bold leading-tight lg:text-4xl">今年的活跃状态</div>
   <p class="max-w-3xl leading-7 opacity-80">过去一年 GitHub 贡献 {contributionCount} 次。</p>
 
-  <div class="mt-6 overflow-x-auto rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5 lg:p-6">
+  <div class="mt-6 overflow-x-auto rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5 lg:p-6" data-contribution-scroll>
     <div class="min-w-[40rem] sm:min-w-[44rem] lg:min-w-[48rem]">
       <div class="flex items-end justify-between gap-6">
         <div>
@@ -57,12 +57,15 @@ const intensityClass = [
       <div class="mt-3 grid grid-flow-col grid-rows-7 gap-1">
         {
           weekData.map((week) =>
-            week.map((value) => (
+            week.map((day) => (
               <span
                 class:list={[
-                  "h-3 w-3 rounded-[0.18rem]",
-                  intensityClass[value],
+                  "contribution-cell h-3 w-3 cursor-help rounded-[0.18rem]",
+                  intensityClass[day.level],
                 ]}
+                data-contribution-tooltip={day.tooltip}
+                aria-label={day.tooltip}
+                tabindex="0"
               />
             ))
           )
@@ -70,7 +73,99 @@ const intensityClass = [
       </div>
     </div>
   </div>
+
+  <div
+    class="contribution-tooltip-layer pointer-events-none fixed left-0 top-0 z-[70] hidden max-w-[min(18rem,calc(100vw-1rem))] rounded-lg bg-neutral px-2 py-1 text-sm leading-tight text-neutral-content shadow-lg"
+    data-contribution-tooltip-layer
+    role="tooltip"
+  ></div>
 </section>
+
+<script is:inline>
+  (() => {
+    const POSITION_GAP = 10;
+    const VIEWPORT_PADDING = 8;
+
+    const bindContributionTooltip = (chart) => {
+      if (!(chart instanceof HTMLElement) || chart.dataset.contributionTooltipBound === "true") {
+        return;
+      }
+
+      const tooltipLayer = chart.querySelector("[data-contribution-tooltip-layer]");
+      const cells = Array.from(chart.querySelectorAll("[data-contribution-tooltip]"));
+      const scrollContainer = chart.querySelector("[data-contribution-scroll]");
+
+      if (!(tooltipLayer instanceof HTMLElement) || !cells.length) {
+        return;
+      }
+
+      let activeCell = null;
+
+      const hideTooltip = () => {
+        activeCell = null;
+        tooltipLayer.classList.add("hidden");
+        tooltipLayer.style.visibility = "";
+        tooltipLayer.style.left = "";
+        tooltipLayer.style.top = "";
+      };
+
+      const positionTooltip = (cell) => {
+        const tooltipText = cell.dataset.contributionTooltip;
+
+        if (!tooltipText) {
+          hideTooltip();
+          return;
+        }
+
+        activeCell = cell;
+        tooltipLayer.textContent = tooltipText;
+        tooltipLayer.classList.remove("hidden");
+        tooltipLayer.style.visibility = "hidden";
+
+        const cellRect = cell.getBoundingClientRect();
+        const tooltipRect = tooltipLayer.getBoundingClientRect();
+        const maxLeft = window.innerWidth - tooltipRect.width - VIEWPORT_PADDING;
+        const centeredLeft = cellRect.left + cellRect.width / 2 - tooltipRect.width / 2;
+        const left = Math.min(Math.max(centeredLeft, VIEWPORT_PADDING), Math.max(VIEWPORT_PADDING, maxLeft));
+        const topAbove = cellRect.top - tooltipRect.height - POSITION_GAP;
+        const topBelow = cellRect.bottom + POSITION_GAP;
+        const top = topAbove >= VIEWPORT_PADDING ? topAbove : topBelow;
+
+        tooltipLayer.style.left = `${left}px`;
+        tooltipLayer.style.top = `${top}px`;
+        tooltipLayer.style.visibility = "visible";
+      };
+
+      cells.forEach((cell) => {
+        if (!(cell instanceof HTMLElement)) {
+          return;
+        }
+
+        cell.addEventListener("mouseenter", () => positionTooltip(cell));
+        cell.addEventListener("focus", () => positionTooltip(cell));
+        cell.addEventListener("mouseleave", hideTooltip);
+        cell.addEventListener("blur", hideTooltip);
+      });
+
+      scrollContainer?.addEventListener("scroll", hideTooltip, { passive: true });
+      window.addEventListener("scroll", hideTooltip, { passive: true });
+      window.addEventListener("resize", () => {
+        if (activeCell instanceof HTMLElement) {
+          positionTooltip(activeCell);
+        }
+      });
+
+      chart.dataset.contributionTooltipBound = "true";
+    };
+
+    const bindAllContributionTooltips = () => {
+      document.querySelectorAll("[data-contribution-chart]").forEach(bindContributionTooltip);
+    };
+
+    bindAllContributionTooltips();
+    document.addEventListener("astro:after-swap", bindAllContributionTooltips);
+  })();
+</script>
 
 <style>
   :global([data-theme="light"]) {

@@ -24,10 +24,25 @@ export interface MomentGroup extends MomentGroupInfo {
 
 export const momentGroupInfo: MomentGroupInfo[] = [
   {
-    slug: "recent",
-    title: "近期图片",
-    description: "最近上传的生活、工作和路上片段。",
+    slug: "workbench",
+    title: "工作台片段",
+    date: "2026-05-23",
+    description: "用模拟图先看代码、文档和发布记录混排后的图集节奏。",
     order: 1,
+  },
+  {
+    slug: "city",
+    title: "路上观察",
+    date: "2026-05-22",
+    description: "模拟城市、通勤和夜间场景，检查深浅主题下的图片覆盖效果。",
+    order: 2,
+  },
+  {
+    slug: "interface",
+    title: "界面检查",
+    date: "2026-05-21",
+    description: "模拟产品界面截图，确认九宫格和图片组在不同尺寸下的裁切。",
+    order: 3,
   },
 ];
 

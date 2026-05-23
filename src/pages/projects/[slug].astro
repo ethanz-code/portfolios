@@ -30,6 +30,11 @@ dayjs.locale("zh-cn");
 const displayDate = dayjs(project.updatedDate).format("LL");
 const heroImage = resolveImageSource(project.heroImageLight ?? project.heroImage);
 const heroImageDark = resolveImageSource(project.heroImageDark);
+const projectImages = project.images?.map((image) => ({
+  ...image,
+  light: resolveImageSource(image.light),
+  dark: resolveImageSource(image.dark),
+}));
 ---
 
 <BaseLayout title={project.title} description={project.description} image={heroImage} sideBarActiveItemID="projects">
@@ -97,6 +102,31 @@ const heroImageDark = resolveImageSource(project.heroImageDark);
       }
 
       <Content />
+
+      {
+        projectImages?.map((image) => (
+          <div class="not-prose card my-8 border border-base-300 bg-base-100 shadow-sm">
+            <figure>
+              <ThemeImage
+                light={image.light}
+                dark={image.dark}
+                alt={image.alt}
+                class="aspect-[16/9] w-full object-cover object-left-top"
+                widths={[640, 960, 1280, 1600]}
+                sizes="(max-width: 820px) 100vw, 760px"
+                loading="lazy"
+              />
+            </figure>
+            {
+              image.caption && (
+                <div class="card-body p-4">
+                  <p class="text-sm opacity-70">{image.caption}</p>
+                </div>
+              )
+            }
+          </div>
+        ))
+      }
     </article>
   </main>
 </BaseLayout>

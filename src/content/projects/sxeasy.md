@@ -18,6 +18,11 @@ tags:
   - "用户端"
   - "企业端"
   - "管理后台"
+images:
+  - light: "/projects/sxeasy/dashboard.webp"
+    dark: "/projects/sxeasy/dashboard-dark.webp"
+    alt: "实习轻松办用户端运行截图"
+    caption: "用户端：签到、周报、进度和业务入口"
 ---
 
 实习轻松办是我做的一套实习材料办理网站，主要处理学生实习盖章、打卡、周报和实习身份牌这类需求。
@@ -37,26 +42,6 @@ tags:
 我不想只做一个“看起来像官网”的页面。这个业务真正麻烦的地方，是咨询、提交、处理、记录都散在聊天里，后面追进度也不方便。
 
 所以我把它拆成两个方向：前台先把服务和流程讲清楚，后台再把订单、企业资料和配置管起来。这样别人问到的时候，不用每次都从头解释，也能更快判断这个业务有没有继续做的价值。
-
-<div class="not-prose card my-8 border border-base-300 bg-base-100 shadow-sm">
-  <figure>
-    <div class="theme-image-stack w-full">
-      <img
-        src="/projects/sxeasy/dashboard.webp"
-        alt="实习轻松办用户端运行截图"
-        class="theme-image-variant theme-image-variant--light aspect-[16/9] w-full object-cover object-left-top"
-      />
-      <img
-        src="/projects/sxeasy/dashboard-dark.webp"
-        alt="实习轻松办用户端运行截图"
-        class="theme-image-variant theme-image-variant--dark aspect-[16/9] w-full object-cover object-left-top"
-      />
-    </div>
-  </figure>
-  <div class="card-body p-4">
-    <p class="text-sm opacity-70">用户端：签到、周报、进度和业务入口</p>
-  </div>
-</div>
 
 ## 结果
 

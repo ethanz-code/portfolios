@@ -1,14 +1,15 @@
 import type { ImageMetadata } from "astro";
 
 import profileImage from "./profile.webp";
+import sxeasyDashboardDarkImage from "./projects/sxeasy/dashboard-dark.webp";
 import sxeasyDashboardImage from "./projects/sxeasy/dashboard.webp";
+import sxeasyHomeDarkImage from "./projects/sxeasy/home-dark.webp";
 import sxeasyHomeImage from "./projects/sxeasy/home.webp";
-import serviceCardImage from "./services/post-card.webp";
-import socialCardImage from "./social/social-card.webp";
 
 const mappedImageSources = {
-  "/post_img.webp": serviceCardImage,
+  "/projects/sxeasy/dashboard-dark.webp": sxeasyDashboardDarkImage,
   "/projects/sxeasy/dashboard.webp": sxeasyDashboardImage,
+  "/projects/sxeasy/home-dark.webp": sxeasyHomeDarkImage,
   "/projects/sxeasy/home.webp": sxeasyHomeImage,
 } as const;
 
@@ -20,8 +21,8 @@ export const resolveImageSource = (src?: string | ImageMetadata | null) => {
 
 export {
   profileImage,
-  serviceCardImage,
-  socialCardImage,
+  sxeasyDashboardDarkImage,
   sxeasyDashboardImage,
+  sxeasyHomeDarkImage,
   sxeasyHomeImage,
 };

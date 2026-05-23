@@ -5,6 +5,13 @@ const projectLinkSchema = z.object({
     url: z.string(),
 });
 
+const projectImageSchema = z.object({
+    light: z.string(),
+    dark: z.string().optional(),
+    alt: z.string(),
+    caption: z.string().optional(),
+});
+
 const projectSchema = z.object({
     title: z.string(),
     description: z.string(),
@@ -21,6 +28,7 @@ const projectSchema = z.object({
     externalUrl: z.string().optional(),
     detailPage: z.boolean().default(false),
     links: z.array(projectLinkSchema).optional(),
+    images: z.array(projectImageSchema).optional(),
     tags: z.array(z.string()).optional(),
 });
 
