@@ -256,6 +256,37 @@ const { Content } = await entry.render();
 
 这里的 `Content` 就是 Markdown 正文渲染后的组件。
 
+## Markdown 渲染管线的边界
+
+当前文章是普通 `.md` 文件，不是 MDX，也不是 Markdoc。
+
+这意味着：
+
+- frontmatter 负责标题、摘要、日期、标签和头图。
+- Markdown 正文通过 `entry.render()` 变成 `<Content />`。
+- `prose` 只负责正文排版，不负责把流程图、公式变成可视化结果。
+- 普通 Markdown 里的 `<img>` 和 `![图片]()` 不会自动走 Astro Image 优化。
+
+如果要支持流程图、数学公式、代码块增强，应该改 Astro 的 Markdown 管线：
+
+```js
+export default defineConfig({
+  markdown: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+});
+```
+
+常见方向：
+
+- 代码块增强：`astro-expressive-code`。
+- 数学公式：`remark-math` + `rehype-katex`。
+- 标题锚点：`rehype-slug` + `rehype-autolink-headings`。
+- Mermaid 流程图：客户端 Mermaid 渲染，或构建期 `rehype-mermaid`。
+
+如果正文需要直接插入 Astro 组件，再考虑把文章从 `.md` 升级到 `.mdx`。
+
 ## 建议的文章类型
 
 这个站点适合写这些内容：

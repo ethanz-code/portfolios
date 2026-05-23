@@ -19,7 +19,8 @@
 - viewport
 - favicon
 - Open Graph
-- Twitter Card
+- canonical
+- 站点作者与基础信息
 
 如果每个页面都写一遍，后期很容易不一致。
 
@@ -120,6 +121,8 @@ https://your-domain.com/social_img.webp
 ```html
 <meta property="og:type" content="website" />
 <meta property="og:url" content="..." />
+<meta property="og:site_name" content="..." />
+<meta property="og:locale" content="zh_CN" />
 <meta property="og:title" content="..." />
 <meta property="og:description" content="..." />
 <meta property="og:image" content="..." />
@@ -129,19 +132,18 @@ https://your-domain.com/social_img.webp
 
 - 微信聊天卡片。
 - 飞书/Slack 链接预览。
-- X/Twitter 分享卡片。
 - Notion 粘贴链接预览。
 
-## Twitter Card
+## 站点基础信息
 
 ```html
-<meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:title" content="..." />
-<meta property="twitter:description" content="..." />
-<meta property="twitter:image" content="..." />
+<link rel="canonical" href="..." />
+<meta name="author" content="张永鑫" />
+<meta name="application-name" content="张永鑫 Ethan Zhang" />
+<meta name="robots" content="index,follow" />
 ```
 
-虽然中文站未必主要面向 Twitter，但保留这些 meta 成本很低。
+这些信息让搜索引擎、链接预览和浏览器都能读到清晰的站点归属。
 
 ## favicon 和 touch icon
 
@@ -197,6 +199,7 @@ heroImage: "/projects/sxeasy/home.webp"
 - `SITE_DESCRIPTION`
 - `Astro.url`
 - Open Graph
-- Twitter Card
+- canonical
+- author
 - favicon
 - meta description

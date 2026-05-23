@@ -26,6 +26,7 @@
 - 发文章：`src/content/articles/`
 - 加项目：`src/content/projects/`
 - 加图集图片：`src/assets/moments/`
+- 加项目亮暗截图：`src/content/projects/*.md` 的 `heroImageLight` / `heroImageDark` / `images`
 - 改图集分组说明：`src/data/moments.ts`
 - 跑检查：`bun run check`
 - 跑构建：`bun run build`
@@ -34,7 +35,7 @@
 
 一句话概括：
 
-> 用 Astro 做静态站点，用 Content Collections 管理文章和项目，用 Layout 统一页面结构，用 Tailwind/DaisyUI 管理视觉系统。
+> 用 Astro 做静态站点，用 Content Collections 管理文章和项目，用 Layout 统一页面结构，用 Tailwind/DaisyUI 管理视觉系统，用 `src/assets` 映射让内容图片也走 Astro Image 优化。
 
 这套模式适合个人站、作品集、技术文章、项目复盘和轻量内容档案。
 

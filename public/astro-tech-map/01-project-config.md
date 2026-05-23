@@ -39,7 +39,7 @@ import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
-  site: "https://astrofy-template.netlify.app",
+  site: "https://itcox.cn",
   integrations: [tailwind()],
 });
 ```

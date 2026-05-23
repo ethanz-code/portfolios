@@ -6,9 +6,12 @@
 - `public/profile.jpg`
 - `public/social_img.webp`
 - `public/projects/sxeasy/home.webp`
+- `src/assets/projects/sxeasy/`
 - `src/assets/moments/`
 - `src/assets/images.ts`
 - `src/components/HorizontalCard.astro`
+- `src/components/ThemeImage.astro`
+- `src/components/ThemeImageSource.astro`
 - `src/components/SideBar.astro`
 - `src/styles/global.css`
 - `tailwind.config.cjs`
@@ -76,6 +79,33 @@ import { Image } from "astro:assets";
 - 保留 alt 文本。
 - 配合 Tailwind 控制展示比例和裁剪。
 
+## 当前项目的图片管线
+
+这个项目同时保留两种路径：
+
+- 内容里写稳定路径，例如 `/projects/sxeasy/home.webp`。
+- 代码里把稳定路径映射到 `src/assets` 导入对象。
+
+这样内容作者不用关心打包产物，页面组件仍然可以拿到 Astro Image 需要的 `ImageMetadata`。
+
+核心入口是 `src/assets/images.ts`：
+
+```ts
+import sxeasyHomeImage from "./projects/sxeasy/home.webp";
+
+const mappedImageSources = {
+  "/projects/sxeasy/home.webp": sxeasyHomeImage,
+} as const;
+
+export const resolveImageSource = (src) => {
+  if (!src) return undefined;
+  if (typeof src !== "string") return src;
+  return mappedImageSources[src] ?? src;
+};
+```
+
+页面先调用 `resolveImageSource()`。如果命中映射，返回 `ImageMetadata`，走 `<Image />` 优化；如果没有命中，仍然按普通字符串路径输出 `<img>`。
+
 ## public 路径和 Astro Image 的关系
 
 如果图片路径来自内容 frontmatter：
@@ -90,7 +120,67 @@ coverImage: "/projects/sxeasy/home.webp"
 <HorizontalCard img={project.data.coverImage} />
 ```
 
-这类图片放在 `public/` 下，路径稳定，适合内容作者维护。
+这类图片路径稳定，适合内容作者维护。
+
+如果希望稳定路径也走 Astro Image 优化，需要同时放一份到 `src/assets`，并在 `src/assets/images.ts` 建一层映射：
+
+```ts
+import sxeasyHomeImage from "./projects/sxeasy/home.webp";
+
+const mappedImageSources = {
+  "/projects/sxeasy/home.webp": sxeasyHomeImage,
+} as const;
+```
+
+页面仍然写 `/projects/sxeasy/home.webp`，组件渲染前先调用 `resolveImageSource()`。如果路径被映射到 `src/assets` 导入对象，`ThemeImageSource` 会使用 Astro 的 `<Image />`；如果没有映射，就退回普通 `<img>`。
+
+## 项目截图的亮暗适配
+
+项目内容支持成对图片：
+
+```yaml
+heroImageLight: "/projects/sxeasy/home.webp"
+heroImageDark: "/projects/sxeasy/home-dark.webp"
+coverImageLight: "/projects/sxeasy/home.webp"
+coverImageDark: "/projects/sxeasy/home-dark.webp"
+images:
+  - light: "/projects/sxeasy/dashboard.webp"
+    dark: "/projects/sxeasy/dashboard-dark.webp"
+    alt: "实习轻松办用户端运行截图"
+    caption: "用户端：签到、周报、进度和业务入口"
+```
+
+首页和项目列表使用 `coverImageLight` / `coverImageDark`，项目详情页顶部使用 `heroImageLight` / `heroImageDark`，详情页正文截图使用 `images`。
+
+真正切换由 `ThemeImage.astro` 和全局 CSS 完成：
+
+```css
+[data-theme="light"] .theme-image-variant--dark,
+[data-theme="black"] .theme-image-variant--light {
+  display: none;
+}
+```
+
+这意味着 light 和 dark 两张图都会输出到页面里，当前主题只显示其中一张。
+
+当前 `sxeasy` 的图片分工：
+
+- `home.webp` / `home-dark.webp`：首页卡片、项目列表卡片、项目详情顶部截图。
+- `dashboard.webp` / `dashboard-dark.webp`：项目详情页正文后的运行截图。
+
+这些路径都已经映射到 `src/assets/projects/sxeasy/`，所以会生成 `_astro/` 优化产物。
+
+## ImageMetadata 是谁提供的
+
+在 Astro 组件或普通 TypeScript 模块里直接导入图片：
+
+```ts
+import homeImage from "./projects/sxeasy/home.webp";
+```
+
+拿到的不是字符串，而是 Astro/Vite 在构建期生成的图片元数据对象。它包含图片路径、宽高、格式等信息，类型通常写作 `ImageMetadata`。
+
+`<Image />` 收到这个对象后，才能生成带指纹、尺寸、`srcset` 和格式处理的优化图片。普通 Markdown 里的 `![图](/path.webp)` 或 HTML `<img src="/path.webp">` 不会自动获得这层优化。
 
 ## Tailwind 怎么接入 Astro
 
@@ -190,7 +280,7 @@ DaisyUI 提供的是一套基于 Tailwind 的组件语义。
 - 和组件强绑定的图片或资源。
 - 希望在构建时自动扫描的图片目录。
 
-当前项目里，文章配图和项目截图主要放 `public/`，图集源图片放 `src/assets/moments/`，这样既方便内容维护，也能让 Astro 在构建时自动处理图集图片。
+当前项目里，项目截图采用“内容稳定路径 + `src/assets` 映射”的方式。图集源图片放 `src/assets/moments/`，让 Astro 在构建时自动处理。文章正文配图仍优先放 `public/articles/`，因为普通 `.md` 正文里的图片不会直接获得 `ImageMetadata`。
 
 ## 当前项目的图集目录怎么组织
 

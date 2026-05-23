@@ -169,7 +169,7 @@ export const primaryNavItems = [
 
 ## HorizontalCard 的复用
 
-`HorizontalCard.astro` 用于项目、服务等横向卡片。
+`HorizontalCard.astro` 用于项目、首页推荐等横向卡片。
 
 它接收：
 

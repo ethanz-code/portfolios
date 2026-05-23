@@ -19,7 +19,8 @@ Astro 会根据 `src/pages/` 里的文件自动生成路由。
 src/pages/index.astro       -> /
 src/pages/articles.astro    -> /articles
 src/pages/projects.astro    -> /projects
-src/pages/services.astro    -> /services
+src/pages/moments.astro     -> /moments
+src/pages/contact.astro     -> /contact
 src/pages/404.astro         -> /404
 ```
 

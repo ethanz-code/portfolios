@@ -19,6 +19,7 @@
 - 日期
 - 标签
 - 封面图
+- 亮暗主题截图
 - 是否草稿
 - 是否生成详情页
 
@@ -78,6 +79,13 @@ const articleSchema = z.object({
 ## 项目集合 schema
 
 ```ts
+const projectImageSchema = z.object({
+  light: z.string(),
+  dark: z.string().optional(),
+  alt: z.string(),
+  caption: z.string().optional(),
+});
+
 const projectSchema = z.object({
   title: z.string(),
   description: z.string(),
@@ -86,10 +94,15 @@ const projectSchema = z.object({
   category: z.enum(["featured", "content"]),
   order: z.number(),
   heroImage: z.string().optional(),
+  heroImageLight: z.string().optional(),
+  heroImageDark: z.string().optional(),
   coverImage: z.string().optional(),
+  coverImageLight: z.string().optional(),
+  coverImageDark: z.string().optional(),
   externalUrl: z.string().optional(),
   detailPage: z.boolean().default(false),
   links: z.array(projectLinkSchema).optional(),
+  images: z.array(projectImageSchema).optional(),
   tags: z.array(z.string()).optional(),
 });
 ```
@@ -98,10 +111,29 @@ const projectSchema = z.object({
 
 - `category`：项目分组，目前是重点项目和内容类项目。
 - `order`：列表排序。
+- `heroImageLight` / `heroImageDark`：项目详情页顶部截图，支持亮暗主题。
+- `coverImageLight` / `coverImageDark`：首页和项目列表卡片截图，支持亮暗主题。
 - `externalUrl`：没有详情页时跳外链。
 - `detailPage`：是否生成 `/projects/slug/` 详情页。
 - `links`：项目相关链接。
+- `images`：项目详情正文后的截图数组，可写多张亮暗成对截图。
 - `tags`：项目标签。
+
+项目截图推荐写在 frontmatter，而不是在 Markdown 正文里手写 `<img>`。这样页面模板可以统一走 `ThemeImage` 和 Astro Image 优化。
+
+示例：
+
+```yaml
+heroImageLight: "/projects/sxeasy/home.webp"
+heroImageDark: "/projects/sxeasy/home-dark.webp"
+coverImageLight: "/projects/sxeasy/home.webp"
+coverImageDark: "/projects/sxeasy/home-dark.webp"
+images:
+  - light: "/projects/sxeasy/dashboard.webp"
+    dark: "/projects/sxeasy/dashboard-dark.webp"
+    alt: "实习轻松办用户端运行截图"
+    caption: "用户端：签到、周报、进度和业务入口"
+```
 
 ## 为什么用 `z.coerce.date()`
 
