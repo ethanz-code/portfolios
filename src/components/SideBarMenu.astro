@@ -1,18 +1,33 @@
 ---
+import { actionNavItems, primaryNavItems } from "../data/navigation";
+
 const { sideBarActiveItemID } = Astro.props;
 const activeClass = "bg-base-300";
 ---
 
 <ul class="menu grow shrink menu-md overflow-y-auto">
-    <li><a class="py-3 text-base" id="home" href="/">首页</a></li>
-    <li><a class="py-3 text-base" id="projects" href="/projects">项目</a></li>
-    <li><a class="py-3 text-base" id="cv" href="/cv">简历</a></li>
-    <li>
-        <a class="py-3 text-base" href="mailto:hi@itcox.cn" target="_blank" referrerpolicy="no-referrer-when-downgrade">联系我</a>
-    </li>
+    {
+        primaryNavItems.map((item) => (
+            <li>
+                <a class:list={["py-3 text-base", item.id === sideBarActiveItemID && activeClass]} href={item.href}>
+                    {item.label}
+                </a>
+            </li>
+        ))
+    }
+    {
+        actionNavItems.map((item) => (
+            <li>
+                <a
+                    class:list={["py-3 text-base", item.id === sideBarActiveItemID && activeClass]}
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    referrerpolicy={item.external ? "no-referrer-when-downgrade" : undefined}
+                >
+                    {item.label}
+                </a>
+            </li>
+        ))
+    }
 </ul>
-
-<script define:vars={{ sideBarActiveItemID: sideBarActiveItemID, activeClass: activeClass }}>
-const activeItemElem = document.getElementById(sideBarActiveItemID);
-activeItemElem && activeItemElem.classList.add(activeClass);
-</script>

@@ -1,0 +1,88 @@
+---
+import { Image } from "astro:assets";
+import type { MomentImage } from "../data/moments";
+
+const {
+  images,
+  title = "近期影像",
+  description = "随机抽取近期上传的图片。",
+  ctaHref,
+  ctaLabel = "查看全部",
+  showMeta = true,
+  compact = false,
+} = Astro.props as {
+  images: MomentImage[];
+  title?: string;
+  description?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+  showMeta?: boolean;
+  compact?: boolean;
+};
+
+const tileClasses = [
+  "moment-tile--large",
+  "moment-tile--wide",
+  "moment-tile--tall",
+  "moment-tile--standard",
+  "moment-tile--standard",
+  "moment-tile--wide",
+  "moment-tile--standard",
+  "moment-tile--tall",
+  "moment-tile--standard",
+];
+
+const hasHeader = title || description || ctaHref;
+---
+
+<section class:list={["moment-section", compact && "moment-section--compact"]}>
+  {
+    hasHeader && (
+      <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between lg:pr-28">
+        <div>
+          {title && <div class="text-2xl font-bold sm:text-3xl lg:text-5xl">{title}</div>}
+          {description && <p class="mt-3 max-w-2xl leading-7 opacity-80">{description}</p>}
+        </div>
+        {
+          ctaHref && (
+            <a class="btn btn-outline w-full sm:w-fit" href={ctaHref}>
+              {ctaLabel}
+            </a>
+          )
+        }
+      </div>
+    )
+  }
+
+  {
+    images.length > 0 ? (
+      <div class="moment-mosaic" aria-label={title}>
+        {images.slice(0, 9).map((image, index) => (
+          <figure class:list={["moment-tile", tileClasses[index] ?? "moment-tile--standard"]}>
+            <Image
+              src={image.src}
+              alt={image.alt}
+              class="h-full w-full object-cover"
+              loading={index < 3 ? "eager" : "lazy"}
+              widths={[320, 640, 960]}
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            />
+            {
+              showMeta && (
+                <figcaption class="moment-tile__overlay">
+                  <div class="text-xs opacity-85">{image.groupDate ?? image.groupTitle}</div>
+                  <div class="mt-1 text-xl font-bold leading-tight">{image.groupTitle}</div>
+                </figcaption>
+              )
+            }
+          </figure>
+        ))}
+      </div>
+    ) : (
+      <div class="moment-empty">
+        <div class="font-bold">还没有图片</div>
+        <p class="mt-2 opacity-75">把图片放进 src/assets/moments/某一组/，这里会自动生成九宫格。</p>
+      </div>
+    )
+  }
+</section>

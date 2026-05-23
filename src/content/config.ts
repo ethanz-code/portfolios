@@ -1,22 +1,46 @@
 import { z, defineCollection } from "astro:content";
 
-const storeSchema = z.object({
-    title: z.string(),
-    description: z.string(),
-    custom_link_label: z.string(),
-    custom_link: z.string().optional(),
-    updatedDate: z.coerce.date(),
-    pricing: z.string().optional(),
-    oldPricing: z.string().optional(),
-    badge: z.string().optional(),
-    checkoutUrl: z.string().optional(),
-    heroImage: z.string().optional(),
+const projectLinkSchema = z.object({
+    label: z.string(),
+    url: z.string(),
 });
 
-export type StoreSchema = z.infer<typeof storeSchema>;
+const projectSchema = z.object({
+    title: z.string(),
+    description: z.string(),
+    badge: z.string(),
+    updatedDate: z.coerce.date(),
+    category: z.enum(["featured", "content"]),
+    order: z.number(),
+    heroImage: z.string().optional(),
+    heroImageLight: z.string().optional(),
+    heroImageDark: z.string().optional(),
+    coverImage: z.string().optional(),
+    coverImageLight: z.string().optional(),
+    coverImageDark: z.string().optional(),
+    externalUrl: z.string().optional(),
+    detailPage: z.boolean().default(false),
+    links: z.array(projectLinkSchema).optional(),
+    tags: z.array(z.string()).optional(),
+});
 
-const storeCollection = defineCollection({ schema: storeSchema });
+const articleSchema = z.object({
+    title: z.string(),
+    description: z.string(),
+    publishedDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    tags: z.array(z.string()).optional(),
+    heroImage: z.string().optional(),
+    draft: z.boolean().default(false),
+});
+
+export type ProjectSchema = z.infer<typeof projectSchema>;
+export type ArticleSchema = z.infer<typeof articleSchema>;
+
+const projectCollection = defineCollection({ schema: projectSchema });
+const articleCollection = defineCollection({ schema: articleSchema });
 
 export const collections = {
-    'store': storeCollection
+    'projects': projectCollection,
+    'articles': articleCollection,
 }

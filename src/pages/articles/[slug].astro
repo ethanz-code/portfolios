@@ -1,0 +1,98 @@
+---
+import { Image } from "astro:assets";
+import { type CollectionEntry, getCollection } from "astro:content";
+import { resolveImageSource } from "../../assets/images";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { type ArticleSchema } from "../../content/config";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import "dayjs/locale/zh-cn";
+
+export async function getStaticPaths() {
+  const articleEntries = await getCollection("articles");
+  return articleEntries
+    .filter((entry) => !entry.data.draft)
+    .map((entry) => ({
+      params: { slug: entry.slug },
+      props: { entry },
+    }));
+}
+
+interface Props {
+  entry: CollectionEntry<"articles">;
+}
+
+const { entry } = Astro.props;
+const article: ArticleSchema = entry.data;
+const { Content } = await entry.render();
+dayjs.extend(localizedFormat);
+dayjs.locale("zh-cn");
+const displayDate = dayjs(article.publishedDate).format("LL");
+const updatedDate = article.updatedDate ? dayjs(article.updatedDate).format("LL") : null;
+const heroImage = resolveImageSource(article.heroImage);
+---
+
+<BaseLayout title={article.title} description={article.description} image={heroImage} sideBarActiveItemID="articles" ogType="article">
+  <main class="mx-auto max-w-[760px]">
+    <article class="prose prose-base max-w-none prose-h2:mt-10 prose-h2:text-2xl prose-p:leading-7 prose-li:leading-7 prose-img:rounded-lg prose-img:border prose-img:border-base-300 sm:prose-lg sm:prose-p:leading-8">
+      <div class="not-prose mb-8">
+        <div class="mb-6">
+          <a href="/articles" class="btn btn-outline btn-sm gap-2">
+            <svg
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+            返回文章
+          </a>
+        </div>
+
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+          <span class="badge badge-neutral">文章</span>
+          {article.tags?.map((tag) => <span class="badge badge-ghost">{tag}</span>)}
+        </div>
+
+        <h1 class="m-0 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{article.title}</h1>
+        <p class="mt-4 text-base leading-7 opacity-80 sm:text-lg sm:leading-relaxed lg:text-xl">{article.description}</p>
+
+        <div class="mt-3 text-sm opacity-60">
+          发布于 <time>{displayDate}</time>
+          {updatedDate && <span> · 更新于 <time>{updatedDate}</time></span>}
+        </div>
+      </div>
+
+      {
+        heroImage && (
+          <div class="not-prose mb-8 overflow-hidden border border-base-300">
+            {
+              typeof heroImage === "string" ? (
+                <img
+                  src={heroImage}
+                  alt={article.title}
+                  class="aspect-[16/9] w-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={heroImage}
+                  alt={article.title}
+                  class="aspect-[16/9] w-full object-cover"
+                  widths={[640, 960, 1280, 1600]}
+                  sizes="(max-width: 820px) 100vw, 760px"
+                />
+              )
+            }
+          </div>
+        )
+      }
+
+      <Content />
+    </article>
+  </main>
+</BaseLayout>

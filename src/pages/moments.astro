@@ -1,0 +1,63 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import MomentMosaic from "../components/MomentMosaic.astro";
+import { momentGroups, momentImages } from "../data/moments";
+---
+
+<BaseLayout
+  title="近期影像"
+  description="近期图片档案，按构建时自动生成的九宫格和图片组展示。"
+  sideBarActiveItemID="moments"
+>
+  <div class="mb-12">
+    <div class="text-3xl font-bold sm:text-4xl lg:text-6xl">近期影像</div>
+    <p class="mt-4 max-w-3xl text-base leading-7 opacity-80 sm:mt-5 sm:text-lg sm:leading-8">
+      把图片放进 `src/assets/moments/` 对应分组，页面会在构建时压缩并生成图集。
+    </p>
+  </div>
+
+  <MomentMosaic
+    images={momentImages}
+    title="随机九宫格"
+    description="每次构建都会从已上传图片里抽取并重排。"
+  />
+
+  {
+    momentGroups.length > 0 && (
+      <section class="mt-16">
+        <div class="mb-6 text-2xl font-bold sm:text-3xl lg:text-5xl">图片组</div>
+        <div class="grid gap-12">
+          {
+            momentGroups.map((group) => (
+              <section>
+                <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <h2 class="text-2xl font-bold">{group.title}</h2>
+                    {
+                      group.description && (
+                        <p class="mt-2 max-w-2xl leading-7 opacity-75">{group.description}</p>
+                      )
+                    }
+                  </div>
+                  <div class="text-sm opacity-65">
+                    {group.date && <time datetime={group.date}>{group.date}</time>}
+                    {group.date && " · "}
+                    {group.images.length} 张
+                  </div>
+                </div>
+
+                <MomentMosaic
+                  images={group.images}
+                  title=""
+                  description=""
+                  showMeta={false}
+                  compact
+                />
+              </section>
+            ))
+          }
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>

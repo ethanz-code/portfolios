@@ -1,0 +1,79 @@
+---
+import type { ImageMetadata } from "astro";
+import ThemeImageSource from "./ThemeImageSource.astro";
+
+interface Props {
+  light?: string | ImageMetadata;
+  dark?: string | ImageMetadata;
+  alt: string;
+  class?: string;
+  widths?: number[];
+  sizes?: string;
+  width?: number;
+  height?: number;
+  format?: "avif" | "jpeg" | "png" | "webp";
+  loading?: "eager" | "lazy";
+}
+
+const {
+  light,
+  dark,
+  alt,
+  class: className,
+  widths,
+  sizes,
+  width,
+  height,
+  format,
+  loading,
+} = Astro.props as Props;
+
+const fallback = light ?? dark;
+---
+
+{
+  light && dark ? (
+    <div class="theme-image-stack">
+      <div class="theme-image-variant theme-image-variant--light">
+        <ThemeImageSource
+          src={light}
+          alt={alt}
+          class={className}
+          widths={widths}
+          sizes={sizes}
+          width={width}
+          height={height}
+          format={format}
+          loading={loading}
+        />
+      </div>
+      <div class="theme-image-variant theme-image-variant--dark">
+        <ThemeImageSource
+          src={dark}
+          alt={alt}
+          class={className}
+          widths={widths}
+          sizes={sizes}
+          width={width}
+          height={height}
+          format={format}
+          loading={loading}
+        />
+      </div>
+    </div>
+  ) : (
+    fallback && (
+      <ThemeImageSource
+        src={fallback}
+        alt={alt}
+        class={className}
+        widths={widths}
+        sizes={sizes}
+        width={width}
+        height={height}
+        format={format}
+        loading={loading}
+      />
+    )
+  )
+}

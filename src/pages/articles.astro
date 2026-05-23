@@ -1,0 +1,41 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import "dayjs/locale/zh-cn";
+
+dayjs.extend(localizedFormat);
+dayjs.locale("zh-cn");
+
+const articles = (await getCollection("articles"))
+  .filter((article) => !article.data.draft)
+  .sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf());
+---
+
+<BaseLayout title="文章" description="张永鑫的文章、复盘和随手记录。" sideBarActiveItemID="articles">
+  <section class="mb-10 max-w-3xl">
+    <div class="mb-3 text-3xl font-bold sm:text-4xl lg:text-6xl">文章</div>
+    <p class="max-w-3xl text-base leading-7 opacity-80 sm:text-lg sm:leading-8">
+      只写做过、踩过、验证过的东西。
+    </p>
+  </section>
+
+  <section class="grid max-w-3xl gap-4">
+    {
+      articles.map((article) => (
+        <a
+          href={`/articles/${article.slug}`}
+          class="block border-b border-base-300 py-5 transition hover:border-base-content"
+        >
+          <div class="mb-2 flex flex-wrap items-center gap-2">
+            <time class="text-sm opacity-60">{dayjs(article.data.publishedDate).format("LL")}</time>
+            {article.data.tags?.map((tag) => <span class="badge badge-ghost badge-sm">{tag}</span>)}
+          </div>
+          <h2 class="text-2xl font-bold leading-snug">{article.data.title}</h2>
+          <p class="mt-2 leading-7 opacity-75">{article.data.description}</p>
+        </a>
+      ))
+    }
+  </section>
+</BaseLayout>

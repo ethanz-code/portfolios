@@ -16,12 +16,117 @@
     text-rendering: optimizeLegibility;
 }
 
+html,
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
 [data-theme="light"],
 [data-theme="black"] {
-    /* DaisyUI button radius token: keep buttons nearly square across themes. */
-    --rounded-btn: 0.2rem;
+    /* Keep DaisyUI component radius consistent across light and dark themes. */
+    --rounded-box: 0;
+    --rounded-btn: 0.08rem;
+    --rounded-badge: 0.2rem;
+    --tab-radius: 0;
+}
+
+.theme-image-stack,
+.theme-image-variant {
+    display: block;
+}
+
+[data-theme="light"] .theme-image-variant--dark,
+[data-theme="black"] .theme-image-variant--light {
+    display: none;
 }
 
 .time-line-container>div:last-child .education__time>.education__line {
     display: none;
+}
+
+.moment-section {
+    margin-bottom: 3.5rem;
+}
+
+.moment-section--compact {
+    margin-bottom: 4rem;
+}
+
+.moment-mosaic {
+    display: grid;
+    grid-auto-flow: dense;
+    grid-auto-rows: 10rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.moment-tile {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, oklch(var(--bc)) 16%, transparent);
+    background: oklch(var(--b2));
+}
+
+.moment-tile--wide,
+.moment-tile--large {
+    grid-column: span 2;
+}
+
+.moment-tile--tall,
+.moment-tile--large {
+    grid-row: span 2;
+}
+
+.moment-tile__placeholder {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background:
+        linear-gradient(135deg, color-mix(in srgb, oklch(var(--bc)) 10%, transparent), transparent 42%),
+        repeating-linear-gradient(
+            -45deg,
+            color-mix(in srgb, oklch(var(--bc)) 10%, transparent) 0,
+            color-mix(in srgb, oklch(var(--bc)) 10%, transparent) 1px,
+            transparent 1px,
+            transparent 14px
+        ),
+        oklch(var(--b2));
+    color: color-mix(in srgb, oklch(var(--bc)) 62%, transparent);
+    font-weight: 700;
+}
+
+.moment-tile__overlay {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 1rem;
+    color: oklch(var(--b1));
+    background: linear-gradient(
+        to top,
+        color-mix(in srgb, oklch(var(--bc)) 82%, transparent),
+        color-mix(in srgb, oklch(var(--bc)) 52%, transparent) 58%,
+        transparent
+    );
+}
+
+.moment-empty {
+    border: 1px dashed color-mix(in srgb, oklch(var(--bc)) 24%, transparent);
+    background: oklch(var(--b2));
+    padding: 2rem;
+}
+
+@media (min-width: 768px) {
+    .moment-mosaic {
+        grid-auto-rows: 11rem;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .moment-mosaic {
+        grid-auto-rows: 12rem;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
 }

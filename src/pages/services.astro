@@ -1,47 +1,64 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HorizontalCard from "../components/HorizontalCard.astro";
+import { serviceCardImage } from "../assets/images";
 ---
 
-<BaseLayout title="服务" sideBarActiveItemID="services">
+<BaseLayout
+  title="服务"
+  description="提供 MVP 开发、全栈交付、AIGC 接入、部署排障和增长支持。"
+  sideBarActiveItemID="services"
+>
+  <section class="mb-10 max-w-3xl">
+    <div class="mb-3 text-3xl font-bold sm:text-4xl lg:text-6xl">服务</div>
+    <p class="text-base leading-7 opacity-80 sm:text-lg sm:leading-8">
+      需要把需求尽快做成可上线、可验证、可接手维护的产品，可以直接找我。
+    </p>
+  </section>
+
   <div>
-    <div class="text-3xl w-full font-bold mb-5">可提供的服务</div>
+    <div class="mb-5 w-full text-2xl font-bold sm:text-3xl">可提供的服务</div>
   </div>
 
   <HorizontalCard
     title="MVP 与可持续交付"
-    img="/post_img.webp"
-    desc="裁剪需求、拆分模块、快速上线，让产品先跑起来，再持续迭代。"
+    img={serviceCardImage}
+    desc="裁剪需求、拆分模块、快速上线，先把第一版跑通。"
     badge="核心"
-    url="mailto:hi@itcox.cn"
+    url="/contact"
+    target="_self"
   />
   <div class="divider my-0"></div>
   <HorizontalCard
     title="Web 全栈与架构整理"
-    img="/post_img.webp"
-    desc="用 TypeScript、Node.js、React/Vue、Prisma、数据库和缓存交付业务系统，并梳理边界与接口。"
-    url="mailto:hi@itcox.cn"
+    img={serviceCardImage}
+    desc="用 TypeScript、Node.js、React/Vue、数据库和缓存交付业务系统，并顺手梳理边界与接口。"
+    url="/contact"
+    target="_self"
   />
   <div class="divider my-0"></div>
   <HorizontalCard
     title="AIGC 应用接入"
-    img="/post_img.webp"
-    desc="接入聊天、绘图、多模态和流式响应，配套用户体系、作品管理和运营后台。"
-    url="mailto:hi@itcox.cn"
+    img={serviceCardImage}
+    desc="接入聊天、绘图、多模态和流式响应，补齐用户体系、作品管理和运营后台。"
+    url="/contact"
+    target="_self"
     badge="AIGC"
   />
   <div class="divider my-0"></div>
   <HorizontalCard
     title="部署与线上排障"
-    img="/post_img.webp"
-    desc="处理 Docker、Nginx、CDN、WAF、多实例、CI/CD 和线上排障，让项目可定位、可恢复。"
-    url="mailto:hi@itcox.cn"
+    img={serviceCardImage}
+    desc="处理 Docker、Nginx、CDN、WAF、多实例、CI/CD 和线上排障，让问题能定位、能恢复。"
+    url="/contact"
+    target="_self"
   />
   <div class="divider my-0"></div>
   <HorizontalCard
     title="数据分析与增长运营"
-    img="/post_img.webp"
-    desc="梳理指标、路径和转化，把上线后的真实数据变成下一步决策。"
-    url="mailto:hi@itcox.cn"
+    img={serviceCardImage}
+    desc="梳理指标、路径和转化，把上线后的真实数据变成下一步动作。"
+    url="/contact"
+    target="_self"
   />
 </BaseLayout>

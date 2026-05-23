@@ -1,37 +1,55 @@
 ---
-const { title, img, desc, url, badge, tags, target = "_blank" } = Astro.props;
-import { Image } from "astro:assets";
+import ThemeImage from "./ThemeImage.astro";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  title: string;
+  img?: string | ImageMetadata;
+  imgLight?: string | ImageMetadata;
+  imgDark?: string | ImageMetadata;
+  desc: string;
+  url: string;
+  badge?: string;
+  tags?: string[];
+  target?: string;
+}
+
+const { title, img, imgLight, imgDark, desc, url, badge, tags, target = "_blank" } = Astro.props as Props;
 const tag_url = url.split("/").slice(0, -1).join("/") + "/tag";
 ---
 
-<div
-  class="rounded-lg bg-base-100 hover:shadow-xl transition ease-in-out hover:scale-[102%]"
->
+<div class="card bg-base-100 transition ease-in-out md:hover:scale-[102%] md:hover:shadow-xl">
   <a href={url} target={target}>
-    <div class="hero-content flex-col md:flex-row">
+    <div class="card-body flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center">
       {
-        img && (
-          <Image
-            src={img}
-            width={750}
-            height={422}
-            format="webp"
-            alt={title}
-            class="max-w-full md:max-w-[13rem] rounded-lg"
-          />
+        (imgLight || imgDark || img) && (
+          <figure class="w-full shrink-0 md:w-auto">
+            <ThemeImage
+              light={imgLight ?? img}
+              dark={imgDark}
+              alt={title}
+              class="aspect-video w-full rounded-lg object-cover object-left-top md:w-[13rem]"
+              width={750}
+              height={422}
+              format="webp"
+              sizes="(max-width: 768px) 100vw, 13rem"
+              widths={[320, 480, 750]}
+              loading="lazy"
+            />
+          </figure>
         )
       }
-      <div class="grow w-full">
-        <h1 class="text-xl font-bold">
-          {title}
-          {badge && <div class="badge badge-secondary mx-2">{badge}</div>}
-        </h1>
-        <p class="py-1 text-1xl">{desc}</p>
+      <div class="grow w-full min-w-0">
+        <div class="flex flex-wrap items-start gap-2">
+          <h2 class="card-title text-lg leading-snug sm:text-xl">{title}</h2>
+          {badge && <div class="badge badge-secondary">{badge}</div>}
+        </div>
+        <p class="py-1 text-base leading-7 sm:text-[1.05rem]">{desc}</p>
         <div class="card-actions justify-end">
           {
             tags &&
               tags.map((tag) => (
-                <a href={`${tag_url}/${tag}`} class="badge badge-outline">
+                <a href={`${tag_url}/${tag}`} class="badge badge-ghost">
                   {tag}
                 </a>
               ))
