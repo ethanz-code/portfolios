@@ -41,6 +41,54 @@ body {
     display: none;
 }
 
+.heading-anchor {
+    margin-left: 0.45rem;
+    color: color-mix(in srgb, oklch(var(--bc)) 38%, transparent);
+    font-size: 0.78em;
+    text-decoration: none;
+    opacity: 0;
+    transition:
+        color 160ms ease,
+        opacity 160ms ease;
+}
+
+:is(h2, h3, h4, h5, h6):hover .heading-anchor,
+.heading-anchor:focus-visible {
+    opacity: 1;
+}
+
+.heading-anchor:hover {
+    color: oklch(var(--bc));
+}
+
+.mermaid-diagram {
+    margin: 2rem 0;
+    overflow-x: auto;
+    border: 1px solid color-mix(in srgb, oklch(var(--bc)) 14%, transparent);
+    background: oklch(var(--b1));
+    padding: 1.25rem;
+}
+
+.mermaid-diagram svg {
+    display: block;
+    height: auto;
+    min-width: 38rem;
+    max-width: none;
+    margin: 0 auto;
+}
+
+.mermaid-diagram__source {
+    margin: 0;
+    white-space: pre-wrap;
+    color: color-mix(in srgb, oklch(var(--bc)) 78%, transparent);
+}
+
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.25rem 0;
+}
+
 .time-line-container>div:last-child .education__time>.education__line {
     display: none;
 }

@@ -1,0 +1,49 @@
+---
+import type { ImageMetadata } from "astro";
+import { resolveImageSource } from "../assets/images";
+import ThemeImage from "./ThemeImage.astro";
+
+interface Props {
+  light: string | ImageMetadata;
+  dark?: string | ImageMetadata;
+  alt: string;
+  caption?: string;
+  class?: string;
+  widths?: number[];
+  sizes?: string;
+  loading?: "eager" | "lazy";
+}
+
+const {
+  light,
+  dark,
+  alt,
+  caption,
+  class: className = "aspect-[16/9] w-full object-cover object-left-top",
+  widths = [640, 960, 1280, 1600],
+  sizes = "(max-width: 820px) 100vw, 760px",
+  loading = "lazy",
+} = Astro.props as Props;
+
+const lightImage = resolveImageSource(light);
+const darkImage = resolveImageSource(dark);
+---
+
+<figure class="not-prose card my-8 overflow-hidden border border-base-300 bg-base-100 shadow-sm">
+  <ThemeImage
+    light={lightImage}
+    dark={darkImage}
+    alt={alt}
+    class={className}
+    widths={widths}
+    sizes={sizes}
+    loading={loading}
+  />
+  {
+    caption && (
+      <figcaption class="card-body m-0 p-4 text-sm opacity-70">
+        {caption}
+      </figcaption>
+    )
+  }
+</figure>

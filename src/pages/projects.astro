@@ -17,14 +17,14 @@ const contentProjects = projects
 
 const getProjectUrl = (project: ProjectEntry): string => {
   if (project.data.detailPage) {
-    return `/projects/${project.slug}`;
+    return `/projects/${project.id}`;
   }
 
   if (project.data.externalUrl) {
     return project.data.externalUrl;
   }
 
-  throw new Error(`Project "${project.slug}" is missing externalUrl while detailPage is false.`);
+  throw new Error(`Project "${project.id}" is missing externalUrl while detailPage is false.`);
 };
 
 const getProjectImageLight = (project: ProjectEntry) =>
@@ -51,7 +51,7 @@ const getProjectImageDark = (project: ProjectEntry) =>
   <section class="mb-10 max-w-3xl">
     <div class="mb-3 text-3xl font-bold sm:text-4xl lg:text-6xl">项目</div>
     <p class="text-base leading-7 opacity-80 sm:text-lg sm:leading-8">
-      挑几件做过、上线过、还能继续维护的项目放在这里。
+      往年本人做过的一些项目都会放到这里。
     </p>
   </section>
 

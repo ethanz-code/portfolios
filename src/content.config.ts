@@ -1,4 +1,6 @@
-import { z, defineCollection } from "astro:content";
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+import { z } from "astro/zod";
 
 const projectLinkSchema = z.object({
     label: z.string(),
@@ -45,8 +47,15 @@ const articleSchema = z.object({
 export type ProjectSchema = z.infer<typeof projectSchema>;
 export type ArticleSchema = z.infer<typeof articleSchema>;
 
-const projectCollection = defineCollection({ schema: projectSchema });
-const articleCollection = defineCollection({ schema: articleSchema });
+const projectCollection = defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
+    schema: projectSchema,
+});
+
+const articleCollection = defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/articles" }),
+    schema: articleSchema,
+});
 
 export const collections = {
     'projects': projectCollection,

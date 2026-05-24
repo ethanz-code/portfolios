@@ -17,7 +17,7 @@ const articles = (await getCollection("articles"))
   <section class="mb-10 max-w-3xl">
     <div class="mb-3 text-3xl font-bold sm:text-4xl lg:text-6xl">文章</div>
     <p class="max-w-3xl text-base leading-7 opacity-80 sm:text-lg sm:leading-8">
-      只写做过、踩过、验证过的东西。
+      写一些有趣，值得思考的文章。
     </p>
   </section>
 
@@ -25,7 +25,7 @@ const articles = (await getCollection("articles"))
     {
       articles.map((article) => (
         <a
-          href={`/articles/${article.slug}`}
+          href={`/articles/${article.id}`}
           class="block border-b border-base-300 py-5 transition hover:border-base-content"
         >
           <div class="mb-2 flex flex-wrap items-center gap-2">
