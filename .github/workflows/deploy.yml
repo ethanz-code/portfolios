@@ -14,7 +14,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   CONTAINER_NAME: ${{ vars.DEPLOY_CONTAINER_NAME || 'portfolios' }}
-  PORT_MAPPING: ${{ vars.DEPLOY_PORT_MAPPING || '8080:80' }}
+  PORT_MAPPING: ${{ vars.DEPLOY_PORT_MAPPING || '10020:80' }}
 
 jobs:
   build:
@@ -97,7 +97,7 @@ jobs:
           CONTAINER_NAME_B64="$(encode "$CONTAINER_NAME")"
           PORT_MAPPING_B64="$(encode "$PORT_MAPPING")"
 
-          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
             GHCR_USERNAME_B64="$GHCR_USERNAME_B64" \
             GHCR_TOKEN_B64="$GHCR_TOKEN_B64" \
             IMAGE_B64="$IMAGE_B64" \

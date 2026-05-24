@@ -53,4 +53,4 @@ bun run preview
 - `SSH_PORT`：默认 `22`
 - `GHCR_USERNAME`、`GHCR_TOKEN`：私有镜像拉取凭据
 - `DEPLOY_CONTAINER_NAME`：默认 `portfolios`
-- `DEPLOY_PORT_MAPPING`：默认 `8080:80`
+- `DEPLOY_PORT_MAPPING`：默认 `10020:80`
