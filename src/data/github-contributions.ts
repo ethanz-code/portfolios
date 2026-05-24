@@ -6,6 +6,7 @@ export interface ContributionMonthLabel {
 export interface ContributionDay {
   count: number;
   date: string;
+  isPlaceholder?: boolean;
   level: number;
   tooltip: string;
 }
@@ -23,6 +24,10 @@ const monthLabelPattern =
 const dayCellPattern =
   /data-date="(\d{4}-\d{2}-\d{2})" id="(contribution-day-component-(\d)-(\d+))" data-level="([0-4])"/g;
 const tooltipPattern = /<tool-tip[^>]*for="([^"]+)"[^>]*>([^<]+)<\/tool-tip>/g;
+export const buildContributionSourceUrl = (username: string) =>
+  `https://proxy.scalar.com/?scalar_url=${encodeURIComponent(
+    `https://github.com/users/${username}/contributions`,
+  )}`;
 
 const formatContributionTooltip = (date: string, count: number) => `${date} · ${count} 次提交`;
 
@@ -106,21 +111,25 @@ const parseWeekData = (html: string) => {
 
   return [...weeks.entries()]
     .sort((left, right) => left[0] - right[0])
-    .map(([, weekDays]) => {
-      const days = Array.from({ length: 7 }, (_, row) => weekDays.get(row));
-
-      if (days.some((day) => !day)) {
-        throw new Error("GitHub contribution grid is missing one or more days.");
-      }
-
-      return days as ContributionDay[];
-    });
+    .map(([, weekDays]) =>
+      Array.from(
+        { length: 7 },
+        (_, row): ContributionDay =>
+          weekDays.get(row) ?? {
+            count: 0,
+            date: "",
+            isPlaceholder: true,
+            level: 0,
+            tooltip: "",
+          },
+      ),
+    );
 };
 
 export const getGithubContributionCalendar = async (
   username = "ethanz-code",
 ): Promise<GithubContributionCalendar> => {
-  const sourceUrl = `https://github.com/users/${username}/contributions`;
+  const sourceUrl = buildContributionSourceUrl(username);
   const profileUrl = `https://github.com/${username}`;
 
   const response = await fetch(sourceUrl, {
