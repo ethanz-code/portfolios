@@ -9,7 +9,6 @@ const { sideBarActiveItemID } = Astro.props;
 <div class="drawer-side z-40 lg:col-start-1 lg:row-start-1">
   <label for="my-drawer" class="drawer-overlay"></label>
   <aside class="sidebar-shell relative flex h-auto min-h-full w-[18rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden bg-base-200 px-4 pb-4 pt-4 text-base-content lg:sticky lg:top-0 lg:h-screen lg:w-[19rem] lg:max-w-none lg:border-r lg:border-base-300/60">
-    <div class="sidebar-shell__ambient" aria-hidden="true"></div>
     <div class="relative z-10 flex h-full min-h-full flex-1 flex-col">
       <div class="mx-auto mb-6 mt-4 w-fit sm:mb-8 sm:mt-6">
         <a href="/">
@@ -25,44 +24,3 @@ const { sideBarActiveItemID } = Astro.props;
     </div>
   </aside>
 </div>
-
-<style>
-  .sidebar-shell__ambient {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: url("/sidebar/virtual-airframe.png");
-    background-position: calc(100% + 3.5rem) top;
-    background-repeat: no-repeat;
-    background-size: auto 100%;
-    opacity: 0.16;
-    transform: scale(1.03);
-    transform-origin: right top;
-  }
-
-  :global([data-theme="light"]) .sidebar-shell__ambient {
-    opacity: 0.19;
-    filter: brightness(0.72) contrast(1.18) saturate(0.95);
-  }
-
-  :global([data-theme="black"]) .sidebar-shell__ambient {
-    opacity: 0.19;
-    filter: brightness(0.82) contrast(0.96) saturate(0.92);
-  }
-
-  @media (max-width: 1023px) {
-    .sidebar-shell__ambient {
-      opacity: 0.12;
-      background-position: calc(100% + 2rem) top;
-      background-size: auto 100%;
-    }
-
-    :global([data-theme="light"]) .sidebar-shell__ambient {
-      opacity: 0.15;
-    }
-
-    :global([data-theme="black"]) .sidebar-shell__ambient {
-      opacity: 0.15;
-    }
-  }
-</style>
