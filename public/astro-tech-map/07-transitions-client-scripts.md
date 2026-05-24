@@ -1,4 +1,4 @@
-# 07. View Transitions 与客户端脚本
+# 07. ClientRouter 与客户端脚本
 
 ## 相关文件
 
@@ -18,14 +18,14 @@ Astro 的默认思路是：
 
 - 主题切换。
 - 主题按钮状态同步。
-- View Transitions 后重新绑定事件。
+- 页面切换后重新绑定事件。
 
-## View Transitions 怎么启用
+## ClientRouter 怎么启用
 
 `BaseLayout.astro`：
 
 ```ts
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 ```
 
 `src/config.ts`：
@@ -37,14 +37,14 @@ export const TRANSITION_API = true;
 layout 里：
 
 ```astro
-{TRANSITION_API && <ViewTransitions />}
+{TRANSITION_API && <ClientRouter />}
 ```
 
 这样可以通过配置开关控制是否启用页面过渡。
 
 ## 为什么要关注 `astro:after-swap`
 
-启用 View Transitions 后，页面切换不完全等同于传统刷新。
+启用 `ClientRouter` 后，页面切换不完全等同于传统刷新。
 
 如果脚本只在初次加载时绑定事件，切换页面后新 DOM 里的按钮可能没有事件。
 
@@ -189,7 +189,7 @@ mediaQuery.addEventListener("change", () => {
 
 ## 这一节要掌握的关键词
 
-- `ViewTransitions`
+- `ClientRouter`
 - `astro:after-swap`
 - `is:inline`
 - `localStorage`

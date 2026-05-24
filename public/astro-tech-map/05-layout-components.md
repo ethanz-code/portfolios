@@ -55,7 +55,7 @@ const { title } = Astro.props;
 - Footer。
 - 主内容容器。
 - 主题切换。
-- View Transitions。
+- ClientRouter 页面切换增强。
 
 页面只需要把自己的内容放进去：
 
@@ -174,13 +174,24 @@ export const primaryNavItems = [
 它接收：
 
 ```ts
-const { title, img, desc, url, badge, tags, target = "_blank" } = Astro.props;
+const {
+  title,
+  img,
+  imgLight,
+  imgDark,
+  desc,
+  url,
+  badge,
+  tags,
+  target = "_blank",
+} = Astro.props;
 ```
 
 好处：
 
 - 项目页不用重复写卡片结构。
 - 首页和项目页可以复用。
+- `imgLight` / `imgDark` 可以复用亮暗主题图片切换。
 - 后续调整卡片样式，只改一个组件。
 
 ## 什么时候拆组件

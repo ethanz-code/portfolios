@@ -1,172 +1,144 @@
 ---
 title: "安装奖励技术方案：书签不可验真与 PWA 校验路径"
-description: "为什么普通网页不能验证收藏成功，以及安装奖励如何设计得更可控。"
+description: "说明收藏奖励为什么缺少验真链路，以及 PWA 安装奖励如何建立更可控的领取边界。"
 publishedDate: "2026-05-18"
-updatedDate: "2026-05-18"
+updatedDate: "2026-05-23"
 tags:
   - "PWA"
   - "浏览器"
   - "风控"
 ---
 
-普通网页无法真正监听或验证用户是否收藏了浏览器书签。
-
-浏览器不会把书签列表、收藏确认结果暴露给页面脚本。这是隐私和安全边界，不是前端技巧问题。
-
-因此奖励口径不应该叫“收藏奖励”。更稳妥的实现是“安装奖励”：用户把站点安装为 PWA，或在 iOS Safari 添加到主屏幕后，从独立窗口或主屏幕图标打开，再领取一次性奖励。
-
-## 为什么不能做真正收藏监听
-
-页面最多能感知一些弱信号：
-
-- 用户按下 `Ctrl + D` 或 `Command + D`。
-- 页面触发 `blur`。
-- 页面触发 `visibilitychange`。
-- 用户在弹窗附近停留了一段时间。
-
-这些都不能证明“收藏成功”。
-
-`Ctrl + D` 只能说明用户按过快捷键。用户可能取消收藏，也可能浏览器拦截，也可能快捷键被系统、插件或浏览器行为覆盖。
-
-浏览器书签 API 只存在于扩展能力中。普通网页没有 `bookmarks` 权限，也不能读取用户书签列表。
-
-```ts
-window.addEventListener("keydown", (event) => {
-  const maybeBookmarkShortcut = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d";
-
-  if (maybeBookmarkShortcut) {
-    // 这里只能说明用户按过快捷键。
-    // 不能说明用户确认收藏，也不能说明收藏写入成功。
+## 结论先行
+浏览器书签属于用户隐私区，页面脚本无法读取书签状态，验真链路天然断裂。「收藏成功」不适合作为可信发奖触发条件。
+需要绑定「用户以独立入口打开站点」这一行为时，应改用 PWA 安装信号，配合服务端一次性校验和基础风控。
+---
+## 一、为什么「书签收藏」验不了真
+浏览器没有 `bookmarkadd` 事件，也不会向页面脚本暴露书签列表、目录或收藏结果。能监听的边缘信号只有：
+- `keydown`：用户按了 Ctrl+D / Cmd+D
+- `visibilitychange` / `blur`：页面失焦，可能是弹窗出现了
+这些信号最多说明「用户可能触发了收藏动作」，不能证明书签被实际创建。
+```typescript
+// 只能证明用户按过某些键，不能证明收藏成功
+window.addEventListener('keydown', (event) => {
+  const maybeBookmark = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd';
+  if (maybeBookmark) {
+    showBookmarkGuide(); // 只能做引导提示，不能据此发奖
   }
 });
 ```
+后端同样看不到书签。如果前端把 `tag: 'install_reward'` 直接 POST 给后端，用户可以在控制台直接调接口，完全不可信任。唯一能读到书签的方式是浏览器扩展（`chrome.bookmarks` API），移动端不支持，不适合奖励场景。
+---
+## 二、为什么改用 PWA 安装信号
+<table header-row="true">
+<tr>
+<td>信号</td>
+<td>触发时机</td>
+<td>平台</td>
+</tr>
+<tr>
+<td>`beforeinstallprompt`</td>
+<td>浏览器判断站点满足 PWA 安装条件</td>
+<td>Chrome 系</td>
+</tr>
+<tr>
+<td>`appinstalled`</td>
+<td>用户完成安装</td>
+<td>Chrome 系</td>
+</tr>
+<tr>
+<td>`display-mode: standalone`</td>
+<td>从桌面图标打开</td>
+<td>跨平台</td>
+</tr>
+<tr>
+<td>`navigator.standalone`</td>
+<td>从主屏图标打开</td>
+<td>iOS Safari</td>
+</tr>
+</table>
+这些信号仍然是客户端信号，不是银行级校验。但对低额一次性奖励而言，「能解释、能落库、能防重复」已经足够。
+---
+## 三、前端：收集安装信号
+```typescript
+type InstallClaimSignal = {
+  url: string;
+  standalone: boolean;
+  displayMode: 'standalone' | 'fullscreen' | 'minimal-ui' | 'browser';
+  navigatorStandalone?: boolean;
+};
 
-如果后端只接收前端上报的 `tag=bookmarked`，风险更明显：
+const detectStandalone = (): boolean => {
+  const ios = (window.navigator as Navigator & { standalone?: boolean }).standalone;
+  return window.matchMedia('(display-mode: standalone)').matches || ios === true;
+};
 
-```http
-POST /reward/bookmark/claim
-Content-Type: application/json
+const getDisplayMode = (): InstallClaimSignal['displayMode'] => {
+  if (window.matchMedia('(display-mode: standalone)').matches) return 'standalone';
+  if (window.matchMedia('(display-mode: fullscreen)').matches) return 'fullscreen';
+  if (window.matchMedia('(display-mode: minimal-ui)').matches) return 'minimal-ui';
+  return 'browser';
+};
 
-{ "tag": "bookmarked" }
+const buildInstallSignal = (): InstallClaimSignal => ({
+  url: window.location.href,
+  standalone: detectStandalone(),
+  displayMode: getDisplayMode(),
+  navigatorStandalone: (window.navigator as Navigator & { standalone?: boolean }).standalone,
+});
+
+// 前端拦截：明显不满足条件时先提示，不作最终校验
+const signal = buildInstallSignal();
+if (!signal.standalone) {
+  showToast('请先从桌面或主屏幕图标打开后再领取');
+  return;
+}
+await api.post('/app/user/reward/install/claim', signal);
 ```
+---
+## 四、后端：一次性发奖逻辑
+```typescript
+private hasInstallOpenSignal(signal?: InstallClaimSignal): boolean {
+  return (
+    signal?.standalone === true ||
+    signal?.navigatorStandalone === true ||
+    signal?.displayMode === 'standalone' ||
+    signal?.displayMode === 'fullscreen' ||
+    signal?.displayMode === 'minimal-ui'
+  );
+}
 
-这个请求可以被脚本直接伪造。后端没有可靠证据证明用户真的完成了收藏动作。
+async claim(userId: number, signal?: InstallClaimSignal) {
+  if (!this.hasInstallOpenSignal(signal)) {
+    throw new BizException('请先从桌面或主屏幕图标打开后再领取');
+  }
 
-## PWA 路径为什么更合适
+  return await this.dataSource.manager.transaction(async (manager) => {
+    // 锁用户行，防并发重复领取
+    await manager.findOne(UserEntity, {
+      where: { id: userId },
+      lock: { mode: 'pessimistic_write' },
+    });
 
-PWA 安装也不是绝对不可伪造，但它至少有更明确的浏览器状态和用户路径。
+    const existing = await manager.findOne(InstallRewardEntity, { where: { userId } });
+    if (existing) return { alreadyClaimed: true, amount: Number(existing.rewardAmount) };
 
-电脑和 Android Chromium 可以使用：
+    const amount = this.generateRewardAmount();
+    await manager.save(InstallRewardEntity, { userId, rewardAmount: amount });
+    await manager.increment(UserWalletEntity, { userId }, 'balance', amount);
+    await manager.save(FundFlowEntity, { userId, amount, type: 'install_reward' });
 
-- `beforeinstallprompt`：浏览器认为站点满足安装条件时触发。
-- `appinstalled`：用户接受安装后触发。
-- `display-mode: standalone`：用户从安装后的入口打开。
-
-iOS Safari 不支持标准 `beforeinstallprompt` 自动安装弹窗。用户必须手动点分享按钮，再选择“添加到主屏幕”。
-
-iOS 可用于判断的信号是：
-
-- `navigator.standalone === true`
-- `window.matchMedia("(display-mode: standalone)").matches`
-
-也就是说，iOS 不能在浏览器页里确认“刚刚添加成功”，只能在用户从主屏幕图标打开后确认当前处于 standalone 模式。
-
-```ts
-const isStandalone =
-  window.matchMedia("(display-mode: standalone)").matches ||
-  ("standalone" in navigator && Boolean(navigator.standalone));
-
-if (isStandalone) {
-  // 允许展示领取入口，但最终仍要由后端做一次性领取控制。
+    return { alreadyClaimed: false, amount };
+  });
 }
 ```
-
-## 前端应该收集什么
-
-前端不要声称自己能证明安装成功。它只负责收集浏览器侧可见信号，并把用户引导到正确路径。
-
-可以上报：
-
-- `displayMode`
-- `navigatorStandalone`
-- `url`
-- `userAgent`
-- 是否触发过 `appinstalled`
-
-示例：
-
-```ts
-const displayMode = window.matchMedia("(display-mode: standalone)").matches
-  ? "standalone"
-  : "browser";
-
-await fetch("/app/user/reward/install/claim", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    displayMode,
-    navigatorStandalone: "standalone" in navigator ? Boolean(navigator.standalone) : false,
-    url: location.href,
-  }),
-});
-```
-
-## 后端应该怎么控制
-
-后端不要把“客户端说已经安装”当成唯一依据。更稳的做法是把它当成领取前置信号，再叠加账号、活动配置和一次性领取控制。
-
-关键动作：
-
-- 查活动开关。
-- 查用户是否已领取。
-- 检查是否有安装打开信号。
-- 在事务里写领取记录。
-- 在同一个事务里写余额和资金流水。
-
-伪代码：
-
-```ts
-await dataSource.transaction(async (manager) => {
-  const existing = await manager.findOne(UserInstallRewardEntity, {
-    where: { userId },
-    lock: { mode: "pessimistic_write" },
-  });
-
-  if (existing) {
-    throw new Error("已领取");
-  }
-
-  if (!hasInstallOpenSignal(payload)) {
-    throw new Error("请从桌面或主屏幕图标打开后领取");
-  }
-
-  await manager.save(UserInstallRewardEntity, { userId, amount });
-  await manager.increment(UserBalanceEntity, { userId }, "balance", amount);
-  await manager.save(UserBalanceFlowEntity, {
-    userId,
-    amount,
-    flowType: "install_reward",
-    relatedType: "install",
-  });
-});
-```
-
-这里的重点不是“前端状态绝对可信”，而是把奖励设计成成本可控的一次性动作。
-
-## 风控边界
-
-这个方案能防止同一账号反复领取，因为后端有唯一记录。
-
-它仍不能完全防止：
-
-- 用户直接调用接口伪造领取。
-- 批量注册账号领取。
-- 自动化脚本登录后请求接口。
-
-如果奖励金额较高，还要叠加手机号绑定、新账号等待期、验证码、IP 频控、设备指纹、后台审计，或者把奖励改为优惠券和积分。
-
-## 结论
-
-收藏动作不可验真，不适合作为发钱依据。
-
-PWA 或主屏 App 打开路径可验证性更强，但也不是绝对安全。正确做法是把它设计成“浏览器信号 + 后端一次性约束 + 风控策略”的组合，而不是相信某个前端事件。
+---
+## 五、边界与取舍
+- PWA 信号有技术用户可以伪造，但伪造成本远高于奖励价值，对低额一次性场景可以接受
+- 奖励金额较高时，可叠加设备指纹、IP 限频、账号风控
+- 「收藏按钮」适合做引导和用户教育，不适合绑定金额奖励
+- 发奖后应有审计日志，方便事后核查异常领取行为
+## 后续待验证
+- iOS 18+ 对 `navigator.standalone` 的支持是否有变化
+- Android TWA 场景下 display-mode 信号是否可靠
+- 是否引入设备指纹服务作为补充风控

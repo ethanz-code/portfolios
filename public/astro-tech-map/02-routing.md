@@ -70,7 +70,7 @@ export async function getStaticPaths() {
   return articleEntries
     .filter((entry) => !entry.data.draft)
     .map((entry) => ({
-      params: { slug: entry.slug },
+      params: { slug: entry.id },
       props: { entry },
     }));
 }
@@ -80,7 +80,7 @@ export async function getStaticPaths() {
 
 1. 读取 `articles` 内容集合。
 2. 过滤掉 `draft: true` 的文章。
-3. 用 `entry.slug` 生成 URL。
+3. 用 `entry.id` 生成 URL。
 4. 把整篇文章 entry 传给页面组件。
 
 如果有文件：
@@ -114,7 +114,7 @@ src/content/articles/start-here.md
 
 ```ts
 {
-  params: { slug: entry.slug },
+  params: { slug: entry.id },
   props: { entry },
 }
 ```
@@ -141,7 +141,7 @@ const { entry } = Astro.props;
 `src/pages/articles.astro`：
 
 ```astro
-<a href={`/articles/${article.slug}`}>
+<a href={`/articles/${article.id}`}>
   ...
 </a>
 ```

@@ -2,7 +2,7 @@
 
 ## 相关文件
 
-- `src/content/config.ts`
+- `src/content.config.ts`
 - `src/content/articles/start-here.md`
 - `src/content/projects/sxeasy.md`
 - `src/pages/articles.astro`
@@ -34,9 +34,22 @@ Content Collections 的作用是：
 
 ## 当前有哪些集合
 
-`src/content/config.ts`：
+`src/content.config.ts`：
 
 ```ts
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+
+const projectCollection = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
+  schema: projectSchema,
+});
+
+const articleCollection = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/articles" }),
+  schema: articleSchema,
+});
+
 export const collections = {
   projects: projectCollection,
   articles: articleCollection,
@@ -50,7 +63,7 @@ src/content/articles/
 src/content/projects/
 ```
 
-集合名必须和目录名对应。
+集合名必须和页面里 `getCollection("articles")` 使用的名字对应。`glob()` loader 负责把目录里的 `.md` 和 `.mdx` 文件加载进集合。
 
 ## 文章集合 schema
 
@@ -189,15 +202,17 @@ const articleEntries = await getCollection("articles");
 `getCollection()` 返回的 entry 包含：
 
 - `entry.data`：frontmatter。
-- `entry.slug`：文件名生成的 slug。
-- `entry.render()`：渲染 Markdown 正文。
+- `entry.id`：由文件名生成的稳定 ID，用来拼 URL。
+- `render(entry)`：渲染 Markdown / MDX 正文。
 
 ## 渲染 Markdown 正文
 
 详情页：
 
 ```ts
-const { Content } = await entry.render();
+import { render } from "astro:content";
+
+const { Content } = await render(entry);
 ```
 
 模板里：
@@ -246,10 +261,11 @@ tags:
 ## 这一节要掌握的关键词
 
 - Content Collections
-- `src/content/config.ts`
+- `src/content.config.ts`
 - `defineCollection`
+- `glob`
 - `zod`
 - `getCollection`
 - `entry.data`
-- `entry.slug`
-- `entry.render`
+- `entry.id`
+- `render(entry)`

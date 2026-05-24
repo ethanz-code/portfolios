@@ -12,7 +12,7 @@
 4. [Markdown 发文流程](04-markdown-publishing.md)
 5. [Layout、组件与 slot](05-layout-components.md)
 6. [Head、SEO 与站点元信息](06-head-seo.md)
-7. [View Transitions 与客户端脚本](07-transitions-client-scripts.md)
+7. [ClientRouter 与客户端脚本](07-transitions-client-scripts.md)
 8. [图片、public 静态资源与样式系统](08-assets-styles.md)
 9. [动手练习路线](09-practice-path.md)
 

@@ -241,7 +241,7 @@ tags:
 
 ## 练习 8：关闭页面过渡
 
-目标：理解配置开关和 View Transitions。
+目标：理解配置开关和 ClientRouter。
 
 步骤：
 
@@ -262,7 +262,7 @@ bun run dev
 掌握点：
 
 - 配置可以影响 layout 行为。
-- View Transitions 是增强体验，不是页面内容的必要条件。
+- ClientRouter 是增强体验，不是页面内容的必要条件。
 
 ## 练习 9：调整全站按钮圆角
 
@@ -333,7 +333,7 @@ og:image
 第三轮再改：
 
 1. 主题切换。
-2. View Transitions。
+2. ClientRouter。
 3. 样式系统。
 
 不要一开始就追完所有 Astro API。先把这个项目从“能维护”变成“能解释”，再考虑扩展 RSS、标签页、搜索或 MDX。
