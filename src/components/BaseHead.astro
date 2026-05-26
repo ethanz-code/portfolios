@@ -2,9 +2,7 @@
 // Import global styles once through the shared head component.
 import "katex/dist/katex.min.css";
 import '../styles/global.css';
-import type { ImageMetadata } from "astro";
 import { SITE_AUTHOR, SITE_TITLE } from '../config';
-import { resolveImageSource } from "../assets/images";
 
 export interface Props {
 	title: string;
@@ -16,10 +14,10 @@ export interface Props {
 const { title, description, image, ogType = 'website' } = Astro.props;
 const pageTitle = title === SITE_TITLE ? title : `${title} | ${SITE_TITLE}`;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
-const resolvedImage = resolveImageSource(image) ?? "/social_img.webp";
-const socialImageUrl = typeof resolvedImage === "string"
-  ? new URL(resolvedImage, Astro.url).toString()
-  : new URL(resolvedImage.src, Astro.url).toString();
+const socialImage = image ?? "/social_img.webp";
+const socialImageUrl = typeof socialImage === "string"
+  ? new URL(socialImage, Astro.url).toString()
+  : new URL(socialImage.src, Astro.url).toString();
 ---
 
 <!-- Global metadata -->

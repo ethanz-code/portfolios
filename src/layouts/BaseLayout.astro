@@ -170,5 +170,118 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
         bindThemeControls();
       })();
     </script>
+    <script is:inline>
+      (() => {
+        const hashToId = () => {
+          const hash = window.location.hash.slice(1);
+
+          if (!hash) {
+            return "";
+          }
+
+          try {
+            return decodeURIComponent(hash);
+          } catch {
+            return hash;
+          }
+        };
+
+        const getHashTarget = () => {
+          const id = hashToId();
+
+          if (!id) {
+            return null;
+          }
+
+          return document.getElementById(id) ?? document.getElementById(window.location.hash.slice(1));
+        };
+
+        const getScrollContainer = (target) => {
+          let current = target.parentElement;
+
+          while (current && current !== document.body) {
+            const style = window.getComputedStyle(current);
+            const canScroll = /(auto|scroll|overlay)/.test(style.overflowY);
+
+            if (canScroll && current.scrollHeight > current.clientHeight) {
+              return current;
+            }
+
+            current = current.parentElement;
+          }
+
+          return document.scrollingElement ?? document.documentElement;
+        };
+
+        const getScrollMarginTop = (target) => {
+          const margin = Number.parseFloat(window.getComputedStyle(target).scrollMarginTop);
+          return Number.isFinite(margin) ? margin : 0;
+        };
+
+        const scrollHashTargetIntoView = () => {
+          const target = getHashTarget();
+
+          if (!target) {
+            return;
+          }
+
+          window.requestAnimationFrame(() => {
+            const scrollContainer = getScrollContainer(target);
+            const marginTop = getScrollMarginTop(target);
+
+            if (
+              scrollContainer === document.scrollingElement ||
+              scrollContainer === document.documentElement ||
+              scrollContainer === document.body
+            ) {
+              window.scrollTo({
+                top: target.getBoundingClientRect().top + window.scrollY - marginTop,
+                behavior: "auto",
+              });
+              return;
+            }
+
+            scrollContainer.scrollTo({
+              top:
+                target.getBoundingClientRect().top -
+                scrollContainer.getBoundingClientRect().top +
+                scrollContainer.scrollTop -
+                marginTop,
+              behavior: "auto",
+            });
+          });
+        };
+
+        const scheduleHashScroll = () => {
+          [0, 80, 250, 700].forEach((delay) => {
+            window.setTimeout(scrollHashTargetIntoView, delay);
+          });
+        };
+
+        if (!window.__contentHashScrollBound) {
+          document.addEventListener("astro:page-load", scheduleHashScroll);
+          document.addEventListener("astro:after-swap", scheduleHashScroll);
+          window.addEventListener("hashchange", scheduleHashScroll);
+          window.addEventListener("load", scheduleHashScroll);
+          document.addEventListener("click", (event) => {
+            const target = event.target;
+
+            if (!(target instanceof Element)) {
+              return;
+            }
+
+            const anchor = target.closest(".heading-anchor[href^='#']");
+
+            if (anchor) {
+              scheduleHashScroll();
+            }
+          });
+
+          window.__contentHashScrollBound = true;
+        }
+
+        scheduleHashScroll();
+      })();
+    </script>
   </body>
 </html>

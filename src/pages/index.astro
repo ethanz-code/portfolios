@@ -2,8 +2,10 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HorizontalCard from "../components/HorizontalCard.astro";
 import ContributionChart from "../components/ContributionChart.astro";
-import { resolveImageSource } from "../assets/images";
+import { getContentEntryPath } from "../lib/content-routes";
 import { type CollectionEntry, getCollection } from "astro:content";
+import sxeasyHomeImage from "../assets/projects/sxeasy/home.webp";
+import sxeasyHomeDarkImage from "../assets/projects/sxeasy/home-dark.webp";
 
 const workStyle = [
   "先做市场调研，明确用户需求和痛点，再拆最短闭环，尽快把产品推到可验证状态。",
@@ -27,7 +29,7 @@ const homeProjects: ProjectEntry[] = projects
 
 const getProjectUrl = (project: ProjectEntry): string => {
   if (project.data.detailPage) {
-    return `/projects/${project.id}`;
+    return getContentEntryPath("projects", project);
   }
 
   if (project.data.externalUrl) {
@@ -38,19 +40,9 @@ const getProjectUrl = (project: ProjectEntry): string => {
 };
 
 const getProjectImageLight = (project: ProjectEntry) =>
-  resolveImageSource(
-    project.data.coverImageLight
-      ?? project.data.coverImage
-      ?? project.data.heroImageLight
-      ?? project.data.heroImage,
-  );
+  project.id === "sxeasy" ? sxeasyHomeImage : project.data.heroImageLight ?? project.data.heroImage;
 const getProjectImageDark = (project: ProjectEntry) =>
-  resolveImageSource(
-    project.data.coverImageDark
-      ?? project.data.coverImage
-      ?? project.data.heroImageDark
-      ?? project.data.heroImage,
-  );
+  project.id === "sxeasy" ? sxeasyHomeDarkImage : project.data.heroImageDark ?? project.data.heroImage;
 ---
 
 <BaseLayout
@@ -63,7 +55,7 @@ const getProjectImageDark = (project: ProjectEntry) =>
     <div class="py-3 text-xl font-bold leading-tight sm:text-3xl lg:text-5xl">Ethan Zhang · 全栈产品开发</div>
     <div class="max-w-4xl py-2">
       <p class="text-base leading-7 sm:text-lg sm:leading-relaxed lg:text-[1.95rem] lg:leading-[1.5]">
-        把想法做成能上线、能验证、能继续迭代的产品。
+        这是我的个人资料站点，在这里写一些自己的项目经历，技术积累以及所思所想。希望能让你对我有个更全面的了解。
       </p>
     </div>
     <div class="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:gap-4 lg:mt-12">
@@ -106,7 +98,7 @@ const getProjectImageDark = (project: ProjectEntry) =>
   <section class="mb-16">
     <div class="mb-4 text-2xl font-bold leading-tight sm:text-3xl lg:text-5xl">近期项目 {"</>"}</div>
     <p class="mb-6 max-w-3xl leading-7 opacity-80">
-      最近在维护、更新和继续投入的项目，优先放这里。
+      最近在维护、更新和继续投入的项目在这里噢。
     </p>
     <div class="max-w-3xl">
       {

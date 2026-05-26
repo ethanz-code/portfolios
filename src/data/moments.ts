@@ -1,5 +1,3 @@
-import type { ImageMetadata } from "astro";
-
 export interface MomentGroupInfo {
   slug: string;
   title: string;

@@ -4,6 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
+import { getContentEntryPath } from "../lib/content-routes";
 
 dayjs.extend(localizedFormat);
 dayjs.locale("zh-cn");
@@ -17,7 +18,7 @@ const articles = (await getCollection("articles"))
   <section class="mb-10 max-w-3xl">
     <div class="mb-3 text-3xl font-bold sm:text-4xl lg:text-6xl">文章</div>
     <p class="max-w-3xl text-base leading-7 opacity-80 sm:text-lg sm:leading-8">
-      写一些有趣，值得思考的文章。
+      定期同步一下 Notion 上记录的文章，都是 Claude Code 总结的一些知识点和复盘，偶尔也会有一些随手记录的东西。希望能对你有所帮助！
     </p>
   </section>
 
@@ -25,7 +26,7 @@ const articles = (await getCollection("articles"))
     {
       articles.map((article) => (
         <a
-          href={`/articles/${article.id}`}
+          href={getContentEntryPath("articles", article)}
           class="block border-b border-base-300 py-5 transition hover:border-base-content"
         >
           <div class="mb-2 flex flex-wrap items-center gap-2">

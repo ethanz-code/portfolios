@@ -1,7 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HorizontalCard from "../components/HorizontalCard.astro";
-import { resolveImageSource } from "../assets/images";
+import { getContentEntryPath } from "../lib/content-routes";
+import sxeasyHomeImage from "../assets/projects/sxeasy/home.webp";
+import sxeasyHomeDarkImage from "../assets/projects/sxeasy/home-dark.webp";
 
 import { type CollectionEntry, getCollection } from "astro:content";
 
@@ -17,7 +19,7 @@ const contentProjects = projects
 
 const getProjectUrl = (project: ProjectEntry): string => {
   if (project.data.detailPage) {
-    return `/projects/${project.id}`;
+    return getContentEntryPath("projects", project);
   }
 
   if (project.data.externalUrl) {
@@ -28,19 +30,9 @@ const getProjectUrl = (project: ProjectEntry): string => {
 };
 
 const getProjectImageLight = (project: ProjectEntry) =>
-  resolveImageSource(
-    project.data.coverImageLight
-      ?? project.data.coverImage
-      ?? project.data.heroImageLight
-      ?? project.data.heroImage,
-  );
+  project.id === "sxeasy" ? sxeasyHomeImage : project.data.heroImageLight ?? project.data.heroImage;
 const getProjectImageDark = (project: ProjectEntry) =>
-  resolveImageSource(
-    project.data.coverImageDark
-      ?? project.data.coverImage
-      ?? project.data.heroImageDark
-      ?? project.data.heroImage,
-  );
+  project.id === "sxeasy" ? sxeasyHomeDarkImage : project.data.heroImageDark ?? project.data.heroImage;
 ---
 
 <BaseLayout
@@ -51,7 +43,7 @@ const getProjectImageDark = (project: ProjectEntry) =>
   <section class="mb-10 max-w-3xl">
     <div class="mb-3 text-3xl font-bold sm:text-4xl lg:text-6xl">项目</div>
     <p class="text-base leading-7 opacity-80 sm:text-lg sm:leading-8">
-      往年本人做过的一些项目都会放到这里。
+      本人做过的一些项目都会放到这里，一起共勉。
     </p>
   </section>
 

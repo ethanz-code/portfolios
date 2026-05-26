@@ -1,20 +1,15 @@
 ---
-import { type CollectionEntry, getCollection, render } from "astro:content";
-import { resolveImageSource } from "../../assets/images";
-import ThemeImage from "../../components/ThemeImage.astro";
-import MermaidRenderer from "../../components/MermaidRenderer.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { type ProjectSchema } from "../../content.config";
-import dayjs from "dayjs";
-import localizedFormat from "dayjs/plugin/localizedFormat";
-import "dayjs/locale/zh-cn";
+import { type CollectionEntry, getCollection } from "astro:content";
+import ContentEntryDetail from "../../components/ContentEntryDetail.astro";
+import { getContentEntryRouteParams } from "../../lib/content-routes";
 
 export async function getStaticPaths() {
   const projectEntries = await getCollection("projects");
+
   return projectEntries
     .filter((entry) => entry.data.detailPage)
     .map((entry) => ({
-      params: { slug: entry.id },
+      params: getContentEntryRouteParams(entry),
       props: { entry },
     }));
 }
@@ -24,112 +19,6 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const project: ProjectSchema = entry.data;
-const { Content } = await render(entry);
-dayjs.extend(localizedFormat);
-dayjs.locale("zh-cn");
-const displayDate = dayjs(project.updatedDate).format("LL");
-const heroImage = resolveImageSource(project.heroImageLight ?? project.heroImage);
-const heroImageDark = resolveImageSource(project.heroImageDark);
-const projectImages = project.images?.map((image) => ({
-  ...image,
-  light: resolveImageSource(image.light),
-  dark: resolveImageSource(image.dark),
-}));
-const hasMermaid = entry.body?.includes("```mermaid") ?? false;
 ---
 
-<BaseLayout title={project.title} description={project.description} image={heroImage} sideBarActiveItemID="projects">
-  <main class="mx-auto max-w-[760px]">
-    <article class="prose prose-base max-w-none prose-h2:mt-10 prose-h2:text-2xl prose-p:leading-7 prose-li:leading-7 prose-img:rounded-lg prose-img:border prose-img:border-base-300 sm:prose-lg sm:prose-p:leading-8">
-      <div class="not-prose mb-8">
-        <div class="mb-6">
-          <a href="/projects" class="btn btn-outline btn-sm gap-2">
-            <svg
-              class="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m15 18-6-6 6-6"></path>
-            </svg>
-            返回项目
-          </a>
-        </div>
-
-        <div class="mb-4 flex flex-wrap items-center gap-2">
-          <span class="badge badge-secondary">{project.badge}</span>
-          <span class="badge badge-neutral">项目复盘</span>
-        </div>
-
-        <div class="mb-4">
-          <h1 class="m-0 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{project.title}</h1>
-        </div>
-
-        <p class="text-base leading-7 opacity-80 sm:text-lg sm:leading-relaxed lg:text-xl">{project.description}</p>
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          {project.tags?.map((tag) => <span class="badge badge-ghost">{tag}</span>)}
-        </div>
-
-        <div class="mt-3 text-sm opacity-60">
-          更新于 <time>{displayDate}</time>
-        </div>
-      </div>
-
-      {
-        heroImage && (
-          <div class="not-prose card mb-8 border border-base-300 bg-base-100 shadow-sm">
-            <figure>
-              {
-                <ThemeImage
-                  light={heroImage}
-                  dark={heroImageDark}
-                  alt={`${project.title}运行截图`}
-                  class="aspect-[16/9] w-full object-cover object-left-top"
-                  widths={[640, 960, 1280, 1600]}
-                  sizes="(max-width: 820px) 100vw, 760px"
-                />
-              }
-            </figure>
-            <div class="card-body p-4">
-              <p class="text-sm opacity-70">首页：服务展示与办理入口</p>
-            </div>
-          </div>
-        )
-      }
-
-      <Content />
-
-      {
-        projectImages?.map((image) => (
-          <div class="not-prose card my-8 border border-base-300 bg-base-100 shadow-sm">
-            <figure>
-              <ThemeImage
-                light={image.light}
-                dark={image.dark}
-                alt={image.alt}
-                class="aspect-[16/9] w-full object-cover object-left-top"
-                widths={[640, 960, 1280, 1600]}
-                sizes="(max-width: 820px) 100vw, 760px"
-                loading="lazy"
-              />
-            </figure>
-            {
-              image.caption && (
-                <div class="card-body p-4">
-                  <p class="text-sm opacity-70">{image.caption}</p>
-                </div>
-              )
-            }
-          </div>
-        ))
-      }
-      {hasMermaid && <MermaidRenderer />}
-    </article>
-  </main>
-</BaseLayout>
+<ContentEntryDetail section="projects" entry={entry} />
