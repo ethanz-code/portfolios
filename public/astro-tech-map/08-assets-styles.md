@@ -8,7 +8,6 @@
 - `public/projects/sxeasy/home.webp`
 - `src/assets/projects/sxeasy/`
 - `src/assets/moments/`
-- `src/assets/images.ts`
 - `src/components/HorizontalCard.astro`
 - `src/components/ThemeImage.astro`
 - `src/components/ThemeImageSource.astro`
@@ -39,8 +38,7 @@ public/projects/sxeasy/home.webp
 - favicon。
 - 头像。
 - 社交分享图。
-- 项目截图。
-- 文章正文配图和头图。
+- 需要稳定 URL 的文章正文配图和头图。
 - 不需要经过打包处理的静态文档。
 
 这组学习文档也放在 `public/astro-tech-map/`，构建后可通过：
@@ -81,76 +79,68 @@ import { Image } from "astro:assets";
 
 ## 当前项目的图片管线
 
-这个项目同时保留两种路径：
+这个项目分两种图片来源：
 
-- 内容里写稳定路径，例如 `/projects/sxeasy/home.webp`。
-- 代码里把稳定路径映射到 `src/assets` 导入对象。
+- 组件和 MDX 里需要 Astro Image 优化的图片：从 `src/assets/` 直接 import。
+- 普通 Markdown 正文图片、favicon、社交图：放在 `public/`，用根路径引用。
 
-这样内容作者不用关心打包产物，页面组件仍然可以拿到 Astro Image 需要的 `ImageMetadata`。
+核心原则：`<Image />` 要拿到导入出来的图片对象，才能生成优化图片。字符串路径不会自动变成优化图片。
 
-核心入口是 `src/assets/images.ts`：
+例如项目卡片直接导入截图：
 
 ```ts
-import sxeasyHomeImage from "./projects/sxeasy/home.webp";
-
-const mappedImageSources = {
-  "/projects/sxeasy/home.webp": sxeasyHomeImage,
-} as const;
-
-export const resolveImageSource = (src) => {
-  if (!src) return undefined;
-  if (typeof src !== "string") return src;
-  return mappedImageSources[src] ?? src;
-};
+import sxeasyHomeImage from "../assets/projects/sxeasy/home.webp";
+import sxeasyHomeDarkImage from "../assets/projects/sxeasy/home-dark.webp";
 ```
-
-页面先调用 `resolveImageSource()`。如果命中映射，返回 `ImageMetadata`，走 `<Image />` 优化；如果没有命中，仍然按普通字符串路径输出 `<img>`。
 
 ## public 路径和 Astro Image 的关系
 
 如果图片路径来自内容 frontmatter：
 
 ```yaml
-coverImage: "/projects/sxeasy/home.webp"
+heroImage: "/projects/sxeasy/home.webp"
 ```
 
 组件拿到的是字符串：
 
 ```astro
-<HorizontalCard img={project.data.coverImage} />
+<HorizontalCard img={project.data.heroImage} />
 ```
 
-这类图片路径稳定，适合内容作者维护。
+这类图片路径稳定，适合内容作者维护，但它只是字符串。
 
-如果希望稳定路径也走 Astro Image 优化，需要同时放一份到 `src/assets`，并在 `src/assets/images.ts` 建一层映射：
+如果希望走 Astro Image 优化，就直接 import 图片对象，再传给组件：
 
 ```ts
-import sxeasyHomeImage from "./projects/sxeasy/home.webp";
-
-const mappedImageSources = {
-  "/projects/sxeasy/home.webp": sxeasyHomeImage,
-} as const;
+import sxeasyHomeImage from "../assets/projects/sxeasy/home.webp";
 ```
 
-页面仍然写 `/projects/sxeasy/home.webp`，组件渲染前先调用 `resolveImageSource()`。如果路径被映射到 `src/assets` 导入对象，`ThemeImageSource` 会使用 Astro 的 `<Image />`；如果没有映射，就退回普通 `<img>`。
+`ThemeImageSource` 会判断 `src` 类型：导入图片对象走 `<Image />`，字符串路径退回普通 `<img>`。
 
 ## 项目截图的亮暗适配
 
-项目内容支持成对图片：
+项目卡片 frontmatter 可以写成对图片路径：
 
 ```yaml
 heroImageLight: "/projects/sxeasy/home.webp"
 heroImageDark: "/projects/sxeasy/home-dark.webp"
-coverImageLight: "/projects/sxeasy/home.webp"
-coverImageDark: "/projects/sxeasy/home-dark.webp"
-images:
-  - light: "/projects/sxeasy/dashboard.webp"
-    dark: "/projects/sxeasy/dashboard-dark.webp"
-    alt: "实习轻松办用户端运行截图"
-    caption: "用户端：签到、周报、进度和业务入口"
 ```
 
-首页和项目列表使用 `coverImageLight` / `coverImageDark`，项目详情页顶部使用 `heroImageLight` / `heroImageDark`，详情页正文截图使用 `images`。
+首页和项目列表会读取 `heroImageLight` / `heroImageDark`。如果页面代码直接导入了对应的 `src/assets` 图片对象，就走 Astro Image 优化；如果只传字符串路径，就按普通图片 URL 渲染。
+
+项目详情页没有单独的 frontmatter 图集字段。正文截图写在 `.mdx` 里，直接导入图片对象并传给 `ArticleThemeImage`：
+
+```mdx
+import ArticleThemeImage from "../../components/ArticleThemeImage.astro";
+import repositoryImage from "../../assets/projects/sxeasy/repository.webp";
+import repositoryDarkImage from "../../assets/projects/sxeasy/repository-dark.webp";
+
+<ArticleThemeImage
+  light={repositoryImage}
+  dark={repositoryDarkImage}
+  alt="实习轻松办仓库概览截图"
+/>
+```
 
 真正切换由 `ThemeImage.astro` 和全局 CSS 完成：
 
@@ -165,10 +155,11 @@ images:
 
 当前 `sxeasy` 的图片分工：
 
-- `home.webp` / `home-dark.webp`：首页卡片、项目列表卡片、项目详情顶部截图。
-- `dashboard.webp` / `dashboard-dark.webp`：项目详情页正文后的运行截图。
+- `home.webp` / `home-dark.webp`：首页卡片和项目列表卡片；`public/` 同名文件用于 frontmatter 稳定路径。
+- `repository.webp` / `repository-dark.webp`：项目详情正文截图。
+- `repository-commit.webp` / `repository-commit-dark.webp`：项目详情正文截图。
 
-这些路径都已经映射到 `src/assets/projects/sxeasy/`，所以会生成 `_astro/` 优化产物。
+这些图片在页面或 MDX 里直接从 `src/assets/projects/sxeasy/` 导入，所以会生成 `_astro/` 优化产物。
 
 ## ImageMetadata 是谁提供的
 
@@ -178,7 +169,9 @@ images:
 import homeImage from "./projects/sxeasy/home.webp";
 ```
 
-拿到的不是字符串，而是 Astro/Vite 在构建期生成的图片元数据对象。它包含图片路径、宽高、格式等信息，类型通常写作 `ImageMetadata`。
+拿到的不是字符串，而是 Astro/Vite 在构建期生成的图片元数据对象。它包含图片路径、宽高、格式等信息，类型可以直接写作 `ImageMetadata`。
+
+注意：当前项目不从 `"astro"` 导入 `ImageMetadata`。Astro 类型环境会提供这个全局类型。
 
 `<Image />` 收到这个对象后，才能生成带指纹、尺寸、`srcset` 和格式处理的优化图片。普通 Markdown 里的 `![图](/path.webp)` 或 HTML `<img src="/path.webp">` 不会自动获得这层优化。
 
@@ -280,7 +273,7 @@ DaisyUI 提供的是一套基于 Tailwind 的组件语义。
 - 和组件强绑定的图片或资源。
 - 希望在构建时自动扫描的图片目录。
 
-当前项目里，项目截图采用“内容稳定路径 + `src/assets` 映射”的方式。图集源图片放 `src/assets/moments/`，让 Astro 在构建时自动处理。文章正文配图仍优先放 `public/articles/`，因为普通 `.md` 正文里的图片不会直接获得 `ImageMetadata`。
+当前项目里，项目截图放 `src/assets/projects/` 并在使用处直接导入。图集源图片放 `src/assets/moments/`，让 Astro 在构建时自动处理。文章正文配图仍优先放 `public/articles/`，因为普通 `.md` 正文里的图片不会直接获得 `ImageMetadata`。
 
 ## 当前项目的图集目录怎么组织
 

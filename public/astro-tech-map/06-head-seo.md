@@ -36,7 +36,7 @@ src/components/BaseHead.astro
 export interface Props {
   title: string;
   description: string;
-  image?: string;
+  image?: string | ImageMetadata;
   ogType?: string;
 }
 ```
@@ -99,7 +99,11 @@ image={article.heroImage}
 用它生成图片绝对地址：
 
 ```astro
-<meta property="og:image" content={new URL(image, Astro.url)} />
+const socialImageUrl = typeof socialImage === "string"
+  ? new URL(socialImage, Astro.url).toString()
+  : new URL(socialImage.src, Astro.url).toString();
+
+<meta property="og:image" content={socialImageUrl} />
 ```
 
 如果 `image` 是：
@@ -113,6 +117,8 @@ image={article.heroImage}
 ```text
 https://your-domain.com/social_img.webp
 ```
+
+如果 `image` 是从 `src/assets` 导入的图片对象，就取它的 `.src` 再转成绝对地址。
 
 ## Open Graph 是什么
 

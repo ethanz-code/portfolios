@@ -13,7 +13,7 @@ tags:
 `Response` 是 **Web 标准 API**（Fetch API）的一部分，在浏览器和 Cloudflare Workers 的运行时环境中都是**全局内置的**，不需要 import，直接用就行。
 ---
 ## 必须用 `new Response` 吗？
-Cloudflare Workers 的 `fetch` 处理函数**必须返回一个 ****`Response`**** 对象**（或 Promise\<Response\>），否则会报错。但不一定非得用 `new Response`，有几种方式：
+Cloudflare Workers 的 `fetch` 处理函数必须返回一个 `Response` 对象（或 `Promise<Response>`），否则会报错。但不一定非得用 `new Response`，有几种方式：
 ```javascript
 // ✅ 1. 最常用：new Response
 return new Response('Hello World!');

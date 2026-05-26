@@ -72,7 +72,7 @@ index === 0 ? "left-[0%]" : "left-[50%]"
 // ❌ 不行：字符串拼接，同理
 "left-[" + value + "%]"
 ```
-**动态数值 → 只能用内联 ****`style`**，这是 Tailwind 的硬限制。
+**动态数值 → 只能用内联 `style`，这是 Tailwind 的硬限制。**
 ```javascript
 <!-- ✅ 正确 -->
 <span style={`left: ${pct}%;`}>...</span>

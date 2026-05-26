@@ -141,7 +141,7 @@ primaryNavItems.push({
 
 ## 练习 5：给文章加头图
 
-目标：理解 public 静态资源。
+目标：理解 public 静态资源和 Open Graph 图片。
 
 步骤：
 
@@ -157,13 +157,13 @@ public/articles/astro-routing.webp
 heroImage: "/articles/astro-routing.webp"
 ```
 
-3. 打开文章详情页。
+3. 打开文章详情页，检查页面 `<head>` 里的 Open Graph 图片。
 
 掌握点：
 
 - `public/` 文件映射到根路径。
 - frontmatter 可以保存图片路径。
-- 详情页根据 `heroImage` 条件渲染头图。
+- 详情页把 `heroImage` 用于 SEO 和分享卡片，不额外渲染可见头图。
 
 ## 练习 6：故意写错 schema
 

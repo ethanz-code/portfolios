@@ -4,9 +4,10 @@
 
 - `src/pages/index.astro`
 - `src/pages/articles.astro`
-- `src/pages/articles/[slug].astro`
 - `src/pages/projects.astro`
+- `src/pages/articles/[slug].astro`
 - `src/pages/projects/[slug].astro`
+- `src/components/ContentEntryDetail.astro`
 - `src/pages/404.astro`
 
 ## 文件路由是什么
@@ -53,24 +54,31 @@ src/pages/articles/index.astro
 ```text
 src/pages/articles/[slug].astro
 -> /articles/:slug
+
+src/pages/projects/[slug].astro
+-> /projects/:slug
 ```
 
 但这个项目是静态站，不是在用户访问时临时查询数据。它需要在构建时把所有 slug 都列出来。
 
 这就是 `getStaticPaths()` 的作用。
 
-## 文章详情页怎么生成
+## 详情页怎么生成
+
+文章和项目各自保留明确的路由入口，详情模板共用 `src/components/ContentEntryDetail.astro`。
 
 `src/pages/articles/[slug].astro`：
 
 ```ts
+import { getContentEntryRouteParams } from "../../lib/content-routes";
+
 export async function getStaticPaths() {
   const articleEntries = await getCollection("articles");
 
   return articleEntries
     .filter((entry) => !entry.data.draft)
     .map((entry) => ({
-      params: { slug: entry.id },
+      params: getContentEntryRouteParams(entry),
       props: { entry },
     }));
 }
@@ -80,8 +88,8 @@ export async function getStaticPaths() {
 
 1. 读取 `articles` 内容集合。
 2. 过滤掉 `draft: true` 的文章。
-3. 用 `entry.id` 生成 URL。
-4. 把整篇文章 entry 传给页面组件。
+3. 用统一的 `getContentEntryRouteParams(entry)` 生成 `[slug]` 路由参数。
+4. 把整篇文章 entry 传给共享详情组件。
 
 如果有文件：
 
@@ -97,7 +105,7 @@ src/content/articles/start-here.md
 
 ## 项目详情页怎么生成
 
-`src/pages/projects/[slug].astro` 的逻辑类似，但多了一个条件：
+项目详情页也是同一个动态路由生成的，只是多了一个条件：
 
 ```ts
 .filter((entry) => entry.data.detailPage)
@@ -114,7 +122,7 @@ src/content/articles/start-here.md
 
 ```ts
 {
-  params: { slug: entry.id },
+  params: getContentEntryRouteParams(entry),
   props: { entry },
 }
 ```
@@ -141,12 +149,14 @@ const { entry } = Astro.props;
 `src/pages/articles.astro`：
 
 ```astro
-<a href={`/articles/${article.id}`}>
+<a href={getContentEntryPath("articles", article)}>
   ...
 </a>
 ```
 
 列表页和详情页靠同一个 `slug` 串起来。
+
+这里的 `slug` 指的是 `articles/[slug].astro` 或 `projects/[slug].astro` 里的动态路由片段，不是额外的页面模板。
 
 ## 常见坑
 
@@ -173,7 +183,7 @@ avoid: 从这里开始记录.md
 
 ### 3. 动态路由没有 `getStaticPaths()`
 
-静态构建时，Astro 不知道要生成哪些动态页面，所以 `[slug].astro` 必须提供 `getStaticPaths()`。
+静态构建时，Astro 不知道要生成哪些动态页面，所以两个 `[slug].astro` 都必须提供 `getStaticPaths()`。
 
 ## 可以动手试的事
 

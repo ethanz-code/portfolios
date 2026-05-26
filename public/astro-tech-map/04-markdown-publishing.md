@@ -5,6 +5,7 @@
 - `src/content/articles/`
 - `src/pages/articles.astro`
 - `src/pages/articles/[slug].astro`
+- `src/components/ContentEntryDetail.astro`
 - `src/content.config.ts`
 - `src/components/ArticleThemeImage.astro`
 - `astro.config.mjs`
@@ -178,7 +179,7 @@ public/projects/sxeasy/home.webp
 -> /projects/sxeasy/home.webp
 ```
 
-文章详情页会读取 `heroImage` 并展示。
+文章详情页会把 `heroImage` 交给 SEO 和 Open Graph，不再额外渲染一张可见头图。正文配图直接写在 Markdown 正文里。
 
 ## 正文怎么写
 
@@ -240,16 +241,18 @@ src/content/articles/sxeasy-image-note.mdx
 
 ```mdx
 import ArticleThemeImage from "../../components/ArticleThemeImage.astro";
+import sxeasyHomeImage from "../../assets/projects/sxeasy/home.webp";
+import sxeasyHomeDarkImage from "../../assets/projects/sxeasy/home-dark.webp";
 
 <ArticleThemeImage
-  light="/projects/sxeasy/home.webp"
-  dark="/projects/sxeasy/home-dark.webp"
+  light={sxeasyHomeImage}
+  dark={sxeasyHomeDarkImage}
   alt="实习轻松办首页截图"
   caption="首页截图会跟随亮暗主题切换。"
 />
 ```
 
-`ArticleThemeImage` 内部会复用项目图片表里的 `ImageMetadata`，能匹配到的图片走 Astro Image 优化；匹配不到时退回普通路径。
+`ArticleThemeImage` 收到导入图片对象时会走 Astro Image 优化；如果传字符串路径，就退回普通 `<img>`。
 
 ## 文章列表怎么读取文章
 
@@ -269,7 +272,7 @@ const articles = (await getCollection("articles"))
 
 ## 文章详情怎么渲染正文
 
-`src/pages/articles/[slug].astro`：
+`src/components/ContentEntryDetail.astro`：
 
 ```ts
 import { render } from "astro:content";
@@ -397,6 +400,7 @@ expressiveCode({
 - Markdown 管线负责代码块、公式、Mermaid 和标题锚点。
 - 普通 Markdown 里的 `<img>` 和 `![图片]()` 不会自动走 Astro Image 优化。
 - MDX 可以直接插入 `ArticleThemeImage` 这类 Astro 组件。
+- `.astro` 模板里写 `class`；`.mdx` 正文是 JSX 语法，HTML/JSX 标签优先写 `className`。
 
 如果正文需要直接插入 Astro 组件，把文章从 `.md` 改成 `.mdx`。
 

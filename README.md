@@ -4,6 +4,17 @@
 
 技术栈：Astro、Tailwind CSS、DaisyUI、Bun。
 
+## 核心技术点
+
+- 用 Astro 静态生成站点，页面走文件路由，项目和文章走 Content Collections，构建时完成类型校验和内容校验。
+- 用 Markdown / MDX 管理文章和项目复盘，支持数学公式、标题锚点、代码高亮和 Mermaid 图表。
+- 用 Tailwind CSS + DaisyUI 搭建界面，保留浅色 / 黑色主题切换，主题偏好写入 `localStorage`，默认跟随系统。
+- 用 `astro:assets` 处理站内图片，项目截图支持明暗主题图切换，图集页面在构建时按数据生成九宫格和分组展示。
+- 用共享布局组件统一 SEO、Open Graph、侧边栏、页头、页脚和主题控制，保证各页面结构一致。
+- 用客户端脚本延迟加载 GitHub 贡献图，空闲时请求数据，失败时降级展示，不阻塞首屏内容。
+- 用 Bun 管理依赖和构建流程，`bun run check` 做 Astro 类型检查，`bun run build` 输出静态文件。
+- 用 Docker 多阶段构建产物，最终由 Nginx 托管 `dist/`，GitHub Actions 构建 `linux/amd64` 镜像并推送 GHCR，再通过 SSH 重启服务器容器。
+
 ## 启动
 
 ```bash
