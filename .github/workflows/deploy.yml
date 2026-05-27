@@ -50,10 +50,13 @@ jobs:
           LATEST_IMAGE: ${{ steps.meta.outputs.latest_image }}
         run: |
           SHA_IMAGE="${IMAGE}:${GITHUB_SHA}"
+          DEPLOYED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
           DOCKER_BUILDKIT=1 docker build \
             --platform linux/amd64 \
             --pull \
+            --build-arg DEPLOYED_AT="$DEPLOYED_AT" \
+            --label org.opencontainers.image.created="$DEPLOYED_AT" \
             -t "$LATEST_IMAGE" \
             -t "$SHA_IMAGE" \
             .

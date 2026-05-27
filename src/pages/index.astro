@@ -5,6 +5,8 @@ import ContributionChart from "../components/ContributionChart.astro";
 import { getContentEntryPath } from "../lib/content-routes";
 import { type CollectionEntry, getCollection } from "astro:content";
 import aiDesignEffectDisplayImage from "../assets/projects/ai-design-aigc/effect-display.webp";
+import newlandKnowledgeBaseDarkImage from "../assets/projects/newland-iot-technical-services/knowledge-base-dark.webp";
+import newlandKnowledgeBaseImage from "../assets/projects/newland-iot-technical-services/knowledge-base.webp";
 import sxeasyHomeImage from "../assets/projects/sxeasy/home.webp";
 import sxeasyHomeDarkImage from "../assets/projects/sxeasy/home-dark.webp";
 
@@ -45,13 +47,17 @@ const getProjectImageLight = (project: ProjectEntry) =>
     ? sxeasyHomeImage
     : project.id === "ai-design-aigc"
       ? aiDesignEffectDisplayImage
-      : project.data.heroImageLight ?? project.data.heroImage;
+      : project.id === "newland-iot-technical-services"
+        ? newlandKnowledgeBaseImage
+        : project.data.heroImageLight ?? project.data.heroImage;
 const getProjectImageDark = (project: ProjectEntry) =>
   project.id === "sxeasy"
     ? sxeasyHomeDarkImage
     : project.id === "ai-design-aigc"
       ? aiDesignEffectDisplayImage
-      : project.data.heroImageDark ?? project.data.heroImage;
+      : project.id === "newland-iot-technical-services"
+        ? newlandKnowledgeBaseDarkImage
+        : project.data.heroImageDark ?? project.data.heroImage;
 ---
 
 <BaseLayout

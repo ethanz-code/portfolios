@@ -195,15 +195,75 @@ body {
 }
 
 .moment-section--compact {
-    margin-bottom: 4rem;
+    margin-bottom: 0;
+}
+
+.moments-archive {
+    margin-top: clamp(3rem, 8vw, 5rem);
+}
+
+.moments-archive__divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.moments-archive__line {
+    height: 1px;
+    flex: 1;
+    background: color-mix(in srgb, oklch(var(--bc)) 16%, transparent);
+}
+
+.moments-archive__count {
+    flex: none;
+    color: color-mix(in srgb, oklch(var(--bc)) 58%, transparent);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.moment-group-list {
+    display: grid;
+    gap: clamp(2.75rem, 7vw, 4.5rem);
+}
+
+.moment-group {
+    display: grid;
+    gap: 1rem;
+}
+
+.moment-group__meta {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, oklch(var(--bc)) 16%, transparent);
+}
+
+.moment-group__description {
+    max-width: 42rem;
+    margin: 0;
+    color: color-mix(in srgb, oklch(var(--bc)) 72%, transparent);
+    line-height: 1.75;
+}
+
+.moment-group__facts {
+    display: flex;
+    flex: none;
+    gap: 0.75rem;
+    color: color-mix(in srgb, oklch(var(--bc)) 58%, transparent);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: nowrap;
 }
 
 .moment-mosaic {
     display: grid;
     grid-auto-flow: dense;
-    grid-auto-rows: clamp(6rem, 29vw, 7.5rem);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.5rem;
+    grid-auto-rows: clamp(7.25rem, 32vw, 9rem);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
 }
 
 .moment-tile {
@@ -270,7 +330,7 @@ body {
 
     .moment-mosaic {
         gap: 0.75rem;
-        grid-auto-rows: 11rem;
+        grid-auto-rows: clamp(9rem, 18vw, 10.5rem);
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
@@ -285,10 +345,36 @@ body {
     }
 }
 
+@media (max-width: 639px) {
+    .moment-tile:last-child:nth-child(odd):not(:first-child) {
+        grid-column: span 2;
+        grid-row: span 1;
+    }
+
+    .moment-group__meta {
+        align-items: flex-start;
+        flex-direction: column-reverse;
+        gap: 0.5rem;
+    }
+
+    .moment-group__facts {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+    .moment-mosaic {
+        grid-auto-rows: clamp(7.5rem, 24vw, 9rem);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
 @media (min-width: 1024px) {
     .moment-mosaic {
-        grid-auto-rows: 12rem;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0.875rem;
+        grid-auto-rows: clamp(9rem, 12vw, 11rem);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
 

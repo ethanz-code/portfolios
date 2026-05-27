@@ -6,7 +6,7 @@ import { momentGroups, momentImages } from "../data/moments";
 
 <BaseLayout
   title="近期影像"
-  description="近期图片档案，按构建时自动生成的九宫格和图片组展示。"
+  description="近期图片档案，按构建时自动生成的九宫格和分组展示。"
   sideBarActiveItemID="moments"
 >
   <h1 class="sr-only">近期影像</h1>
@@ -15,29 +15,27 @@ import { momentGroups, momentImages } from "../data/moments";
     images={momentImages}
     title=""
     description=""
+    ariaLabel="近期影像随机预览"
+    showMeta={false}
   />
 
   {
     momentGroups.length > 0 && (
-      <section class="mt-16">
-        <h2 class="mb-6 text-xl font-bold leading-tight sm:text-2xl lg:text-3xl">图片组</h2>
-        <div class="grid gap-12">
+      <section class="moments-archive" aria-label="分组影像">
+        <div class="moments-archive__divider" aria-hidden="true">
+          <span class="moments-archive__line" />
+          <span class="moments-archive__count">{momentGroups.length} 组 · {momentImages.length} 张</span>
+        </div>
+
+        <div class="moment-group-list">
           {
             momentGroups.map((group) => (
-              <section>
-                <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                  <div>
-                    <h3 class="text-lg font-bold leading-tight sm:text-xl">{group.title}</h3>
-                    {
-                      group.description && (
-                        <p class="mt-2 max-w-2xl leading-7 opacity-75">{group.description}</p>
-                      )
-                    }
-                  </div>
-                  <div class="text-sm opacity-65">
+              <section class="moment-group" aria-label={group.title}>
+                <div class="moment-group__meta">
+                  {group.description && <p class="moment-group__description">{group.description}</p>}
+                  <div class="moment-group__facts">
                     {group.date && <time datetime={group.date}>{group.date}</time>}
-                    {group.date && " · "}
-                    {group.images.length} 张
+                    <span>{group.images.length} 张</span>
                   </div>
                 </div>
 
@@ -45,6 +43,7 @@ import { momentGroups, momentImages } from "../data/moments";
                   images={group.images}
                   title=""
                   description=""
+                  ariaLabel={`${group.title}影像`}
                   showMeta={false}
                   compact
                 />

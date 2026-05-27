@@ -8,6 +8,7 @@ const {
   description = "随机抽取近期上传的图片。",
   ctaHref,
   ctaLabel = "查看全部",
+  ariaLabel,
   showMeta = true,
   compact = false,
 } = Astro.props as {
@@ -16,6 +17,7 @@ const {
   description?: string;
   ctaHref?: string;
   ctaLabel?: string;
+  ariaLabel?: string;
   showMeta?: boolean;
   compact?: boolean;
 };
@@ -33,6 +35,7 @@ const tileClasses = [
 ];
 
 const hasHeader = title || description || ctaHref;
+const mosaicLabel = ariaLabel || title || "影像九宫格";
 ---
 
 <section class:list={["moment-section", compact && "moment-section--compact"]}>
@@ -56,7 +59,7 @@ const hasHeader = title || description || ctaHref;
 
   {
     images.length > 0 ? (
-      <div class="moment-mosaic" aria-label={title}>
+      <div class="moment-mosaic" aria-label={mosaicLabel}>
         {images.slice(0, 9).map((image, index) => (
           <figure class:list={["moment-tile", tileClasses[index] ?? "moment-tile--standard"]}>
             <Image

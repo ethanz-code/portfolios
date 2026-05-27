@@ -1,5 +1,21 @@
 ---
 const today = new Date();
+const rawDeployedAt = process.env.DEPLOYED_AT || import.meta.env.DEPLOYED_AT || today.toISOString();
+const deployedAt = new Date(rawDeployedAt);
+const deployedAtLabel = Number.isNaN(deployedAt.valueOf())
+  ? rawDeployedAt
+  : new Intl.DateTimeFormat("zh-CN", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(deployedAt).replace(/\//g, "-");
+const deployedAtISOString = Number.isNaN(deployedAt.valueOf())
+  ? undefined
+  : deployedAt.toISOString();
 ---
 
 <footer class="footer footer-center mt-auto block px-6 pb-8 pt-4 lg:px-12">
@@ -13,6 +29,13 @@ const today = new Date();
     >
       鲁ICP备2024099705号
     </a>
+  </div>
+  <div
+    class="pointer-events-none fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-30 text-[10px] leading-none text-base-content/30 sm:right-4 lg:bottom-3 lg:right-4"
+    aria-label="Latest deployment time"
+  >
+    <span>deploy</span>
+    <time datetime={deployedAtISOString}>{deployedAtLabel}</time>
   </div>
 </footer>
 <style></style>

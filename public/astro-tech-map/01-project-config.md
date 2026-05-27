@@ -102,8 +102,11 @@ dist/
 
 1. 读取 `src/pages/`。
 2. 读取 `src/content/`。
-3. 渲染 `.astro` 和 Markdown。
-4. 生成 `dist/` 静态文件。
+3. 读取 `DEPLOYED_AT` 等构建期环境变量。
+4. 渲染 `.astro` 和 Markdown。
+5. 生成 `dist/` 静态文件。
+
+页面角落的 `deploy` 时间就是构建期写入的静态内容。GitHub Actions 构建 Docker 镜像时传入 `DEPLOYED_AT`，本地开发没有这个变量时使用当前构建时间兜底。
 
 ## 可以动手试的事
 

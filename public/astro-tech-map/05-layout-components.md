@@ -52,7 +52,7 @@ const { title } = Astro.props;
 - `<head>` 元信息。
 - Header。
 - Sidebar。
-- Footer。
+- Footer，其中包含备案号和低透明度 `deploy` 时间角标。
 - 主内容容器。
 - 主题切换。
 - ClientRouter 页面切换增强。

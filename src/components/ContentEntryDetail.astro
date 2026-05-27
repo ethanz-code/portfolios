@@ -5,6 +5,7 @@ import MermaidRenderer from "./MermaidRenderer.astro";
 import { type ArticleSchema, type ProjectSchema } from "../content.config";
 import { contentProseClass } from "../lib/prose";
 import aiDesignEffectDisplayImage from "../assets/projects/ai-design-aigc/effect-display.webp";
+import newlandKnowledgeBaseImage from "../assets/projects/newland-iot-technical-services/knowledge-base.webp";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
@@ -30,7 +31,9 @@ const title = article?.title ?? project?.title ?? "";
 const description = article?.description ?? project?.description ?? "";
 const projectImage = !isArticle && entry.id === "ai-design-aigc"
   ? aiDesignEffectDisplayImage
-  : project?.heroImageLight ?? project?.heroImage;
+  : !isArticle && entry.id === "newland-iot-technical-services"
+    ? newlandKnowledgeBaseImage
+    : project?.heroImageLight ?? project?.heroImage;
 const image = article?.heroImage ?? projectImage;
 const backHref = isArticle ? "/articles" : "/projects";
 const backLabel = isArticle ? "返回文章" : "返回项目";
