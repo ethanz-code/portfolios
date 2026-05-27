@@ -1,0 +1,119 @@
+---
+title: "SDCIT 高考志愿填报"
+description: "学校老师接的高考志愿填报项目，我负责主前端，做 H5 查分查校和 Admin 后台数据维护页面。"
+updatedDate: "2025.11.20"
+category: "featured"
+order: 2
+detailPage: true
+tags:
+  - "高考志愿"
+  - "H5 前台"
+  - "Admin 后台"
+---
+
+import ArticleThemeImage from "../../components/ArticleThemeImage.astro";
+import ProjectVideoLink from "../../components/ProjectVideoLink.astro";
+import featureListDarkImage from "../../assets/projects/sdcit-gaokao-volunteer/feature-list-dark.webp";
+import featureListImage from "../../assets/projects/sdcit-gaokao-volunteer/feature-list.webp";
+import repositoryCommitDarkImage from "../../assets/projects/sdcit-gaokao-volunteer/repository-commit-dark.webp";
+import repositoryCommitImage from "../../assets/projects/sdcit-gaokao-volunteer/repository-commit.webp";
+
+## 项目的起点
+
+这个项目是学校老师接的活，我和另外两位同学一起做。我负责主前端，一位同学做后端，另一位同学做前端兼数据整理。
+
+项目要交付一套面向学生和家长的高考志愿填报系统。前台负责查分、查学校、看推荐结果；后台负责维护学校、专业、批次和历年分数线。
+
+我主要做 H5 前台和 Admin 后台两端前端开发，开发和维护周期大概半年。写这篇时（2026.05.27），另外两位同学还要时不时维护项目。只能说这种项目真的不是做完页面就结束，后续数据、接口和运营问题都得继续处理。
+
+项目细节不便公开。页面只保留功能范围和可公开的提交统计，用来说明我参与过实际开发，不展开合同、仓库、客户和业务内部信息。
+
+## 为何做？
+
+原因很简单，老师拉我过来的，但当时我们都在稀里糊涂的做，不知道老师与甲方签的合同多少钱，也不了解老师能给我们多少钱。
+
+高考志愿填报这种东西和普通展示页不一样，它牵涉学校、专业、批次、分数线、推荐结果这些数据。用户也不是随便点点，他们是真的想知道“这个分数能去哪”“这个学校有没有机会”。
+
+所以这个项目对前端的要求不是炫，而是把信息组织清楚，把等待状态、空状态、错误提示补齐，让学生和家长不要在关键查询流程里迷路。
+
+## 实际效果演示
+
+项目视频预览已托管到阿里网盘。由于网盘分享页不是稳定的视频直链，这里保留外链入口，避免站内播放器失效。
+
+<ProjectVideoLink
+  href="https://www.alipan.com/s/PCitAw4V39r"
+  title="高考志愿填报演示视频"
+  description="查看 H5 前台和后台管理相关效果。"
+/>
+
+## 我做了什么
+
+- 维护 Admin 后台的数据管理页面，让运营人员能录入和修正学校、专业、批次、分数线等信息。
+- 开发 H5 查分、查学校、学校详情和推荐列表页面，承接学生家长的主要查询流程。
+- 配合后台基础模块开发，处理用户、角色、菜单、部门、岗位、日志、公告和系统监控等管理页面。
+- 对接推荐结果、录取概率、学校详情等核心接口。
+- 处理两套前端项目的构建、联调和日常问题，一个偏稳定后台，一个偏移动端体验。
+- 在 H5 里减少重组件依赖，优先用 Tailwind 手写移动端布局，避免页面在手机上变重。
+- 根据接口速度补齐 loading、空状态和异常提示，避免用户在查询等待中以为页面卡死。
+
+## 功能清单范围
+
+当时的需求文档把系统分成管理员账号和普通账号。管理员负责后台维护，普通用户负责按高考分数、省份、批次查询推荐结果。
+
+<ArticleThemeImage
+  light={featureListImage}
+  dark={featureListDarkImage}
+  alt="SDCIT 高考志愿填报功能清单截图"
+  caption="当时的功能清单节选：后台系统管理、系统监控，以及高考志愿推荐的账号和查询能力。亮色和暗色主题会自动切换对应截图。"
+  className="w-full object-contain"
+/>
+
+后台部分除了学校和分数线数据，还包含一套完整的基础管理能力：
+
+- 用户管理：新增、编辑、导入、导出、重置密码、分配权限。
+- 角色和菜单管理：维护角色、菜单、状态和权限分配。
+- 组织管理：维护部门、岗位等基础组织数据。
+- 日志和公告：记录登录日志、操作日志，维护系统通知公告。
+- 系统监控：查看在线用户、服务状态、缓存状态，并支持强制用户退出。
+
+这部分更像一个完整后台，而不是只做几张学校表单。我的工作重点是把这些后台能力接到前端页面里，再把志愿推荐相关的数据维护流程串起来，让运营人员能持续更新数据。
+
+## 前台和后台
+
+这个项目的前端并不是一套代码跑到底，而是两套技术栈并行维护。
+
+### Admin 后台
+
+后台在 `college-ui`，技术栈是 Vue 2、Element UI、Webpack。整体是标准若依后台，核心工作是维护 CRUD、表单、筛选和数据管理页面。这里优先稳定，少做花活。
+
+### H5 前台
+
+前台在 `college-vue3-app`，技术栈是 Vue 3.5、TypeScript、Tailwind CSS v4、Vite。主要面向手机端使用，页面要轻、反馈要快，查分和推荐结果不能让用户等得不明不白。
+
+## 后端配合
+
+核心业务逻辑在 `college-analysis` 模块里。前台调用查学校、算录取概率、返回推荐结果等接口，相关逻辑集中在 `PopController` 和 `SimpleIndexService`。
+
+这个项目的数据量比较大，学校、专业、历年分数线都会影响查询速度。前端侧需要把 loading、空状态、错误提示补齐；接口慢的时候，也要和后端一起判断是 SQL、缓存还是返回结构的问题。
+
+## 这个决定是否正确？
+
+从经历上说，是值得的。这个项目让我接触到更真实的外包协作：不是一个人想怎么做就怎么做，而是要配合后端、数据整理、老师、客户和后续维护。
+
+但这类项目也确实磨人。需求不一定一次说清，数据问题经常会反过来影响页面，后续维护也很难完全切断。它不像个人项目，写完放着就行。
+
+对我来说，真正留下来的价值是两点：一是熟悉了 Vue 2 后台和 Vue 3 H5 并行维护；二是知道了数据型业务页面最重要的不是样式多好看，而是查询路径、反馈状态和结果解释能不能让用户看懂。
+
+## 可公开的开发记录
+
+项目仓库统计里，我个人提交 89 次。因为项目不是个人产品，也不是公开仓库，这里只展示提交次数统计，不公开源码、客户信息和更细的业务页面。
+
+<ArticleThemeImage
+  light={repositoryCommitImage}
+  dark={repositoryCommitDarkImage}
+  alt="SDCIT 高考志愿填报 Gitee 仓库提交统计截图"
+  caption="可公开的提交统计：个人提交 89 次。"
+  className="w-full object-contain"
+/>
+
+最后吐槽几句，辛辛苦苦做了几个月，老师不看个人劳动成果统一给钱，我真气炸了。

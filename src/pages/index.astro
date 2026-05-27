@@ -4,12 +4,13 @@ import HorizontalCard from "../components/HorizontalCard.astro";
 import ContributionChart from "../components/ContributionChart.astro";
 import { getContentEntryPath } from "../lib/content-routes";
 import { type CollectionEntry, getCollection } from "astro:content";
+import aiDesignEffectDisplayImage from "../assets/projects/ai-design-aigc/effect-display.webp";
 import sxeasyHomeImage from "../assets/projects/sxeasy/home.webp";
 import sxeasyHomeDarkImage from "../assets/projects/sxeasy/home-dark.webp";
 
 const workStyle = [
-  "先做市场调研，明确用户需求和痛点，再拆最短闭环，尽快把产品推到可验证状态。",
-  "会在开发中集成日志和监控，确保上线后能及时发现和解决问题，同时上线做好备份和恢复方案，避免数据丢失和服务中断。",
+  "先确认用户、场景和成本，再拆最短闭环，把产品推到可验证状态。",
+  "上线前补齐日志、监控、备份和恢复方案，确保问题能发现、能回退。",
 ];
 
 const deliveryPoints = [
@@ -40,9 +41,17 @@ const getProjectUrl = (project: ProjectEntry): string => {
 };
 
 const getProjectImageLight = (project: ProjectEntry) =>
-  project.id === "sxeasy" ? sxeasyHomeImage : project.data.heroImageLight ?? project.data.heroImage;
+  project.id === "sxeasy"
+    ? sxeasyHomeImage
+    : project.id === "ai-design-aigc"
+      ? aiDesignEffectDisplayImage
+      : project.data.heroImageLight ?? project.data.heroImage;
 const getProjectImageDark = (project: ProjectEntry) =>
-  project.id === "sxeasy" ? sxeasyHomeDarkImage : project.data.heroImageDark ?? project.data.heroImage;
+  project.id === "sxeasy"
+    ? sxeasyHomeDarkImage
+    : project.id === "ai-design-aigc"
+      ? aiDesignEffectDisplayImage
+      : project.data.heroImageDark ?? project.data.heroImage;
 ---
 
 <BaseLayout
@@ -51,10 +60,10 @@ const getProjectImageDark = (project: ProjectEntry) =>
 >
   <div class="mt-2 pb-12 sm:mt-4 sm:pb-14 lg:mt-6 lg:pb-16">
     <div class="py-1 text-lg sm:text-xl">你好 👋</div>
-    <div class="text-3xl font-bold leading-tight sm:text-5xl lg:text-7xl">我是 张永鑫</div>
-    <div class="py-3 text-xl font-bold leading-tight sm:text-3xl lg:text-5xl">Ethan Zhang · 全栈产品开发</div>
+    <div class="text-3xl font-bold leading-tight sm:text-5xl lg:text-6xl">我是 张永鑫</div>
+    <div class="py-3 text-xl font-bold leading-tight sm:text-3xl lg:text-4xl">Ethan Zhang · 全栈产品开发</div>
     <div class="max-w-4xl py-2">
-      <p class="text-base leading-7 sm:text-lg sm:leading-relaxed lg:text-[1.95rem] lg:leading-[1.5]">
+      <p class="text-base leading-7 sm:text-lg sm:leading-relaxed lg:text-xl lg:leading-[1.6]">
         这是我的个人资料站点，在这里写一些自己的项目经历，技术积累以及所思所想。希望能让你对我有个更全面的了解。
       </p>
     </div>
@@ -96,11 +105,11 @@ const getProjectImageDark = (project: ProjectEntry) =>
   <ContributionChart />
 
   <section class="mb-16">
-    <div class="mb-4 text-2xl font-bold leading-tight sm:text-3xl lg:text-5xl">近期项目 {"</>"}</div>
+    <div class="mb-4 text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">近期项目 {"</>"}</div>
     <p class="mb-6 max-w-3xl leading-7 opacity-80">
       最近在维护、更新和继续投入的项目在这里噢。
     </p>
-    <div class="max-w-3xl">
+    <div class="w-full min-w-0 max-w-3xl">
       {
         homeProjects.map((project, index) => (
           <>
@@ -110,7 +119,6 @@ const getProjectImageDark = (project: ProjectEntry) =>
               imgDark={getProjectImageDark(project)}
               desc={project.data.description}
               url={getProjectUrl(project)}
-              badge={project.data.badge}
               target={project.data.detailPage ? "_self" : "_blank"}
             />
             {index < homeProjects.length - 1 && <div class="divider my-0" />}

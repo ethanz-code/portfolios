@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@astrojs/tailwind": "^6.0.2",
+    "@fontsource/noto-serif-sc": "^5.2.9",
     "astro": "^6.3.7",
     "daisyui": "^4.4.10",
     "dayjs": "^1.11.9",

@@ -4,6 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import MermaidRenderer from "./MermaidRenderer.astro";
 import { type ArticleSchema, type ProjectSchema } from "../content.config";
 import { contentProseClass } from "../lib/prose";
+import aiDesignEffectDisplayImage from "../assets/projects/ai-design-aigc/effect-display.webp";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
@@ -27,7 +28,10 @@ const article = isArticle ? entry.data as ArticleSchema : null;
 const project = !isArticle ? entry.data as ProjectSchema : null;
 const title = article?.title ?? project?.title ?? "";
 const description = article?.description ?? project?.description ?? "";
-const image = article?.heroImage ?? project?.heroImageLight ?? project?.heroImage;
+const projectImage = !isArticle && entry.id === "ai-design-aigc"
+  ? aiDesignEffectDisplayImage
+  : project?.heroImageLight ?? project?.heroImage;
+const image = article?.heroImage ?? projectImage;
 const backHref = isArticle ? "/articles" : "/projects";
 const backLabel = isArticle ? "返回文章" : "返回项目";
 const sideBarActiveItemID = section;
@@ -40,7 +44,7 @@ const hasMermaid = entry.body?.includes("```mermaid") ?? false;
 ---
 
 <BaseLayout title={title} description={description} image={image} sideBarActiveItemID={sideBarActiveItemID} ogType={ogType}>
-  <main class="mx-auto max-w-[760px]">
+  <main class="mx-auto w-full min-w-0 max-w-[760px]">
     <article class={contentProseClass}>
       <div class="not-prose mb-8">
         <div class="mb-6">
@@ -61,20 +65,15 @@ const hasMermaid = entry.body?.includes("```mermaid") ?? false;
           </a>
         </div>
 
-        <div class="mb-4 flex flex-wrap items-center gap-2">
-          {
-            isArticle ? (
+        {
+          isArticle && (
+            <div class="mb-4 flex flex-wrap items-center gap-2">
               <span class="badge badge-neutral">文章</span>
-            ) : (
-              <>
-                {project?.badge && <span class="badge badge-secondary">{project.badge}</span>}
-                <span class="badge badge-neutral">项目复盘</span>
-              </>
-            )
-          }
-        </div>
+            </div>
+          )
+        }
 
-        <h1 class="m-0 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{title}</h1>
+        <h1 class="m-0 break-words text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{title}</h1>
 
         {
           isArticle ? (

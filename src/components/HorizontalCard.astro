@@ -8,26 +8,29 @@ interface Props {
   imgDark?: string | ImageMetadata;
   desc: string;
   url: string;
-  badge?: string;
-  tags?: string[];
   target?: string;
+  compactMobile?: boolean;
 }
 
-const { title, img, imgLight, imgDark, desc, url, badge, tags, target = "_blank" } = Astro.props as Props;
-const tag_url = url.split("/").slice(0, -1).join("/") + "/tag";
+const { title, img, imgLight, imgDark, desc, url, target = "_blank", compactMobile = false } = Astro.props as Props;
 ---
 
-<div class="card bg-base-100 transition ease-in-out md:hover:scale-[102%] md:hover:shadow-xl">
-  <a href={url} target={target}>
-    <div class="card-body flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center">
+<div
+  class:list={[
+    "project-card card w-full min-w-0 overflow-hidden border border-base-300/70 bg-base-100 shadow-sm transition ease-in-out md:border-0 md:shadow-none md:hover:scale-[102%] md:hover:shadow-xl",
+    compactMobile && "project-card--compact-mobile",
+  ]}
+>
+  <a class="block min-w-0" href={url} target={target}>
+    <div class="card-body min-w-0 flex-col gap-0 p-0 md:flex-row md:items-center md:gap-4 md:p-5">
       {
         (imgLight || imgDark || img) && (
-          <figure class="w-full shrink-0 md:w-auto">
+          <figure class="project-card__media w-full min-w-0 shrink-0 bg-base-200 md:w-auto md:bg-transparent">
             <ThemeImage
               light={imgLight ?? img}
               dark={imgDark}
               alt={title}
-              class="aspect-video w-full rounded-lg object-cover object-left-top md:w-[13rem]"
+              class="h-full w-full object-cover object-left-top md:aspect-video md:h-auto md:w-[13rem] md:rounded-lg"
               width={750}
               height={422}
               format="webp"
@@ -38,22 +41,11 @@ const tag_url = url.split("/").slice(0, -1).join("/") + "/tag";
           </figure>
         )
       }
-      <div class="grow w-full min-w-0">
-        <div class="flex flex-wrap items-start gap-2">
-          <h2 class="card-title text-lg leading-snug sm:text-xl">{title}</h2>
-          {badge && <div class="badge badge-secondary">{badge}</div>}
+      <div class="project-card__content w-full min-w-0 grow p-4 md:p-0">
+        <div class="flex flex-wrap items-start gap-2.5">
+          <h3 class="card-title min-w-0 break-words text-lg leading-snug sm:text-xl">{title}</h3>
         </div>
-        <p class="py-1 text-base leading-7 sm:text-[1.05rem]">{desc}</p>
-        <div class="card-actions justify-end">
-          {
-            tags &&
-              tags.map((tag) => (
-                <a href={`${tag_url}/${tag}`} class="badge badge-ghost">
-                  {tag}
-                </a>
-              ))
-          }
-        </div>
+        <p class="project-card__description mt-2 text-base leading-7 break-words opacity-80 sm:text-[1.05rem] md:py-1 md:opacity-100">{desc}</p>
       </div>
     </div>
   </a>

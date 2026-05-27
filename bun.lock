@@ -6,6 +6,7 @@
       "name": "portfolios",
       "dependencies": {
         "@astrojs/tailwind": "^6.0.2",
+        "@fontsource/noto-serif-sc": "^5.2.9",
         "astro": "^6.3.7",
         "daisyui": "^4.4.10",
         "dayjs": "^1.11.9",
@@ -147,6 +148,8 @@
     "@expressive-code/plugin-shiki": ["@expressive-code/plugin-shiki@0.42.0", "https://mirrors.cloud.tencent.com/npm/@expressive-code/plugin-shiki/-/plugin-shiki-0.42.0.tgz", { "dependencies": { "@expressive-code/core": "^0.42.0", "shiki": "^4.0.2" } }, "sha512-PMKey/kLmewttAHQezL+Y5Fx3vVssfDi3+FJOYQQS2mXP3tQspFELtKKAfsXfmSXdToZYgwoO69HJndqfE+09g=="],
 
     "@expressive-code/plugin-text-markers": ["@expressive-code/plugin-text-markers@0.42.0", "https://mirrors.cloud.tencent.com/npm/@expressive-code/plugin-text-markers/-/plugin-text-markers-0.42.0.tgz", { "dependencies": { "@expressive-code/core": "^0.42.0" } }, "sha512-l59lUx8fq1v5g6SpmbDjiU0+7IdfbiWnAyRmtTVSpfhyq+nZMN4UcmYyu2b9Mynhzt7Gr+O+cXyEPDNb2AVWVQ=="],
+
+    "@fontsource/noto-serif-sc": ["@fontsource/noto-serif-sc@5.2.9", "https://mirrors.cloud.tencent.com/npm/@fontsource/noto-serif-sc/-/noto-serif-sc-5.2.9.tgz", {}, "sha512-+wosdNmyrtRjnqJ/4A6i99jApm6ye34n8Nh7jUO3P/+6Hd1ZBY1gB9yGaI5jVxb56RS1lM2kTc0DzX1ifRO2MA=="],
 
     "@iconify/types": ["@iconify/types@2.0.0", "https://mirrors.cloud.tencent.com/npm/@iconify/types/-/types-2.0.0.tgz", {}, "sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg=="],
 
