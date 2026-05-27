@@ -15,26 +15,21 @@ const articles = (await getCollection("articles"))
 ---
 
 <BaseLayout title="文章" description="张永鑫的文章、复盘和随手记录。" sideBarActiveItemID="articles">
-  <section class="mb-10 max-w-3xl">
-    <div class="mb-3 text-3xl font-bold sm:text-4xl lg:text-6xl">文章</div>
-    <p class="max-w-3xl text-base leading-7 opacity-80 sm:text-lg sm:leading-8">
-      定期同步一下 Notion 上记录的文章，都是 Claude Code 总结的一些知识点和复盘，偶尔也会有一些随手记录的东西。希望能对你有所帮助！
-    </p>
-  </section>
+  <h1 class="sr-only">文章</h1>
 
-  <section class="grid max-w-3xl gap-4">
+  <section class="grid w-full min-w-0 max-w-3xl gap-4">
     {
       articles.map((article) => (
         <a
           href={getContentEntryPath("articles", article)}
-          class="block border-b border-base-300 py-5 transition hover:border-base-content"
+          class="block min-w-0 border-b border-base-300 py-5 transition hover:border-base-content"
         >
           <div class="mb-2 flex flex-wrap items-center gap-2">
             <time class="text-sm opacity-60">{dayjs(article.data.publishedDate).format("LL")}</time>
             {article.data.tags?.map((tag) => <span class="badge badge-ghost badge-sm">{tag}</span>)}
           </div>
-          <h2 class="text-2xl font-bold leading-snug">{article.data.title}</h2>
-          <p class="mt-2 leading-7 opacity-75">{article.data.description}</p>
+          <h2 class="break-words text-lg font-bold leading-snug sm:text-xl">{article.data.title}</h2>
+          <p class="mt-2 break-words leading-7 opacity-75">{article.data.description}</p>
         </a>
       ))
     }

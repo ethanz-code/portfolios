@@ -64,7 +64,7 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
       >
         <Header title={SITE_TITLE} />
         <div class="flex-1">
-          <main class="mx-auto w-full max-w-5xl px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8 lg:px-12 lg:pb-16 lg:pt-16">
+          <main class="mx-auto w-full min-w-0 max-w-5xl px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8 lg:px-12 lg:pb-16 lg:pt-16">
             <slot />
           </main>
         </div>
@@ -75,6 +75,27 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
     <div class="fixed right-6 top-6 z-40 hidden lg:block">
       <ThemeToggle />
     </div>
+    <button
+      type="button"
+      class="btn btn-square btn-neutral pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 translate-y-3 scale-95 opacity-0 shadow-lg transition duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-base-content lg:bottom-6 lg:right-6"
+      aria-label="回到顶部"
+      aria-hidden="true"
+      data-back-to-top
+      disabled
+      tabindex="-1"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.8"
+        stroke="currentColor"
+        class="h-5 w-5"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+      </svg>
+    </button>
     <script is:inline>
       (() => {
         const storageKey = "theme-preference";
@@ -281,6 +302,258 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
         }
 
         scheduleHashScroll();
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        const storagePrefix = "article-scroll:";
+        const restoreDelays = [0, 80, 250, 700];
+
+        const normalizePath = (pathname) => pathname.replace(/\/+$/, "") || "/";
+        const isArticlePath = (pathname) => {
+          const path = normalizePath(pathname);
+          return path === "/articles" || path.startsWith("/articles/");
+        };
+        const isArticleIndexPath = (pathname) => normalizePath(pathname) === "/articles";
+        const getStorageKey = (pathname) => `${storagePrefix}${normalizePath(pathname)}`;
+
+        const getPageScrollContainer = () => {
+          const drawerContent = document.querySelector(".drawer-content");
+
+          if (drawerContent instanceof HTMLElement) {
+            const style = window.getComputedStyle(drawerContent);
+            const canScroll = /(auto|scroll|overlay)/.test(style.overflowY);
+
+            if (canScroll && drawerContent.scrollHeight > drawerContent.clientHeight) {
+              return drawerContent;
+            }
+          }
+
+          return document.scrollingElement ?? document.documentElement;
+        };
+
+        const getCurrentScrollTop = () => {
+          const scrollContainer = getPageScrollContainer();
+
+          if (
+            scrollContainer === document.scrollingElement ||
+            scrollContainer === document.documentElement ||
+            scrollContainer === document.body
+          ) {
+            return window.scrollY;
+          }
+
+          return scrollContainer.scrollTop;
+        };
+
+        const setCurrentScrollTop = (top) => {
+          const scrollContainer = getPageScrollContainer();
+
+          if (
+            scrollContainer === document.scrollingElement ||
+            scrollContainer === document.documentElement ||
+            scrollContainer === document.body
+          ) {
+            window.scrollTo({ top, behavior: "auto" });
+            return;
+          }
+
+          scrollContainer.scrollTo({ top, behavior: "auto" });
+        };
+
+        const saveScrollPosition = (pathname = window.location.pathname) => {
+          if (!isArticlePath(pathname)) {
+            return;
+          }
+
+          try {
+            window.sessionStorage.setItem(
+              getStorageKey(pathname),
+              JSON.stringify({ top: getCurrentScrollTop(), updatedAt: Date.now() }),
+            );
+          } catch {
+            // Keep navigation working when sessionStorage is unavailable.
+          }
+        };
+
+        const shouldRestoreCurrentPath = () => {
+          if (!isArticlePath(window.location.pathname) || window.location.hash) {
+            return false;
+          }
+
+          if (isArticleIndexPath(window.location.pathname)) {
+            return true;
+          }
+
+          const lastNavigation = window.__articleScrollLastNavigation;
+          const navigationEntries = performance.getEntriesByType?.("navigation") ?? [];
+          const documentNavigationType = navigationEntries[0]?.type;
+
+          return lastNavigation?.navigationType === "traverse" || documentNavigationType === "back_forward";
+        };
+
+        const restoreCurrentScrollPosition = () => {
+          if (!shouldRestoreCurrentPath()) {
+            return;
+          }
+
+          let savedPosition = null;
+
+          try {
+            savedPosition = JSON.parse(window.sessionStorage.getItem(getStorageKey(window.location.pathname)) ?? "null");
+          } catch {
+            savedPosition = null;
+          }
+
+          if (!savedPosition || !Number.isFinite(savedPosition.top)) {
+            return;
+          }
+
+          restoreDelays.forEach((delay) => {
+            window.setTimeout(() => setCurrentScrollTop(savedPosition.top), delay);
+          });
+        };
+
+        if (!window.__articleScrollRestorationBound) {
+          document.addEventListener("astro:before-preparation", (event) => {
+            saveScrollPosition(event.from?.pathname);
+            window.__articleScrollLastNavigation = {
+              navigationType: event.navigationType,
+              toPathname: event.to?.pathname,
+            };
+          });
+          document.addEventListener("astro:page-load", restoreCurrentScrollPosition);
+          document.addEventListener("astro:after-swap", restoreCurrentScrollPosition);
+          window.addEventListener("pagehide", () => saveScrollPosition());
+          document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+              saveScrollPosition();
+            }
+          });
+
+          window.__articleScrollRestorationBound = true;
+        }
+
+        restoreCurrentScrollPosition();
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        const visibleScrollTop = 1400;
+        const normalizePath = (pathname) => pathname.replace(/\/+$/, "") || "/";
+
+        const supportsBackToTop = () => {
+          const path = normalizePath(window.location.pathname);
+          return path === "/articles" || path.startsWith("/articles/") || path === "/projects" || path.startsWith("/projects/");
+        };
+
+        const isRootScrollContainer = (scrollContainer) =>
+          scrollContainer === document.scrollingElement ||
+          scrollContainer === document.documentElement ||
+          scrollContainer === document.body;
+
+        const getPageScrollContainer = () => {
+          const drawerContent = document.querySelector(".drawer-content");
+
+          if (drawerContent instanceof HTMLElement) {
+            const style = window.getComputedStyle(drawerContent);
+            const canScroll = /(auto|scroll|overlay)/.test(style.overflowY);
+
+            if (canScroll && drawerContent.scrollHeight > drawerContent.clientHeight) {
+              return drawerContent;
+            }
+          }
+
+          return document.scrollingElement ?? document.documentElement;
+        };
+
+        const getScrollTop = () => {
+          const scrollContainer = getPageScrollContainer();
+
+          if (isRootScrollContainer(scrollContainer)) {
+            return window.scrollY;
+          }
+
+          return scrollContainer.scrollTop;
+        };
+
+        const updateBackToTopButton = () => {
+          const button = document.querySelector("[data-back-to-top]");
+
+          if (!(button instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          const shouldShow = supportsBackToTop() && getScrollTop() > visibleScrollTop;
+          button.disabled = !shouldShow;
+          button.tabIndex = shouldShow ? 0 : -1;
+          button.classList.toggle("pointer-events-none", !shouldShow);
+          button.classList.toggle("translate-y-3", !shouldShow);
+          button.classList.toggle("scale-95", !shouldShow);
+          button.classList.toggle("opacity-0", !shouldShow);
+          button.classList.toggle("translate-y-0", shouldShow);
+          button.classList.toggle("scale-100", shouldShow);
+          button.classList.toggle("opacity-100", shouldShow);
+          button.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+        };
+
+        const scrollPageToTop = () => {
+          const scrollContainer = getPageScrollContainer();
+
+          if (isRootScrollContainer(scrollContainer)) {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return;
+          }
+
+          scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+        };
+
+        const bindBackToTop = () => {
+          const state = window.__backToTopState ?? {
+            scrollTarget: null,
+            clickBound: false,
+          };
+          const scrollContainer = getPageScrollContainer();
+          const scrollTarget = isRootScrollContainer(scrollContainer) ? window : scrollContainer;
+
+          if (state.scrollTarget !== scrollTarget) {
+            state.scrollTarget?.removeEventListener("scroll", updateBackToTopButton);
+            scrollTarget.addEventListener("scroll", updateBackToTopButton, { passive: true });
+            state.scrollTarget = scrollTarget;
+          }
+
+          if (!state.clickBound) {
+            document.addEventListener("click", (event) => {
+              const target = event.target;
+
+              if (!(target instanceof Element)) {
+                return;
+              }
+
+              const button = target.closest("[data-back-to-top]");
+
+              if (!(button instanceof HTMLButtonElement)) {
+                return;
+              }
+
+              scrollPageToTop();
+              button.blur();
+            });
+            state.clickBound = true;
+          }
+
+          window.__backToTopState = state;
+          updateBackToTopButton();
+        };
+
+        if (!window.__backToTopLifecycleBound) {
+          document.addEventListener("astro:page-load", bindBackToTop);
+          document.addEventListener("astro:after-swap", bindBackToTop);
+          window.addEventListener("resize", bindBackToTop);
+          window.__backToTopLifecycleBound = true;
+        }
+
+        bindBackToTop();
       })();
     </script>
   </body>

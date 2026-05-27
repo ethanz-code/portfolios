@@ -9,30 +9,25 @@ import { momentGroups, momentImages } from "../data/moments";
   description="近期图片档案，按构建时自动生成的九宫格和图片组展示。"
   sideBarActiveItemID="moments"
 >
-  <div class="mb-12">
-    <div class="text-3xl font-bold sm:text-4xl lg:text-6xl">近期影像</div>
-    <p class="mt-4 max-w-3xl text-base leading-7 opacity-80 sm:mt-5 sm:text-lg sm:leading-8">
-      生活，工作，旅行，日常的碎片。每次构建时会从已上传的图片中抽取并重排生成九宫格，展示近期的影像记录。也会根据上传时的分组信息自动生成图片组，按时间顺序排列。希望这些影像能带来一些温暖和回忆。
-    </p>
-  </div>
+  <h1 class="sr-only">近期影像</h1>
 
   <MomentMosaic
     images={momentImages}
-    title="随机九宫格"
-    description="每次构建都会从已上传图片里抽取并重排。"
+    title=""
+    description=""
   />
 
   {
     momentGroups.length > 0 && (
       <section class="mt-16">
-        <div class="mb-6 text-2xl font-bold sm:text-3xl lg:text-5xl">图片组</div>
+        <h2 class="mb-6 text-xl font-bold leading-tight sm:text-2xl lg:text-3xl">图片组</h2>
         <div class="grid gap-12">
           {
             momentGroups.map((group) => (
               <section>
                 <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <h2 class="text-2xl font-bold">{group.title}</h2>
+                    <h3 class="text-lg font-bold leading-tight sm:text-xl">{group.title}</h3>
                     {
                       group.description && (
                         <p class="mt-2 max-w-2xl leading-7 opacity-75">{group.description}</p>
