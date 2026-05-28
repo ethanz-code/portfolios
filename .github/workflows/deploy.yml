@@ -11,45 +11,25 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_TAG: portfolios:${{ github.sha }}
+  IMAGE_ARCHIVE: portfolios-${{ github.sha }}.tar.gz
+  REMOTE_IMAGE_ARCHIVE: /tmp/portfolios-${{ github.sha }}.tar.gz
   CONTAINER_NAME: ${{ vars.DEPLOY_CONTAINER_NAME || 'portfolios' }}
   PORT_MAPPING: ${{ vars.DEPLOY_PORT_MAPPING || '10020:80' }}
 
 jobs:
-  build:
-    name: Build and push image
+  deploy:
+    name: Build and deploy image
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
-    outputs:
-      image: ${{ steps.meta.outputs.image }}
-      latest_image: ${{ steps.meta.outputs.latest_image }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set image metadata
-        id: meta
+      - name: Build image archive
         run: |
-          IMAGE="${REGISTRY}/${IMAGE_NAME,,}"
-          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
-          echo "latest_image=${IMAGE}:latest" >> "$GITHUB_OUTPUT"
-
-      - name: Log in to GHCR
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          printf '%s' "$GHCR_TOKEN" | docker login "$REGISTRY" -u "$GITHUB_ACTOR" --password-stdin
-
-      - name: Build and push
-        env:
-          IMAGE: ${{ steps.meta.outputs.image }}
-          LATEST_IMAGE: ${{ steps.meta.outputs.latest_image }}
-        run: |
-          SHA_IMAGE="${IMAGE}:${GITHUB_SHA}"
           DEPLOYED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
           DOCKER_BUILDKIT=1 docker build \
@@ -57,21 +37,12 @@ jobs:
             --pull \
             --build-arg DEPLOYED_AT="$DEPLOYED_AT" \
             --label org.opencontainers.image.created="$DEPLOYED_AT" \
-            -t "$LATEST_IMAGE" \
-            -t "$SHA_IMAGE" \
+            -t "$IMAGE_TAG" \
             .
 
-          docker push "$LATEST_IMAGE"
-          docker push "$SHA_IMAGE"
+          docker save "$IMAGE_TAG" | gzip -1 > "$IMAGE_ARCHIVE"
+          ls -lh "$IMAGE_ARCHIVE"
 
-  deploy:
-    name: Deploy on server
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-
-    steps:
       - name: Install SSH key
         run: |
           mkdir -p ~/.ssh
@@ -80,53 +51,70 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "${{ secrets.SSH_PORT || '22' }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Pull image and restart container
+      - name: Upload image archive
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
-          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-          IMAGE: ${{ needs.build.outputs.latest_image }}
+        run: |
+          scp \
+            -i ~/.ssh/deploy_key \
+            -P "$SSH_PORT" \
+            -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=20 \
+            "$IMAGE_ARCHIVE" \
+            "$SSH_USER@$SSH_HOST:$REMOTE_IMAGE_ARCHIVE"
+
+      - name: Load image and restart container
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
           CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
           PORT_MAPPING: ${{ env.PORT_MAPPING }}
+          REMOTE_IMAGE_ARCHIVE: ${{ env.REMOTE_IMAGE_ARCHIVE }}
         run: |
           encode() {
             printf '%s' "$1" | base64 -w 0
           }
 
-          GHCR_USERNAME_B64="$(encode "$GHCR_USERNAME")"
-          GHCR_TOKEN_B64="$(encode "$GHCR_TOKEN")"
-          IMAGE_B64="$(encode "$IMAGE")"
+          IMAGE_TAG_B64="$(encode "$IMAGE_TAG")"
           CONTAINER_NAME_B64="$(encode "$CONTAINER_NAME")"
           PORT_MAPPING_B64="$(encode "$PORT_MAPPING")"
+          REMOTE_IMAGE_ARCHIVE_B64="$(encode "$REMOTE_IMAGE_ARCHIVE")"
 
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            GHCR_USERNAME_B64="$GHCR_USERNAME_B64" \
-            GHCR_TOKEN_B64="$GHCR_TOKEN_B64" \
-            IMAGE_B64="$IMAGE_B64" \
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -p "$SSH_PORT" \
+            -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=20 \
+            "$SSH_USER@$SSH_HOST" \
+            IMAGE_TAG_B64="$IMAGE_TAG_B64" \
             CONTAINER_NAME_B64="$CONTAINER_NAME_B64" \
             PORT_MAPPING_B64="$PORT_MAPPING_B64" \
+            REMOTE_IMAGE_ARCHIVE_B64="$REMOTE_IMAGE_ARCHIVE_B64" \
             'sh -s' <<'EOF'
           set -eu
 
-          GHCR_USERNAME="$(printf '%s' "$GHCR_USERNAME_B64" | base64 -d)"
-          GHCR_TOKEN="$(printf '%s' "$GHCR_TOKEN_B64" | base64 -d)"
-          IMAGE="$(printf '%s' "$IMAGE_B64" | base64 -d)"
+          IMAGE_TAG="$(printf '%s' "$IMAGE_TAG_B64" | base64 -d)"
           CONTAINER_NAME="$(printf '%s' "$CONTAINER_NAME_B64" | base64 -d)"
           PORT_MAPPING="$(printf '%s' "$PORT_MAPPING_B64" | base64 -d)"
+          IMAGE_ARCHIVE="$(printf '%s' "$REMOTE_IMAGE_ARCHIVE_B64" | base64 -d)"
 
-          if [ -n "${GHCR_TOKEN:-}" ]; then
-            printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
-          fi
+          trap 'rm -f "$IMAGE_ARCHIVE"' EXIT
 
-          docker pull "$IMAGE"
+          docker load -i "$IMAGE_ARCHIVE"
+          docker image inspect "$IMAGE_TAG" >/dev/null
+
           docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
           docker run -d \
             --name "$CONTAINER_NAME" \
             --restart unless-stopped \
             -p "$PORT_MAPPING" \
-            "$IMAGE"
+            "$IMAGE_TAG"
 
           docker image prune -f
           EOF
