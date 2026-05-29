@@ -17,6 +17,8 @@ import { momentGroups, momentImages } from "../data/moments";
     description=""
     ariaLabel="近期影像随机预览"
     showMeta={false}
+    previewGrid
+    galleryId="moments-preview"
   />
 
   {
@@ -46,6 +48,7 @@ import { momentGroups, momentImages } from "../data/moments";
                   ariaLabel={`${group.title}影像`}
                   showMeta={false}
                   compact
+                  galleryId={`moments-${group.slug}`}
                 />
               </section>
             ))

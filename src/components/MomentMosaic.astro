@@ -11,6 +11,8 @@ const {
   ariaLabel,
   showMeta = true,
   compact = false,
+  previewGrid = false,
+  galleryId = "moment-gallery",
 } = Astro.props as {
   images: MomentImage[];
   title?: string;
@@ -20,6 +22,8 @@ const {
   ariaLabel?: string;
   showMeta?: boolean;
   compact?: boolean;
+  previewGrid?: boolean;
+  galleryId?: string;
 };
 
 const tileClasses = [
@@ -34,11 +38,25 @@ const tileClasses = [
   "moment-tile--standard",
 ];
 
+const previewTileClasses = [
+  "moment-tile--large",
+  "moment-tile--wide",
+  "moment-tile--standard",
+  "moment-tile--standard",
+  "moment-tile--tall",
+  "moment-tile--standard",
+  "moment-tile--wide",
+  "moment-tile--standard",
+  "moment-tile--wide",
+];
+
 const hasHeader = title || description || ctaHref;
 const mosaicLabel = ariaLabel || title || "影像九宫格";
+const visibleImages = previewGrid ? images.slice(0, 9) : images;
+const activeTileClasses = previewGrid ? previewTileClasses : tileClasses;
 ---
 
-<section class:list={["moment-section", compact && "moment-section--compact"]}>
+<section class:list={["moment-section", compact && "moment-section--compact", previewGrid && "moment-section--preview"]}>
   {
     hasHeader && (
       <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between lg:pr-28">
@@ -60,24 +78,35 @@ const mosaicLabel = ariaLabel || title || "影像九宫格";
   {
     images.length > 0 ? (
       <div class="moment-mosaic" aria-label={mosaicLabel}>
-        {images.slice(0, 9).map((image, index) => (
-          <figure class:list={["moment-tile", tileClasses[index] ?? "moment-tile--standard"]}>
-            <Image
-              src={image.src}
-              alt={image.alt}
-              class="h-full w-full object-cover"
-              loading={index < 3 ? "eager" : "lazy"}
-              widths={[320, 640, 960]}
-              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            />
-            {
-              showMeta && (
-                <figcaption class="moment-tile__overlay">
-                  <div class="text-xs opacity-85">{image.groupDate ?? image.groupTitle}</div>
-                  <div class="mt-1 text-xl font-bold leading-tight">{image.groupTitle}</div>
-                </figcaption>
-              )
-            }
+        {visibleImages.map((image, index) => (
+          <figure class:list={["moment-tile", activeTileClasses[index] ?? "moment-tile--standard"]}>
+            <button
+              class="moment-tile__button"
+              type="button"
+              aria-label={`查看${image.alt}`}
+              data-moment-trigger={galleryId}
+              data-index={index}
+              data-full-src={image.src.src}
+              data-alt={image.alt}
+              data-caption={`${image.groupTitle} · ${image.fileName.replace(/\.[^.]+$/, "")}`}
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                class="h-full w-full object-cover"
+                loading={index < 3 ? "eager" : "lazy"}
+                widths={[320, 640, 960]}
+                sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              />
+              {
+                showMeta && (
+                  <span class="moment-tile__overlay" aria-hidden="true">
+                    <span class="block text-xs opacity-85">{image.groupDate ?? image.groupTitle}</span>
+                    <span class="mt-1 block text-xl font-bold leading-tight">{image.groupTitle}</span>
+                  </span>
+                )
+              }
+            </button>
           </figure>
         ))}
       </div>
@@ -88,4 +117,93 @@ const mosaicLabel = ariaLabel || title || "影像九宫格";
       </div>
     )
   }
+
+  {
+    visibleImages.length > 0 && (
+      <dialog class="modal moment-lightbox" data-moment-lightbox={galleryId} aria-label={mosaicLabel}>
+        <div class="modal-box moment-lightbox__box">
+          <button class="btn btn-circle btn-ghost moment-lightbox__nav moment-lightbox__nav--prev" type="button" data-lightbox-prev aria-label="上一张图片">
+            上一张
+          </button>
+          <figure class="moment-lightbox__figure">
+            <button class="btn btn-sm moment-lightbox__close" type="button" data-lightbox-close aria-label="关闭图片查看">
+              关闭
+            </button>
+            <img class="moment-lightbox__image" data-lightbox-image alt="" />
+            <figcaption class="moment-lightbox__caption" data-lightbox-caption></figcaption>
+          </figure>
+          <button class="btn btn-circle btn-ghost moment-lightbox__nav moment-lightbox__nav--next" type="button" data-lightbox-next aria-label="下一张图片">
+            下一张
+          </button>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+          <button aria-label="关闭图片查看">关闭</button>
+        </form>
+      </dialog>
+    )
+  }
 </section>
+
+<script is:inline define:vars={{ galleryId }}>
+  (() => {
+    const dialog = document.querySelector(`[data-moment-lightbox="${galleryId}"]`);
+    const triggers = [...document.querySelectorAll(`[data-moment-trigger="${galleryId}"]`)];
+
+    if (!(dialog instanceof HTMLDialogElement) || triggers.length === 0) {
+      return;
+    }
+
+    const image = dialog.querySelector("[data-lightbox-image]");
+    const caption = dialog.querySelector("[data-lightbox-caption]");
+    const closeButton = dialog.querySelector("[data-lightbox-close]");
+    const prevButton = dialog.querySelector("[data-lightbox-prev]");
+    const nextButton = dialog.querySelector("[data-lightbox-next]");
+    let activeIndex = 0;
+
+    const setActiveImage = (index) => {
+      activeIndex = (index + triggers.length) % triggers.length;
+      const trigger = triggers[activeIndex];
+
+      if (image instanceof HTMLImageElement) {
+        image.src = trigger.dataset.fullSrc || "";
+        image.alt = trigger.dataset.alt || "";
+      }
+
+      if (caption instanceof HTMLElement) {
+        caption.textContent = trigger.dataset.caption || trigger.dataset.alt || "";
+      }
+    };
+
+    const openLightbox = (index) => {
+      setActiveImage(index);
+
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    };
+
+    triggers.forEach((trigger, index) => {
+      trigger.addEventListener("click", () => openLightbox(index));
+    });
+
+    closeButton?.addEventListener("click", () => dialog.close());
+    prevButton?.addEventListener("click", () => setActiveImage(activeIndex - 1));
+    nextButton?.addEventListener("click", () => setActiveImage(activeIndex + 1));
+
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
+
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        setActiveImage(activeIndex - 1);
+      }
+
+      if (event.key === "ArrowRight") {
+        setActiveImage(activeIndex + 1);
+      }
+    });
+  })();
+</script>
