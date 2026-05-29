@@ -1,5 +1,5 @@
 ---
-const { title } = Astro.props;
+const { title, showDrawerToggle = true } = Astro.props;
 import ThemeToggle from "./ThemeToggle.astro";
 ---
 
@@ -8,11 +8,15 @@ import ThemeToggle from "./ThemeToggle.astro";
 >
   <div class="navbar min-h-16 w-full max-w-full px-3">
     <div class="navbar-start">
-      <label for="my-drawer" class="btn btn-square btn-ghost">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current"
-          ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-      </label>
+      {
+        showDrawerToggle && (
+          <label for="my-drawer" class="btn btn-square btn-ghost">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-5 w-5 stroke-current">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </label>
+        )
+      }
     </div>
     <div class="navbar-center min-w-0 px-2">
       <a class="btn btn-ghost max-w-full truncate px-2 text-base font-medium normal-case sm:text-lg" href="/">{title}</a>

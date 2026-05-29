@@ -1,0 +1,2154 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import {
+  newTabConfig,
+  newTabSearchEngines,
+  newTabShortcutGroups,
+} from "../data/new-tab-shortcuts";
+
+const defaultNewTabPayload = {
+  config: newTabConfig,
+  searchEngines: newTabSearchEngines,
+  shortcutGroups: newTabShortcutGroups,
+};
+
+const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).replace(/</g, "\\u003c");
+---
+
+<BaseLayout
+  title={newTabConfig.title}
+  description={newTabConfig.description}
+  includeSidebar={false}
+  showHeader={false}
+  showFooter={false}
+  showFloatingThemeToggle={false}
+>
+  <section class="new-tab-shell" aria-labelledby="new-tab-title" data-new-tab-page>
+    <h1 id="new-tab-title" class="sr-only">{newTabConfig.heading}</h1>
+
+    <div class="new-tab-toolbar">
+      <div
+        class="new-tab-greeting text-sm font-medium"
+        data-new-tab-greeting
+        data-new-tab-color-target="navigation"
+      ></div>
+      <div class="new-tab-actions">
+        <ThemeToggle mobile={true} />
+        <a
+          class="btn btn-ghost btn-sm"
+          href={newTabConfig.homeLink.href}
+          data-home-link
+          data-new-tab-color-target="navigation"
+        >
+          {newTabConfig.homeLink.label}
+        </a>
+        <button
+          class="btn btn-outline btn-sm"
+          type="button"
+          data-config-open
+          data-new-tab-color-target="navigation"
+        >
+          {newTabConfig.settings.openLabel}
+        </button>
+      </div>
+    </div>
+
+    <form
+      class="new-tab-search join w-full"
+      role="search"
+      data-new-tab-search
+    >
+      <label class="sr-only" for="new-tab-query">搜索关键词</label>
+      <input
+        id="new-tab-query"
+        class="input input-bordered join-item new-tab-search__input"
+        type="search"
+        name="q"
+        autocomplete="off"
+        placeholder={newTabConfig.search.placeholder}
+        data-search-query
+      />
+      <label class="sr-only" for="new-tab-engine">搜索引擎</label>
+      <select
+        id="new-tab-engine"
+        class="select select-bordered join-item new-tab-search__engine"
+        name="engine"
+        data-search-engine
+      ></select>
+      <button
+        class="btn btn-neutral join-item new-tab-search__submit"
+        type="submit"
+        aria-label={newTabConfig.search.submitLabel}
+        title={newTabConfig.search.submitLabel}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+      </button>
+    </form>
+
+    <div class="shortcut-stack" aria-label="快捷网站" data-shortcut-stack></div>
+  </section>
+
+  <div class="new-tab-config" data-config-drawer hidden>
+    <button class="new-tab-config__backdrop" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
+    <aside class="new-tab-config__sheet" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
+      <div class="new-tab-config__header">
+        <div>
+          <h2>{newTabConfig.settings.panelTitle}</h2>
+          <p data-config-status>{newTabConfig.settings.statusReady}</p>
+        </div>
+        <button class="btn btn-square btn-ghost btn-sm" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="new-tab-config__body">
+        <section class="new-tab-config__section">
+          <div class="new-tab-config__section-title">{newTabConfig.settings.generalLabel}</div>
+          <div class="new-tab-config__grid">
+            <label class="form-control">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.nameLabel}</span>
+              </span>
+              <input class="input input-bordered input-sm" type="text" autocomplete="off" data-config-name />
+            </label>
+            <label class="form-control">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.homeLinkLabel}</span>
+              </span>
+              <input class="input input-bordered input-sm" type="text" autocomplete="off" data-config-home-label />
+            </label>
+            <label class="form-control">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.homeHrefLabel}</span>
+              </span>
+              <input class="input input-bordered input-sm" type="text" autocomplete="off" data-config-home-href />
+            </label>
+            <label class="form-control new-tab-config__wide">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.backgroundUrlLabel}</span>
+              </span>
+              <input
+                class="input input-bordered input-sm"
+                type="url"
+                placeholder={newTabConfig.settings.backgroundPlaceholder}
+                data-config-background
+              />
+            </label>
+            <label class="form-control new-tab-config__wide">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.backgroundFileLabel}</span>
+              </span>
+              <div class="new-tab-config-upload">
+                <input hidden type="file" accept="image/*" data-config-background-file />
+                <button class="btn btn-outline btn-sm" type="button" data-config-background-file-trigger>
+                  {newTabConfig.settings.backgroundFileLabel}
+                </button>
+                <span data-config-background-status>{newTabConfig.settings.backgroundEmptyLabel}</span>
+              </div>
+            </label>
+            <label class="form-control new-tab-config__wide">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.backgroundOpacityLabel}</span>
+                <span class="label-text-alt" data-config-background-opacity-value></span>
+              </span>
+              <input
+                class="range range-xs"
+                type="range"
+                min="0"
+                max="80"
+                step="1"
+                data-config-background-opacity
+              />
+            </label>
+            <div class="new-tab-config__wide new-tab-config__section-title">
+              {newTabConfig.settings.textColorLabel}
+            </div>
+            <label class="form-control new-tab-config__wide">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.textColorModeLabel}</span>
+              </span>
+              <select class="select select-bordered select-sm" data-config-text-color-mode>
+                <option value="default">{newTabConfig.settings.textColorDefaultLabel}</option>
+                <option value="light">{newTabConfig.settings.textColorLightLabel}</option>
+                <option value="dark">{newTabConfig.settings.textColorDarkLabel}</option>
+                <option value="custom">{newTabConfig.settings.textColorCustomLabel}</option>
+              </select>
+            </label>
+            <label class="form-control">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.navigationTextColorLabel}</span>
+              </span>
+              <input class="input input-bordered input-sm h-10 p-1" type="color" data-config-navigation-color />
+            </label>
+            <label class="form-control">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.itemLabelTextColorLabel}</span>
+              </span>
+              <input class="input input-bordered input-sm h-10 p-1" type="color" data-config-item-label-color />
+            </label>
+          </div>
+        </section>
+
+        <section class="new-tab-config__section">
+          <div class="new-tab-config__section-header">
+            <div class="new-tab-config__section-title">{newTabConfig.settings.shortcutsLabel}</div>
+            <button class="btn btn-outline btn-xs" type="button" data-config-add-group>
+              {newTabConfig.settings.addGroupLabel}
+            </button>
+          </div>
+          <div class="new-tab-config__groups" data-config-groups></div>
+        </section>
+      </div>
+
+      <div class="new-tab-config__footer">
+        <input
+          hidden
+          type="file"
+          accept="application/json,.json"
+          aria-label={newTabConfig.settings.fileLabel}
+          data-config-file
+        />
+        <button class="btn btn-sm btn-outline" type="button" data-config-import>
+          {newTabConfig.settings.importLabel}
+        </button>
+        <button class="btn btn-sm btn-outline" type="button" data-config-export>
+          {newTabConfig.settings.exportLabel}
+        </button>
+        <button class="btn btn-sm btn-ghost" type="button" data-config-clear-background>
+          {newTabConfig.settings.clearBackgroundLabel}
+        </button>
+        <button class="btn btn-sm btn-ghost" type="button" data-config-reset>
+          {newTabConfig.settings.resetLabel}
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <script is:inline type="application/json" id="new-tab-defaults" set:html={serializedDefaultNewTabPayload} />
+
+  <script>
+    // @ts-nocheck
+    const defaultPayloadElement = document.getElementById("new-tab-defaults");
+    const defaultPayload = defaultPayloadElement?.textContent
+      ? JSON.parse(defaultPayloadElement.textContent)
+      : {};
+
+    const cloneValue = (value) => {
+      if (typeof structuredClone === "function") {
+        return structuredClone(value);
+      }
+
+      return JSON.parse(JSON.stringify(value));
+    };
+
+    const configVersion = 6;
+    const defaultBackgroundOpacity = 60;
+    const oldDefaultBackgroundOpacities = [34, 50];
+    const defaultTextColors = {
+      mode: "default",
+      navigationColor: "#f8fafc",
+      itemLabelColor: "#f8fafc",
+    };
+
+    const defaultState = () => ({
+      version: configVersion,
+      userName: defaultPayload.config?.userName ?? "Ethanz888",
+      backgroundImage: "",
+      backgroundOpacity: defaultBackgroundOpacity,
+      textColors: cloneValue(defaultTextColors),
+      defaultSearchEngineId: defaultPayload.config?.search?.defaultEngineId ?? "google",
+      homeLink: cloneValue(defaultPayload.config?.homeLink ?? { label: "资料卡首页", href: "/" }),
+      greetings: cloneValue(defaultPayload.config?.greetings ?? []),
+      searchEngines: cloneValue(defaultPayload.searchEngines ?? []),
+      shortcutGroups: cloneValue(defaultPayload.shortcutGroups ?? []),
+    });
+
+    const storageKey = defaultPayload.config?.storageKey ?? "ethanz-new-tab-config";
+    const settingsLabels = defaultPayload.config?.settings ?? {};
+    let newTabState = defaultState();
+    let textColorSaveTimer = 0;
+
+    const isPlainObject = (value) =>
+      value !== null && typeof value === "object" && !Array.isArray(value);
+
+    const normalizeText = (value, fallback = "") =>
+      typeof value === "string" && value.trim() ? value.trim() : fallback;
+
+    const normalizeMaybeText = (value) =>
+      typeof value === "string" && value.trim() ? value.trim() : undefined;
+
+    const normalizeColor = (value, fallback) =>
+      typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value.trim())
+        ? value.trim()
+        : fallback;
+
+    const normalizeTextColors = (value, fallback) => {
+      if (!isPlainObject(value)) {
+        return cloneValue(fallback);
+      }
+
+      const mode = ["default", "light", "dark", "custom"].includes(value.mode)
+        ? value.mode
+        : fallback.mode;
+
+      return {
+        mode,
+        navigationColor: normalizeColor(
+          value.navigationColor ?? value.greetingColor ?? value.homeLinkColor,
+          fallback.navigationColor,
+        ),
+        itemLabelColor: normalizeColor(
+          value.itemLabelColor ?? value.shortcutLabelColor,
+          fallback.itemLabelColor,
+        ),
+      };
+    };
+
+    const normalizeGreetings = (greetings, fallback) => {
+      if (!Array.isArray(greetings)) {
+        return cloneValue(fallback);
+      }
+
+      const normalized = greetings
+        .map((item) => ({
+          label: normalizeText(item?.label),
+          from: Number(item?.from),
+          to: Number(item?.to),
+        }))
+        .filter((item) =>
+          item.label &&
+          Number.isInteger(item.from) &&
+          Number.isInteger(item.to) &&
+          item.from >= 0 &&
+          item.from <= 23 &&
+          item.to >= 0 &&
+          item.to <= 23
+        );
+
+      return normalized.length ? normalized : cloneValue(fallback);
+    };
+
+    const normalizeSearchEngines = (engines, fallback) => {
+      if (!Array.isArray(engines)) {
+        return cloneValue(fallback);
+      }
+
+      const ids = new Set();
+      const normalized = engines
+        .map((engine) => ({
+          id: normalizeText(engine?.id),
+          label: normalizeText(engine?.label),
+          searchUrl: normalizeText(engine?.searchUrl),
+        }))
+        .filter((engine) => {
+          if (!engine.id || !engine.label || !engine.searchUrl.includes("{query}") || ids.has(engine.id)) {
+            return false;
+          }
+
+          ids.add(engine.id);
+          return true;
+        });
+
+      return normalized.length ? normalized : cloneValue(fallback);
+    };
+
+    const normalizeShortcutGroups = (groups, fallback) => {
+      if (!Array.isArray(groups)) {
+        return cloneValue(fallback);
+      }
+
+      const normalized = groups
+        .map((group) => ({
+          title: normalizeText(group?.title),
+          shortcuts: Array.isArray(group?.shortcuts)
+            ? group.shortcuts
+                .map((shortcut) => ({
+                  title: normalizeText(shortcut?.title),
+                  url: normalizeText(shortcut?.url),
+                  description: normalizeMaybeText(shortcut?.description),
+                  logo: normalizeMaybeText(shortcut?.logo),
+                }))
+                .filter((shortcut) => shortcut.title && shortcut.url)
+            : [],
+        }))
+        .filter((group) => group.title && group.shortcuts.length);
+
+      return normalized.length ? normalized : cloneValue(fallback);
+    };
+
+    const normalizeHomeLink = (homeLink, fallback) => {
+      if (!isPlainObject(homeLink)) {
+        return cloneValue(fallback);
+      }
+
+      return {
+        label: normalizeText(homeLink.label, fallback.label),
+        href: normalizeText(homeLink.href, fallback.href),
+      };
+    };
+
+    const normalizeNewTabState = (value) => {
+      const fallback = defaultState();
+
+      if (!isPlainObject(value)) {
+        return fallback;
+      }
+
+      const searchEngines = normalizeSearchEngines(value.searchEngines, fallback.searchEngines);
+      const defaultSearchEngineId = normalizeText(
+        value.defaultSearchEngineId ?? value.search?.defaultEngineId,
+        fallback.defaultSearchEngineId,
+      );
+
+      return {
+        version: configVersion,
+        userName: normalizeText(value.userName, fallback.userName),
+        backgroundImage: typeof value.backgroundImage === "string" ? value.backgroundImage.trim() : "",
+        backgroundOpacity: Number.isFinite(Number(value.backgroundOpacity))
+          ? Math.min(80, Math.max(0, Number(value.backgroundOpacity)))
+          : fallback.backgroundOpacity,
+        textColors: normalizeTextColors(value.textColors, fallback.textColors),
+        defaultSearchEngineId: searchEngines.some((engine) => engine.id === defaultSearchEngineId)
+          ? defaultSearchEngineId
+          : searchEngines[0]?.id ?? fallback.defaultSearchEngineId,
+        homeLink: normalizeHomeLink(value.homeLink, fallback.homeLink),
+        greetings: normalizeGreetings(value.greetings, fallback.greetings),
+        searchEngines,
+        shortcutGroups: normalizeShortcutGroups(value.shortcutGroups, fallback.shortcutGroups),
+      };
+    };
+
+    const readStoredState = () => {
+      try {
+        const storedConfig = window.localStorage.getItem(storageKey);
+
+        if (!storedConfig) {
+          return defaultState();
+        }
+
+        const parsedConfig = JSON.parse(storedConfig);
+        const storedState = normalizeNewTabState(parsedConfig);
+
+        if (
+          Number(parsedConfig?.version ?? 1) < configVersion &&
+          oldDefaultBackgroundOpacities.includes(storedState.backgroundOpacity)
+        ) {
+          storedState.backgroundOpacity = defaultBackgroundOpacity;
+          window.localStorage.setItem(storageKey, JSON.stringify(storedState));
+        }
+
+        return storedState;
+      } catch {
+        return defaultState();
+      }
+    };
+
+    const writeStoredState = () => {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(newTabState));
+      } catch {
+        // The page still works with the in-memory config when storage is unavailable.
+      }
+    };
+
+    const getShortcutHostname = (url) => {
+      try {
+        return new URL(url).hostname.replace(/^www\./, "");
+      } catch {
+        return url;
+      }
+    };
+
+    const getShortcutInitial = (title) => title.trim().slice(0, 1).toUpperCase();
+
+    const getPrimaryLogoUrl = (shortcut) => {
+      if (shortcut.logo) {
+        return shortcut.logo;
+      }
+
+      return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(getShortcutHostname(shortcut.url))}&sz=64`;
+    };
+
+    const getFallbackLogoUrl = (shortcut) =>
+      `https://icons.duckduckgo.com/ip3/${getShortcutHostname(shortcut.url)}.ico`;
+
+    const bindLogoFallback = (image) => {
+      image.addEventListener("error", () => {
+        const fallback = image.dataset.logoFallback;
+
+        if (fallback && image.src !== fallback) {
+          image.src = fallback;
+          image.dataset.logoFallback = "";
+          return;
+        }
+
+        image.hidden = true;
+        image.closest(".shortcut-item__icon")?.classList.add("shortcut-item__icon--fallback");
+      });
+    };
+
+    const renderSearchEngines = () => {
+      const select = document.querySelector("[data-search-engine]");
+
+      if (!(select instanceof HTMLSelectElement)) {
+        return;
+      }
+
+      select.textContent = "";
+      newTabState.searchEngines.forEach((engine) => {
+        const option = document.createElement("option");
+        option.value = engine.id;
+        option.dataset.searchUrl = engine.searchUrl;
+        option.textContent = engine.label;
+        select.append(option);
+      });
+
+      select.value = newTabState.defaultSearchEngineId;
+    };
+
+    const renderGreeting = () => {
+      const greeting = document.querySelector("[data-new-tab-greeting]");
+
+      if (!(greeting instanceof HTMLElement)) {
+        return;
+      }
+
+      const hour = new Date().getHours();
+      const greetingConfig = newTabState.greetings.find((item) => {
+        if (item.from < item.to) {
+          return hour >= item.from && hour < item.to;
+        }
+
+        return hour >= item.from || hour < item.to;
+      });
+
+      greeting.textContent = `${greetingConfig?.label ?? "你好"}，${newTabState.userName}`;
+    };
+
+    const renderHomeLink = () => {
+      const homeLink = document.querySelector("[data-home-link]");
+
+      if (!(homeLink instanceof HTMLAnchorElement)) {
+        return;
+      }
+
+      homeLink.href = newTabState.homeLink.href;
+      homeLink.textContent = newTabState.homeLink.label;
+    };
+
+    const renderShortcutGroups = () => {
+      const stack = document.querySelector("[data-shortcut-stack]");
+
+      if (!(stack instanceof HTMLElement)) {
+        return;
+      }
+
+      stack.textContent = "";
+
+      newTabState.shortcutGroups.forEach((group) => {
+        const section = document.createElement("section");
+        section.className = "shortcut-group";
+        section.setAttribute("aria-label", `${group.title}快捷方式`);
+
+        const summary = document.createElement("div");
+        summary.className = "shortcut-group__summary";
+
+        const title = document.createElement("span");
+        title.dataset.newTabColorTarget = "itemLabel";
+        title.textContent = group.title;
+
+        const count = document.createElement("span");
+        count.textContent = String(group.shortcuts.length);
+
+        summary.append(title, count);
+
+        const items = document.createElement("div");
+        items.className = "shortcut-group__items";
+
+        group.shortcuts.forEach((shortcut) => {
+          const item = document.createElement("a");
+          item.className = "shortcut-item";
+          item.href = shortcut.url;
+          item.target = "_blank";
+          item.rel = "noopener noreferrer";
+          item.setAttribute(
+            "aria-label",
+            `${shortcut.title}：${shortcut.description ?? getShortcutHostname(shortcut.url)}`,
+          );
+
+          const icon = document.createElement("span");
+          icon.className = "shortcut-item__icon";
+          icon.setAttribute("aria-hidden", "true");
+
+          const image = document.createElement("img");
+          image.src = getPrimaryLogoUrl(shortcut);
+          image.alt = "";
+          image.loading = "lazy";
+          image.decoding = "async";
+          image.referrerPolicy = "no-referrer";
+          image.dataset.logoFallback = getFallbackLogoUrl(shortcut);
+          bindLogoFallback(image);
+
+          const initial = document.createElement("span");
+          initial.textContent = getShortcutInitial(shortcut.title);
+
+          icon.append(image, initial);
+
+          const tooltip = document.createElement("span");
+          tooltip.className = "shortcut-item__tooltip";
+          tooltip.role = "tooltip";
+
+          const tooltipTitle = document.createElement("strong");
+          tooltipTitle.dataset.newTabColorTarget = "itemLabel";
+          tooltipTitle.textContent = shortcut.title;
+
+          const tooltipText = document.createElement("small");
+          tooltipText.textContent = shortcut.description ?? getShortcutHostname(shortcut.url);
+
+          tooltip.append(tooltipTitle, tooltipText);
+          item.append(icon, tooltip);
+          items.append(item);
+        });
+
+        section.append(summary, items);
+        stack.append(section);
+      });
+    };
+
+    const setStatus = (message) => {
+      const status = document.querySelector("[data-config-status]");
+
+      if (status instanceof HTMLElement) {
+        status.textContent = message;
+      }
+    };
+
+    const syncSettingsControls = () => {
+      const nameInput = document.querySelector("[data-config-name]");
+      const homeLabelInput = document.querySelector("[data-config-home-label]");
+      const homeHrefInput = document.querySelector("[data-config-home-href]");
+      const backgroundInput = document.querySelector("[data-config-background]");
+      const backgroundOpacityInput = document.querySelector("[data-config-background-opacity]");
+      const backgroundOpacityValue = document.querySelector("[data-config-background-opacity-value]");
+      const backgroundStatus = document.querySelector("[data-config-background-status]");
+      const textColorModeInput = document.querySelector("[data-config-text-color-mode]");
+      const navigationColorInput = document.querySelector("[data-config-navigation-color]");
+      const itemLabelColorInput = document.querySelector("[data-config-item-label-color]");
+
+      if (nameInput instanceof HTMLInputElement) {
+        nameInput.value = newTabState.userName;
+      }
+
+      if (homeLabelInput instanceof HTMLInputElement) {
+        homeLabelInput.value = newTabState.homeLink.label;
+      }
+
+      if (homeHrefInput instanceof HTMLInputElement) {
+        homeHrefInput.value = newTabState.homeLink.href;
+      }
+
+      if (backgroundInput instanceof HTMLInputElement) {
+        backgroundInput.value = newTabState.backgroundImage.startsWith("data:")
+          ? ""
+          : newTabState.backgroundImage;
+      }
+
+      if (backgroundOpacityInput instanceof HTMLInputElement) {
+        backgroundOpacityInput.value = String(Math.round(newTabState.backgroundOpacity));
+      }
+
+      if (backgroundOpacityValue instanceof HTMLElement) {
+        backgroundOpacityValue.textContent = `${Math.round(newTabState.backgroundOpacity)}%`;
+      }
+
+      const resolvedTextColors = getResolvedTextColors() ?? newTabState.textColors;
+
+      if (textColorModeInput instanceof HTMLSelectElement) {
+        textColorModeInput.value = newTabState.textColors.mode;
+      }
+
+      if (navigationColorInput instanceof HTMLInputElement) {
+        navigationColorInput.value = resolvedTextColors.navigationColor;
+        navigationColorInput.title = "修改后切换为自定义";
+      }
+
+      if (itemLabelColorInput instanceof HTMLInputElement) {
+        itemLabelColorInput.value = resolvedTextColors.itemLabelColor;
+        itemLabelColorInput.title = "修改后切换为自定义";
+      }
+
+      if (backgroundStatus instanceof HTMLElement) {
+        backgroundStatus.textContent = newTabState.backgroundImage.startsWith("data:")
+          ? (settingsLabels.backgroundUploadedLabel ?? "已上传本地背景")
+          : newTabState.backgroundImage
+            ? (settingsLabels.backgroundUrlStatusLabel ?? "使用背景 URL")
+            : (settingsLabels.backgroundEmptyLabel ?? "未设置背景");
+      }
+    };
+
+    const createLabeledInput = ({ label, value, placeholder = "", inputType = "text", onInput }) => {
+      const control = document.createElement("label");
+      control.className = "new-tab-config-field";
+
+      const labelText = document.createElement("span");
+      labelText.textContent = label;
+
+      const input = document.createElement("input");
+      input.className = "input input-bordered input-sm";
+      input.type = inputType;
+      input.value = value ?? "";
+      input.placeholder = placeholder;
+      input.autocomplete = "off";
+      input.addEventListener("input", () => onInput(input.value));
+
+      control.append(labelText, input);
+      return control;
+    };
+
+    const persistConfigChange = (message = "已保存") => {
+      writeStoredState();
+      renderGreeting();
+      renderHomeLink();
+      renderSearchEngines();
+      renderShortcutGroups();
+      applyBackground();
+      applyTextColors();
+      setStatus(message);
+    };
+
+    const scheduleTextColorSave = () => {
+      window.clearTimeout(textColorSaveTimer);
+      applyTextColors();
+      textColorSaveTimer = window.setTimeout(() => {
+        writeStoredState();
+        setStatus("已保存");
+      }, 500);
+    };
+
+    const renderConfigGroups = () => {
+      const groupsContainer = document.querySelector("[data-config-groups]");
+
+      if (!(groupsContainer instanceof HTMLElement)) {
+        return;
+      }
+
+      groupsContainer.textContent = "";
+
+      newTabState.shortcutGroups.forEach((group, groupIndex) => {
+        const groupElement = document.createElement("section");
+        groupElement.className = "new-tab-config-group";
+
+        const groupHeader = document.createElement("div");
+        groupHeader.className = "new-tab-config-group__header";
+
+        const titleControl = createLabeledInput({
+          label: settingsLabels.groupTitleLabel ?? "分组名",
+          value: group.title,
+          onInput: (value) => {
+            group.title = value;
+            persistConfigChange();
+          },
+        });
+
+        const removeGroupButton = document.createElement("button");
+        removeGroupButton.className = "btn btn-ghost btn-xs";
+        removeGroupButton.type = "button";
+        removeGroupButton.textContent = settingsLabels.removeGroupLabel ?? "删除分组";
+        removeGroupButton.addEventListener("click", () => {
+          newTabState.shortcutGroups.splice(groupIndex, 1);
+          writeStoredState();
+          renderAll();
+          renderConfigGroups();
+          setStatus("已删除");
+        });
+
+        groupHeader.append(titleControl, removeGroupButton);
+
+        const shortcuts = document.createElement("div");
+        shortcuts.className = "new-tab-config-group__items";
+
+        group.shortcuts.forEach((shortcut, shortcutIndex) => {
+          const item = document.createElement("details");
+          item.className = "new-tab-config-item";
+
+          const itemHeader = document.createElement("summary");
+          itemHeader.className = "new-tab-config-item__header";
+
+          const itemTitle = document.createElement("strong");
+          itemTitle.dataset.newTabColorTarget = "itemLabel";
+          itemTitle.textContent = shortcut.title || `Item ${shortcutIndex + 1}`;
+
+          const itemMeta = document.createElement("small");
+          itemMeta.textContent = shortcut.url || "未设置地址";
+
+          const itemIdentity = document.createElement("span");
+          itemIdentity.className = "new-tab-config-item__identity";
+          itemIdentity.append(itemTitle, itemMeta);
+
+          const removeItemButton = document.createElement("button");
+          removeItemButton.className = "btn btn-ghost btn-xs";
+          removeItemButton.type = "button";
+          removeItemButton.textContent = settingsLabels.removeShortcutLabel ?? "删除 item";
+          removeItemButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            group.shortcuts.splice(shortcutIndex, 1);
+            writeStoredState();
+            renderAll();
+            renderConfigGroups();
+            setStatus("已删除");
+          });
+
+          const itemCue = document.createElement("span");
+          itemCue.className = "new-tab-config-item__cue";
+          itemCue.textContent = settingsLabels.editShortcutLabel ?? "编辑";
+
+          const itemActions = document.createElement("span");
+          itemActions.className = "new-tab-config-item__actions";
+          itemActions.append(itemCue, removeItemButton);
+
+          itemHeader.append(itemIdentity, itemActions);
+
+          const fields = document.createElement("div");
+          fields.className = "new-tab-config-item__fields";
+
+          fields.append(
+            createLabeledInput({
+              label: settingsLabels.shortcutTitleLabel ?? "名称",
+              value: shortcut.title,
+              onInput: (value) => {
+                shortcut.title = value;
+                itemTitle.textContent = value || `Item ${shortcutIndex + 1}`;
+                persistConfigChange();
+              },
+            }),
+            createLabeledInput({
+              label: settingsLabels.shortcutUrlLabel ?? "地址",
+              value: shortcut.url,
+              inputType: "url",
+              onInput: (value) => {
+                shortcut.url = value;
+                itemMeta.textContent = value || "未设置地址";
+                persistConfigChange();
+              },
+            }),
+            createLabeledInput({
+              label: settingsLabels.shortcutDescriptionLabel ?? "说明",
+              value: shortcut.description ?? "",
+              onInput: (value) => {
+                shortcut.description = value.trim() ? value : undefined;
+                persistConfigChange();
+              },
+            }),
+            createLabeledInput({
+              label: settingsLabels.shortcutLogoLabel ?? "图标 URL",
+              value: shortcut.logo ?? "",
+              inputType: "url",
+              placeholder: "可选",
+              onInput: (value) => {
+                shortcut.logo = value.trim() ? value : undefined;
+                persistConfigChange();
+              },
+            }),
+          );
+
+          item.append(itemHeader, fields);
+          shortcuts.append(item);
+        });
+
+        const addItemButton = document.createElement("button");
+        addItemButton.className = "btn btn-outline btn-xs new-tab-config-group__add";
+        addItemButton.type = "button";
+        addItemButton.textContent = settingsLabels.addShortcutLabel ?? "添加 item";
+        addItemButton.addEventListener("click", () => {
+          group.shortcuts.push({
+            title: "新入口",
+            url: "https://example.com",
+            description: "",
+          });
+          writeStoredState();
+          renderAll();
+          renderConfigGroups();
+          setStatus("已添加");
+        });
+
+        groupElement.append(groupHeader, shortcuts, addItemButton);
+        groupsContainer.append(groupElement);
+      });
+    };
+
+    const applyBackground = () => {
+      if (!newTabState.backgroundImage) {
+        delete document.documentElement.dataset.newTabBackground;
+        document.documentElement.style.removeProperty("--new-tab-background-image");
+        document.documentElement.style.removeProperty("--new-tab-background-opacity");
+        return;
+      }
+
+      const cssUrl = newTabState.backgroundImage
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, "");
+
+      document.documentElement.dataset.newTabBackground = "true";
+      document.documentElement.style.setProperty("--new-tab-background-image", `url("${cssUrl}")`);
+      document.documentElement.style.setProperty("--new-tab-background-opacity", String(newTabState.backgroundOpacity / 100));
+    };
+
+    const getResolvedTextColors = () => {
+      const presets = {
+        light: {
+          navigationColor: "#f8fafc",
+          itemLabelColor: "#f8fafc",
+        },
+        dark: {
+          navigationColor: "#111827",
+          itemLabelColor: "#111827",
+        },
+      };
+
+      if (newTabState.textColors.mode === "default") {
+        return null;
+      }
+
+      if (newTabState.textColors.mode === "custom") {
+        return newTabState.textColors;
+      }
+
+      return presets[newTabState.textColors.mode] ?? null;
+    };
+
+    const applyTextColors = () => {
+      const colors = getResolvedTextColors();
+
+      if (!colors) {
+        delete document.documentElement.dataset.newTabTextColors;
+        document.documentElement.style.removeProperty("--new-tab-navigation-color");
+        document.documentElement.style.removeProperty("--new-tab-item-label-color");
+        return;
+      }
+
+      document.documentElement.dataset.newTabTextColors = newTabState.textColors.mode;
+      document.documentElement.style.setProperty("--new-tab-navigation-color", colors.navigationColor);
+      document.documentElement.style.setProperty("--new-tab-item-label-color", colors.itemLabelColor);
+    };
+
+    const renderAll = () => {
+      renderSearchEngines();
+      renderGreeting();
+      renderHomeLink();
+      renderShortcutGroups();
+      applyBackground();
+      applyTextColors();
+      syncSettingsControls();
+    };
+
+    const downloadConfig = () => {
+      const blob = new Blob([JSON.stringify(newTabState, null, 2)], {
+        type: "application/json;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "new-tab-config.json";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setStatus("已导出");
+    };
+
+    const importConfigFromText = (text) => {
+      newTabState = normalizeNewTabState(JSON.parse(text));
+      writeStoredState();
+      renderAll();
+      renderConfigGroups();
+      setStatus("已导入");
+    };
+
+    const bindSearch = () => {
+      const form = document.querySelector("[data-new-tab-search]");
+      const input = document.querySelector("[data-search-query]");
+      const select = document.querySelector("[data-search-engine]");
+
+      if (
+        !(form instanceof HTMLFormElement) ||
+        !(input instanceof HTMLInputElement) ||
+        !(select instanceof HTMLSelectElement) ||
+        form.dataset.searchBound === "true"
+      ) {
+        return;
+      }
+
+      select.addEventListener("change", () => {
+        newTabState.defaultSearchEngineId = select.value;
+        writeStoredState();
+        syncSettingsControls();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const query = input.value.trim();
+        const selectedOption = select.selectedOptions[0];
+        const searchUrl = selectedOption?.dataset.searchUrl;
+
+        if (!query) {
+          input.focus();
+          return;
+        }
+
+        if (!searchUrl) {
+          return;
+        }
+
+        window.location.assign(searchUrl.replace("{query}", encodeURIComponent(query)));
+      });
+
+      form.dataset.searchBound = "true";
+    };
+
+    const bindSettings = () => {
+      const settings = document.querySelector("[data-config-drawer]");
+      const openButton = document.querySelector("[data-config-open]");
+
+      if (!(settings instanceof HTMLElement) || settings.dataset.settingsBound === "true") {
+        return;
+      }
+
+      const nameInput = settings.querySelector("[data-config-name]");
+      const homeLabelInput = settings.querySelector("[data-config-home-label]");
+      const homeHrefInput = settings.querySelector("[data-config-home-href]");
+      const backgroundInput = settings.querySelector("[data-config-background]");
+      const backgroundOpacityInput = settings.querySelector("[data-config-background-opacity]");
+      const textColorModeInput = settings.querySelector("[data-config-text-color-mode]");
+      const navigationColorInput = settings.querySelector("[data-config-navigation-color]");
+      const itemLabelColorInput = settings.querySelector("[data-config-item-label-color]");
+      const backgroundFileInput = settings.querySelector("[data-config-background-file]");
+      const backgroundFileTrigger = settings.querySelector("[data-config-background-file-trigger]");
+      const fileInput = settings.querySelector("[data-config-file]");
+      const importButton = settings.querySelector("[data-config-import]");
+      const exportButton = settings.querySelector("[data-config-export]");
+      const clearBackgroundButton = settings.querySelector("[data-config-clear-background]");
+      const resetButton = settings.querySelector("[data-config-reset]");
+      const addGroupButton = settings.querySelector("[data-config-add-group]");
+
+      const openSettings = () => {
+        settings.hidden = false;
+        window.requestAnimationFrame(() => {
+          settings.dataset.open = "true";
+        });
+      };
+
+      const closeSettings = () => {
+        delete settings.dataset.open;
+        window.setTimeout(() => {
+          if (!settings.dataset.open) {
+            settings.hidden = true;
+          }
+        }, 180);
+      };
+
+      openButton?.addEventListener("click", openSettings);
+      settings.querySelectorAll("[data-config-close]").forEach((button) => {
+        button.addEventListener("click", closeSettings);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && settings.dataset.open === "true") {
+          closeSettings();
+        }
+      });
+
+      nameInput?.addEventListener("input", () => {
+        if (!(nameInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        newTabState.userName = normalizeText(nameInput.value, defaultPayload.config?.userName ?? "Ethanz888");
+        persistConfigChange();
+      });
+
+      homeLabelInput?.addEventListener("input", () => {
+        if (!(homeLabelInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        newTabState.homeLink.label = normalizeText(homeLabelInput.value, defaultPayload.config?.homeLink?.label ?? "资料卡首页");
+        persistConfigChange();
+      });
+
+      homeHrefInput?.addEventListener("input", () => {
+        if (!(homeHrefInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        newTabState.homeLink.href = normalizeText(homeHrefInput.value, defaultPayload.config?.homeLink?.href ?? "/");
+        persistConfigChange();
+      });
+
+      backgroundInput?.addEventListener("input", () => {
+        if (!(backgroundInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        newTabState.backgroundImage = backgroundInput.value.trim();
+        persistConfigChange();
+      });
+
+      backgroundOpacityInput?.addEventListener("input", () => {
+        if (!(backgroundOpacityInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        newTabState.backgroundOpacity = Math.min(80, Math.max(0, Number(backgroundOpacityInput.value)));
+        persistConfigChange();
+        syncSettingsControls();
+      });
+
+      const handleTextColorModeChange = () => {
+        if (!(textColorModeInput instanceof HTMLSelectElement)) {
+          return;
+        }
+
+        newTabState.textColors.mode = ["default", "light", "dark", "custom"].includes(textColorModeInput.value)
+          ? textColorModeInput.value
+          : "default";
+        persistConfigChange();
+        syncSettingsControls();
+      };
+
+      textColorModeInput?.addEventListener("input", handleTextColorModeChange);
+      textColorModeInput?.addEventListener("change", handleTextColorModeChange);
+
+      navigationColorInput?.addEventListener("input", () => {
+        if (!(navigationColorInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        newTabState.textColors.mode = "custom";
+        newTabState.textColors.navigationColor = normalizeColor(
+          navigationColorInput.value,
+          defaultTextColors.navigationColor,
+        );
+        if (textColorModeInput instanceof HTMLSelectElement) {
+          textColorModeInput.value = "custom";
+        }
+        scheduleTextColorSave();
+      });
+
+      itemLabelColorInput?.addEventListener("input", () => {
+        if (!(itemLabelColorInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        newTabState.textColors.mode = "custom";
+        newTabState.textColors.itemLabelColor = normalizeColor(
+          itemLabelColorInput.value,
+          defaultTextColors.itemLabelColor,
+        );
+        if (textColorModeInput instanceof HTMLSelectElement) {
+          textColorModeInput.value = "custom";
+        }
+        scheduleTextColorSave();
+      });
+
+      backgroundFileTrigger?.addEventListener("click", () => {
+        if (backgroundFileInput instanceof HTMLInputElement) {
+          backgroundFileInput.click();
+        }
+      });
+
+      backgroundFileInput?.addEventListener("change", () => {
+        if (!(backgroundFileInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        const file = backgroundFileInput.files?.[0];
+
+        if (!file) {
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          if (typeof reader.result !== "string") {
+            return;
+          }
+
+          newTabState.backgroundImage = reader.result;
+          writeStoredState();
+          renderAll();
+          renderConfigGroups();
+          backgroundFileInput.value = "";
+          setStatus("背景已保存");
+        });
+        reader.readAsDataURL(file);
+      });
+
+      importButton?.addEventListener("click", () => {
+        if (fileInput instanceof HTMLInputElement) {
+          fileInput.click();
+        }
+      });
+
+      fileInput?.addEventListener("change", () => {
+        if (!(fileInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        const file = fileInput.files?.[0];
+
+        if (!file) {
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          if (typeof reader.result !== "string") {
+            return;
+          }
+
+          try {
+            importConfigFromText(reader.result);
+          } catch {
+            setStatus("JSON 格式不对");
+          }
+
+          fileInput.value = "";
+        });
+        reader.readAsText(file);
+      });
+
+      exportButton?.addEventListener("click", downloadConfig);
+
+      clearBackgroundButton?.addEventListener("click", () => {
+        newTabState.backgroundImage = "";
+        writeStoredState();
+        renderAll();
+        renderConfigGroups();
+        setStatus("背景已清除");
+      });
+
+      addGroupButton?.addEventListener("click", () => {
+        newTabState.shortcutGroups.push({
+          title: "新分组",
+          shortcuts: [
+            {
+              title: "新入口",
+              url: "https://example.com",
+              description: "",
+            },
+          ],
+        });
+        writeStoredState();
+        renderAll();
+        renderConfigGroups();
+        setStatus("已添加");
+      });
+
+      resetButton?.addEventListener("click", () => {
+        newTabState = defaultState();
+
+        try {
+          window.localStorage.removeItem(storageKey);
+        } catch {
+          // Ignore storage write failures and keep the reset state in memory.
+        }
+
+        renderAll();
+        renderConfigGroups();
+        setStatus("已恢复默认");
+      });
+
+      renderConfigGroups();
+      settings.dataset.settingsBound = "true";
+    };
+
+    const bindNewTab = () => {
+      newTabState = readStoredState();
+      renderAll();
+      bindSearch();
+      bindSettings();
+    };
+
+    const clearNewTabBackground = () => {
+      delete document.documentElement.dataset.newTabBackground;
+      delete document.documentElement.dataset.newTabTextColors;
+      document.documentElement.style.removeProperty("--new-tab-background-image");
+      document.documentElement.style.removeProperty("--new-tab-background-opacity");
+      document.documentElement.style.removeProperty("--new-tab-navigation-color");
+      document.documentElement.style.removeProperty("--new-tab-item-label-color");
+    };
+
+    bindNewTab();
+    document.addEventListener("astro:after-swap", bindNewTab);
+    document.addEventListener("astro:before-swap", clearNewTabBackground);
+  </script>
+
+  <style is:global>
+    .new-tab-config[hidden] {
+      display: none;
+    }
+
+    .new-tab-config {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      pointer-events: none;
+    }
+
+    .new-tab-config__backdrop {
+      position: absolute;
+      inset: 0;
+      border: 0;
+      background: color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
+    .new-tab-config__sheet {
+      position: absolute;
+      right: 0;
+      top: 0;
+      display: grid;
+      width: min(100vw, 31rem);
+      height: 100dvh;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      border-left: 1px solid color-mix(in srgb, oklch(var(--bc)) 14%, transparent);
+      background: oklch(var(--b1));
+      box-shadow: -1rem 0 2.5rem color-mix(in srgb, oklch(var(--bc)) 12%, transparent);
+      transform: translateX(100%);
+      transition: transform 180ms ease;
+    }
+
+    .new-tab-config[data-open="true"] {
+      pointer-events: auto;
+    }
+
+    .new-tab-config[data-open="true"] .new-tab-config__backdrop {
+      opacity: 1;
+    }
+
+    .new-tab-config[data-open="true"] .new-tab-config__sheet {
+      transform: translateX(0);
+    }
+
+    .new-tab-config__header,
+    .new-tab-config__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      border-bottom: 1px solid color-mix(in srgb, oklch(var(--bc)) 12%, transparent);
+      padding: 1rem;
+    }
+
+    .new-tab-config__header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .new-tab-config__header p {
+      margin: 0.2rem 0 0;
+      color: color-mix(in srgb, oklch(var(--bc)) 50%, transparent);
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+
+    .new-tab-config__header svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .new-tab-config__body {
+      display: grid;
+      align-content: start;
+      gap: 1.1rem;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .new-tab-config__section {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .new-tab-config__section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .new-tab-config__section-title {
+      color: oklch(var(--bc));
+      font-size: 0.9rem;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .new-tab-config__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .new-tab-config__wide {
+      grid-column: 1 / -1;
+    }
+
+    .new-tab-config-field {
+      display: grid;
+      min-width: 0;
+      gap: 0.35rem;
+    }
+
+    .new-tab-config-field > span {
+      color: color-mix(in srgb, oklch(var(--bc)) 62%, transparent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .new-tab-config-upload {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .new-tab-config-upload span {
+      overflow: hidden;
+      color: color-mix(in srgb, oklch(var(--bc)) 55%, transparent);
+      font-size: 0.78rem;
+      line-height: 1.4;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .new-tab-config__groups {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .new-tab-config-group {
+      display: grid;
+      gap: 0.75rem;
+      border: 1px solid color-mix(in srgb, oklch(var(--bc)) 12%, transparent);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+    }
+
+    .new-tab-config-group__header,
+    .new-tab-config-item__header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .new-tab-config-group__header .new-tab-config-field {
+      flex: 1;
+    }
+
+    .new-tab-config-group__items {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .new-tab-config-item {
+      display: grid;
+      gap: 0.55rem;
+      border-top: 1px solid color-mix(in srgb, oklch(var(--bc)) 10%, transparent);
+      padding-top: 0.45rem;
+    }
+
+    .new-tab-config-item__header {
+      cursor: pointer;
+      list-style: none;
+      padding-block: 0.15rem;
+    }
+
+    .new-tab-config-item__header::-webkit-details-marker {
+      display: none;
+    }
+
+    .new-tab-config-item__identity {
+      display: grid;
+      min-width: 0;
+      gap: 0.1rem;
+    }
+
+    .new-tab-config-item__actions {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .new-tab-config-item__cue {
+      color: color-mix(in srgb, oklch(var(--bc)) 42%, transparent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .new-tab-config-item__header strong,
+    .new-tab-config-item__header small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .new-tab-config-item__header strong {
+      color: color-mix(in srgb, oklch(var(--bc)) 82%, transparent);
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+
+    .new-tab-config-item__header small {
+      color: color-mix(in srgb, oklch(var(--bc)) 45%, transparent);
+      font-size: 0.72rem;
+      line-height: 1.25;
+    }
+
+    .new-tab-config-item__fields {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+      gap: 0.45rem;
+      border-radius: 0.45rem;
+      background: color-mix(in srgb, oklch(var(--b2)) 68%, transparent);
+      margin-top: 0.25rem;
+      padding: 0.55rem;
+    }
+
+    .new-tab-config-item[open] .new-tab-config-item__cue {
+      color: color-mix(in srgb, oklch(var(--bc)) 72%, transparent);
+    }
+
+    .new-tab-config-item[open] .new-tab-config-item__header {
+      color: oklch(var(--bc));
+    }
+
+    .new-tab-config-item:not([open]) .new-tab-config-item__fields {
+      display: none;
+    }
+
+    .new-tab-config-item__fields .new-tab-config-field {
+      padding-bottom: 0.25rem;
+    }
+
+    .new-tab-config-group__add {
+      justify-self: start;
+    }
+
+    .new-tab-config__footer {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      border-top: 1px solid color-mix(in srgb, oklch(var(--bc)) 12%, transparent);
+      border-bottom: 0;
+    }
+
+    @media (max-width: 639px) {
+      .new-tab-config__sheet {
+        width: min(100vw, 24rem);
+      }
+
+      .new-tab-config__grid,
+      .new-tab-config-item__fields {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .new-tab-shell .shortcut-stack {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .new-tab-shell .shortcut-group {
+      display: grid;
+      grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr);
+      align-items: center;
+      gap: 1rem;
+      border-top: 0;
+      padding-block: 0.55rem;
+    }
+
+    .new-tab-shell .shortcut-group__summary {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+      color: color-mix(in srgb, oklch(var(--bc)) 64%, transparent);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .new-tab-shell .shortcut-group__summary span:last-child {
+      color: color-mix(in srgb, oklch(var(--bc)) 38%, transparent);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .new-tab-shell .shortcut-group__items {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 0;
+      isolation: isolate;
+    }
+
+    .new-tab-shell .shortcut-item {
+      position: relative;
+      display: grid;
+      width: 2.75rem;
+      height: 2.75rem;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 0.45rem;
+      background: color-mix(in srgb, oklch(var(--b1)) 96%, oklch(var(--bc)) 4%);
+      color: inherit;
+      text-decoration: none;
+      transform: translateX(calc(var(--shortcut-index, 0) * -1.05rem));
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease;
+    }
+
+    .new-tab-shell .shortcut-item:nth-child(1) {
+      --shortcut-index: 0;
+      z-index: 8;
+    }
+
+    .new-tab-shell .shortcut-item:nth-child(2) {
+      --shortcut-index: 1;
+      z-index: 7;
+    }
+
+    .new-tab-shell .shortcut-item:nth-child(3) {
+      --shortcut-index: 2;
+      z-index: 6;
+    }
+
+    .new-tab-shell .shortcut-item:nth-child(4) {
+      --shortcut-index: 3;
+      z-index: 5;
+    }
+
+    .new-tab-shell .shortcut-item:nth-child(5) {
+      --shortcut-index: 4;
+      z-index: 4;
+    }
+
+    .new-tab-shell .shortcut-item:nth-child(6) {
+      --shortcut-index: 5;
+      z-index: 3;
+    }
+
+    .new-tab-shell .shortcut-item:nth-child(n + 7) {
+      --shortcut-index: 6;
+      z-index: 2;
+    }
+
+    .new-tab-shell .shortcut-group:hover .shortcut-item,
+    .new-tab-shell .shortcut-group:focus-within .shortcut-item {
+      transform: translateX(0);
+    }
+
+    .new-tab-shell .shortcut-item:hover,
+    .new-tab-shell .shortcut-item:focus-visible {
+      z-index: 20;
+      border-color: color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      background: oklch(var(--b2));
+      outline: 0;
+      transform: translateY(-0.18rem);
+    }
+
+    .new-tab-shell .shortcut-item__icon {
+      position: relative;
+      display: grid;
+      width: 1.7rem;
+      height: 1.7rem;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .new-tab-shell .shortcut-item__icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .new-tab-shell .shortcut-item__icon span {
+      display: none;
+      font-size: 0.85rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .new-tab-shell .shortcut-item__icon--fallback span {
+      display: block;
+    }
+
+    .new-tab-shell .shortcut-item__tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 0.55rem);
+      display: grid;
+      min-width: 9rem;
+      max-width: 14rem;
+      gap: 0.18rem;
+      border: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      border-radius: 0.45rem;
+      background: oklch(var(--b1));
+      color: oklch(var(--bc));
+      padding: 0.55rem 0.65rem;
+      box-shadow: 0 1rem 2rem color-mix(in srgb, oklch(var(--bc)) 10%, transparent);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 0.35rem);
+      transition:
+        opacity 150ms ease,
+        transform 150ms ease;
+    }
+
+    .new-tab-shell .shortcut-item__tooltip::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 0.6rem;
+      height: 0.6rem;
+      border-right: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      background: inherit;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .new-tab-shell .shortcut-item__tooltip strong,
+    .new-tab-shell .shortcut-item__tooltip small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .new-tab-shell .shortcut-item__tooltip small {
+      color: color-mix(in srgb, oklch(var(--bc)) 62%, transparent);
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .new-tab-shell .shortcut-item:hover .shortcut-item__tooltip,
+    .new-tab-shell .shortcut-item:focus-visible .shortcut-item__tooltip {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (hover: none) {
+      .new-tab-shell .shortcut-group {
+        align-items: start;
+      }
+
+      .new-tab-shell .shortcut-group__items {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .new-tab-shell .shortcut-item {
+        transform: none;
+      }
+
+      .new-tab-shell .shortcut-item__tooltip {
+        display: none;
+      }
+    }
+
+    @media (max-width: 639px) {
+      .new-tab-shell .shortcut-group {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+      }
+
+      .new-tab-shell .shortcut-group__summary {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+
+  <style>
+    :global(html[data-new-tab-background="true"] body:has(.new-tab-shell)::before) {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: var(--new-tab-background-image);
+      background-position: center;
+      background-size: cover;
+      opacity: var(--new-tab-background-opacity, 0.6);
+      pointer-events: none;
+    }
+
+    :global(html[data-new-tab-background="true"] body:has(.new-tab-shell) > div),
+    :global(html[data-new-tab-background="true"] body:has(.new-tab-shell) > div > div) {
+      position: relative;
+      z-index: 1;
+      background: transparent;
+    }
+
+    :global(main:has(.new-tab-shell)) {
+      display: grid;
+      min-height: 100dvh;
+      place-items: start center;
+      max-width: 72rem;
+      padding-top: clamp(3.5rem, 10vh, 6.5rem);
+      padding-bottom: clamp(2rem, 5vh, 4rem);
+    }
+
+    .new-tab-shell {
+      width: min(100%, 58rem);
+      display: grid;
+      gap: clamp(1rem, 2.2vw, 1.75rem);
+    }
+
+    :global(html[data-new-tab-text-colors] body:has(.new-tab-shell) [data-new-tab-color-target="navigation"]) {
+      color: var(--new-tab-navigation-color) !important;
+    }
+
+    :global(html[data-new-tab-text-colors] body:has(.new-tab-shell) [data-new-tab-color-target="itemLabel"]) {
+      color: var(--new-tab-item-label-color) !important;
+    }
+
+    .new-tab-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      max-width: 48rem;
+    }
+
+    .new-tab-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .new-tab-greeting {
+      color: color-mix(in srgb, oklch(var(--bc)) 70%, transparent);
+      min-height: 1.5rem;
+    }
+
+    .new-tab-search {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto 3.1rem;
+      align-items: stretch;
+      max-width: 48rem;
+    }
+
+    .new-tab-search:focus-within {
+      box-shadow: 0 0 0 1px color-mix(in srgb, oklch(var(--bc)) 22%, transparent);
+    }
+
+    .new-tab-search__input {
+      min-width: 0;
+      height: 3.25rem;
+      font-size: 1rem;
+    }
+
+    .new-tab-search__engine {
+      max-width: 9rem;
+      height: 3.25rem;
+    }
+
+    .new-tab-search__submit {
+      min-height: 3.25rem;
+      width: 3.25rem;
+    }
+
+    .new-tab-search__submit svg {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+
+    .shortcut-stack {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .shortcut-group {
+      display: grid;
+      grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr);
+      align-items: center;
+      gap: 1rem;
+      border-top: 0;
+      padding-block: 0.55rem;
+    }
+
+    .shortcut-group__summary {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+      color: color-mix(in srgb, oklch(var(--bc)) 64%, transparent);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .shortcut-group__summary span:last-child {
+      color: color-mix(in srgb, oklch(var(--bc)) 38%, transparent);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .shortcut-group__items {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 0;
+      isolation: isolate;
+    }
+
+    .shortcut-item {
+      position: relative;
+      display: grid;
+      width: 2.75rem;
+      height: 2.75rem;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 0.45rem;
+      background: color-mix(in srgb, oklch(var(--b1)) 96%, oklch(var(--bc)) 4%);
+      color: inherit;
+      text-decoration: none;
+      transform: translateX(calc(var(--shortcut-index, 0) * -1.05rem));
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease;
+    }
+
+    .shortcut-item:nth-child(1) {
+      --shortcut-index: 0;
+      z-index: 8;
+    }
+
+    .shortcut-item:nth-child(2) {
+      --shortcut-index: 1;
+      z-index: 7;
+    }
+
+    .shortcut-item:nth-child(3) {
+      --shortcut-index: 2;
+      z-index: 6;
+    }
+
+    .shortcut-item:nth-child(4) {
+      --shortcut-index: 3;
+      z-index: 5;
+    }
+
+    .shortcut-item:nth-child(5) {
+      --shortcut-index: 4;
+      z-index: 4;
+    }
+
+    .shortcut-item:nth-child(6) {
+      --shortcut-index: 5;
+      z-index: 3;
+    }
+
+    .shortcut-item:nth-child(n + 7) {
+      --shortcut-index: 6;
+      z-index: 2;
+    }
+
+    .shortcut-group:hover .shortcut-item,
+    .shortcut-group:focus-within .shortcut-item {
+      transform: translateX(0);
+    }
+
+    .shortcut-item:hover,
+    .shortcut-item:focus-visible {
+      z-index: 20;
+      border-color: color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      background: oklch(var(--b2));
+      outline: 0;
+      transform: translateY(-0.18rem);
+    }
+
+    .shortcut-item__icon {
+      position: relative;
+      display: grid;
+      width: 1.7rem;
+      height: 1.7rem;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .shortcut-item__icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .shortcut-item__icon span {
+      display: none;
+      font-size: 0.85rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .shortcut-item__icon--fallback span {
+      display: block;
+    }
+
+    .shortcut-item__tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 0.55rem);
+      display: grid;
+      min-width: 9rem;
+      max-width: 14rem;
+      gap: 0.18rem;
+      border: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      border-radius: 0.45rem;
+      background: oklch(var(--b1));
+      color: oklch(var(--bc));
+      padding: 0.55rem 0.65rem;
+      box-shadow: 0 1rem 2rem color-mix(in srgb, oklch(var(--bc)) 10%, transparent);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 0.35rem);
+      transition:
+        opacity 150ms ease,
+        transform 150ms ease;
+    }
+
+    .shortcut-item__tooltip::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 0.6rem;
+      height: 0.6rem;
+      border-right: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
+      background: inherit;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .shortcut-item__tooltip strong,
+    .shortcut-item__tooltip small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .shortcut-item__tooltip small {
+      color: color-mix(in srgb, oklch(var(--bc)) 62%, transparent);
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .shortcut-item:hover .shortcut-item__tooltip,
+    .shortcut-item:focus-visible .shortcut-item__tooltip {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (hover: none) {
+      .shortcut-group {
+        align-items: start;
+      }
+
+      .shortcut-group__items {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .shortcut-item {
+        transform: none;
+      }
+
+      .shortcut-item__tooltip {
+        display: none;
+      }
+    }
+
+    @media (max-width: 639px) {
+      :global(main:has(.new-tab-shell)) {
+        min-height: 100dvh;
+        place-items: start;
+        padding-top: 1.25rem;
+        padding-bottom: 2rem;
+      }
+
+      .new-tab-shell {
+        gap: 1.75rem;
+      }
+
+      .new-tab-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .new-tab-actions {
+        justify-content: flex-start;
+      }
+
+      .new-tab-search {
+        grid-template-columns: minmax(0, 1fr) 3.1rem;
+      }
+
+      .new-tab-search__engine {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+        max-width: none;
+      }
+
+      .shortcut-group {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+      }
+
+      .shortcut-group__summary {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</BaseLayout>

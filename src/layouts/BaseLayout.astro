@@ -13,6 +13,9 @@ const {
   title = SITE_TITLE,
   description = SITE_DESCRIPTION,
   includeSidebar = true,
+  showHeader = true,
+  showFooter = true,
+  showFloatingThemeToggle = true,
   sideBarActiveItemID,
   ogType,
 } = Astro.props;
@@ -62,19 +65,23 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
             : "flex min-h-screen flex-col",
         ]}
       >
-        <Header title={SITE_TITLE} />
+        {showHeader && <Header title={SITE_TITLE} showDrawerToggle={includeSidebar} />}
         <div class="flex-1">
           <main class="mx-auto w-full min-w-0 max-w-5xl px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8 lg:px-12 lg:pb-16 lg:pt-16">
             <slot />
           </main>
         </div>
-        <Footer />
+        {showFooter && <Footer />}
       </div>
       {includeSidebar && <SideBar sideBarActiveItemID={sideBarActiveItemID} />}
     </div>
-    <div class="fixed right-6 top-6 z-40 hidden lg:block">
-      <ThemeToggle />
-    </div>
+    {
+      showFloatingThemeToggle && (
+        <div class="fixed right-6 top-6 z-40 hidden lg:block">
+          <ThemeToggle />
+        </div>
+      )
+    }
     <button
       type="button"
       class="btn btn-square btn-neutral pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 translate-y-3 scale-95 opacity-0 shadow-lg transition duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-base-content lg:bottom-6 lg:right-6"
