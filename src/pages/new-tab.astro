@@ -24,16 +24,26 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   showFooter={false}
   showFloatingThemeToggle={false}
 >
-  <section class="new-tab-shell" aria-labelledby="new-tab-title" data-new-tab-page>
+  <section
+    class="new-tab-shell relative isolate z-10 grid w-[min(100%,58rem)] gap-[clamp(1rem,2.2vw,1.75rem)] max-sm:gap-7"
+    aria-labelledby="new-tab-title"
+    data-new-tab-page
+  >
     <h1 id="new-tab-title" class="sr-only">{newTabConfig.heading}</h1>
 
-    <div class="new-tab-toolbar">
+    <div
+      class="pointer-events-none fixed inset-0 -z-10 hidden bg-center bg-cover bg-no-repeat opacity-0 transition-opacity duration-200"
+      aria-hidden="true"
+      data-new-tab-background-layer
+    ></div>
+
+    <div class="new-tab-toolbar flex max-w-[48rem] items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-3">
       <div
-        class="new-tab-greeting text-sm font-medium"
+        class="new-tab-greeting min-h-6 text-sm font-medium text-[color-mix(in_srgb,oklch(var(--bc))_70%,transparent)]"
         data-new-tab-greeting
         data-new-tab-color-target="navigation"
       ></div>
-      <div class="new-tab-actions">
+      <div class="new-tab-actions flex flex-wrap items-center justify-end gap-2 max-sm:justify-start">
         <ThemeToggle mobile={true} />
         <a
           class="btn btn-ghost btn-sm"
@@ -55,14 +65,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </div>
 
     <form
-      class="new-tab-search join w-full"
+      class="new-tab-search join grid w-full max-w-[48rem] grid-cols-[minmax(0,1fr)_auto_3.1rem] items-stretch focus-within:shadow-[0_0_0_1px_color-mix(in_srgb,oklch(var(--bc))_22%,transparent)] max-sm:grid-cols-[minmax(0,1fr)_3.1rem]"
       role="search"
       data-new-tab-search
     >
       <label class="sr-only" for="new-tab-query">搜索关键词</label>
       <input
         id="new-tab-query"
-        class="input input-bordered join-item new-tab-search__input"
+        class="input input-bordered join-item new-tab-search__input h-[3.25rem] min-w-0 text-base"
         type="search"
         name="q"
         autocomplete="off"
@@ -72,12 +82,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       <label class="sr-only" for="new-tab-engine">搜索引擎</label>
       <select
         id="new-tab-engine"
-        class="select select-bordered join-item new-tab-search__engine"
+        class="select select-bordered join-item new-tab-search__engine h-[3.25rem] max-w-36 max-sm:col-span-full max-sm:row-start-2 max-sm:w-full max-sm:max-w-none"
         name="engine"
         data-search-engine
       ></select>
       <button
-        class="btn btn-neutral join-item new-tab-search__submit"
+        class="btn btn-neutral join-item new-tab-search__submit min-h-[3.25rem] w-[3.25rem]"
         type="submit"
         aria-label={newTabConfig.search.submitLabel}
         title={newTabConfig.search.submitLabel}
@@ -90,6 +100,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
+          class="h-[1.1rem] w-[1.1rem]"
           aria-hidden="true"
         >
           <circle cx="11" cy="11" r="7" />
@@ -98,16 +109,23 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       </button>
     </form>
 
-    <div class="shortcut-stack" aria-label="快捷网站" data-shortcut-stack></div>
+    <div class="shortcut-stack grid gap-[0.55rem]" aria-label="快捷网站" data-shortcut-stack></div>
+    <button
+      class="shortcut-edit-toggle btn btn-ghost fixed bottom-4 right-4 z-40 h-10 min-h-10 w-10 rounded-full border border-base-content/10 bg-base-100/80 p-0 opacity-60 shadow-sm backdrop-blur transition hover:opacity-100 focus-visible:opacity-100"
+      type="button"
+      aria-pressed="false"
+      aria-label="编辑快捷方式"
+      data-shortcut-edit-toggle
+    ></button>
   </section>
 
-  <div class="new-tab-config" data-config-drawer hidden>
-    <button class="new-tab-config__backdrop" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
-    <aside class="new-tab-config__sheet" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
-      <div class="new-tab-config__header">
-        <div>
-          <h2>{newTabConfig.settings.panelTitle}</h2>
-          <p data-config-status>{newTabConfig.settings.statusReady}</p>
+  <div class="new-tab-config fixed inset-0 z-[80] hidden pointer-events-none opacity-0 transition-opacity duration-200" data-config-drawer>
+    <button class="new-tab-config__backdrop absolute inset-0 border-0 bg-[color:color-mix(in_srgb,oklch(var(--bc))_18%,transparent)] opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
+    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] border-l border-base-content/10 bg-base-100 shadow-[-1rem_0_2.5rem_color-mix(in_srgb,oklch(var(--bc))_12%,transparent)] translate-x-full transition-transform duration-200" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
+      <div class="new-tab-config__header flex items-center justify-between gap-3 border-b border-base-content/10 p-4">
+        <div class="min-w-0">
+          <h2 class="m-0 text-base font-extrabold leading-tight">{newTabConfig.settings.panelTitle}</h2>
+          <p class="mt-1 text-[0.78rem] leading-snug text-base-content/50" data-config-status>{newTabConfig.settings.statusReady}</p>
         </div>
         <button class="btn btn-square btn-ghost btn-sm" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close>
           <svg
@@ -126,29 +144,29 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         </button>
       </div>
 
-      <div class="new-tab-config__body">
-        <section class="new-tab-config__section">
-          <div class="new-tab-config__section-title">{newTabConfig.settings.generalLabel}</div>
-          <div class="new-tab-config__grid">
-            <label class="form-control">
+      <div class="new-tab-config__body grid content-start gap-4 overflow-y-auto p-4">
+        <section class="new-tab-config__section grid gap-3">
+          <div class="new-tab-config__section-title text-sm font-extrabold leading-5 text-base-content">{newTabConfig.settings.generalLabel}</div>
+          <div class="new-tab-config__grid grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+            <label class="form-control grid min-w-0 gap-1.5">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.nameLabel}</span>
               </span>
               <input class="input input-bordered input-sm" type="text" autocomplete="off" data-config-name />
             </label>
-            <label class="form-control">
+            <label class="form-control grid min-w-0 gap-1.5">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.homeLinkLabel}</span>
               </span>
               <input class="input input-bordered input-sm" type="text" autocomplete="off" data-config-home-label />
             </label>
-            <label class="form-control">
+            <label class="form-control grid min-w-0 gap-1.5">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.homeHrefLabel}</span>
               </span>
               <input class="input input-bordered input-sm" type="text" autocomplete="off" data-config-home-href />
             </label>
-            <label class="form-control new-tab-config__wide">
+            <label class="form-control grid min-w-0 gap-1.5 col-span-full">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.backgroundUrlLabel}</span>
               </span>
@@ -159,19 +177,19 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                 data-config-background
               />
             </label>
-            <label class="form-control new-tab-config__wide">
+            <label class="form-control grid min-w-0 gap-1.5 col-span-full">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.backgroundFileLabel}</span>
               </span>
-              <div class="new-tab-config-upload">
+              <div class="new-tab-config-upload flex min-w-0 items-center gap-2">
                 <input hidden type="file" accept="image/*" data-config-background-file />
                 <button class="btn btn-outline btn-sm" type="button" data-config-background-file-trigger>
                   {newTabConfig.settings.backgroundFileLabel}
                 </button>
-                <span data-config-background-status>{newTabConfig.settings.backgroundEmptyLabel}</span>
+                <span class="truncate text-[0.78rem] leading-snug text-base-content/55" data-config-background-status>{newTabConfig.settings.backgroundEmptyLabel}</span>
               </div>
             </label>
-            <label class="form-control new-tab-config__wide">
+            <label class="form-control grid min-w-0 gap-1.5 col-span-full">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.backgroundOpacityLabel}</span>
                 <span class="label-text-alt" data-config-background-opacity-value></span>
@@ -185,10 +203,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                 data-config-background-opacity
               />
             </label>
-            <div class="new-tab-config__wide new-tab-config__section-title">
+            <div class="new-tab-config__wide new-tab-config__section-title col-span-full text-sm font-extrabold leading-5 text-base-content">
               {newTabConfig.settings.textColorLabel}
             </div>
-            <label class="form-control new-tab-config__wide">
+            <label class="form-control grid min-w-0 gap-1.5 col-span-full">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.textColorModeLabel}</span>
               </span>
@@ -199,13 +217,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                 <option value="custom">{newTabConfig.settings.textColorCustomLabel}</option>
               </select>
             </label>
-            <label class="form-control">
+            <label class="form-control grid min-w-0 gap-1.5">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.navigationTextColorLabel}</span>
               </span>
               <input class="input input-bordered input-sm h-10 p-1" type="color" data-config-navigation-color />
             </label>
-            <label class="form-control">
+            <label class="form-control grid min-w-0 gap-1.5">
               <span class="label">
                 <span class="label-text">{newTabConfig.settings.itemLabelTextColorLabel}</span>
               </span>
@@ -214,18 +232,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           </div>
         </section>
 
-        <section class="new-tab-config__section">
-          <div class="new-tab-config__section-header">
-            <div class="new-tab-config__section-title">{newTabConfig.settings.shortcutsLabel}</div>
-            <button class="btn btn-outline btn-xs" type="button" data-config-add-group>
-              {newTabConfig.settings.addGroupLabel}
-            </button>
-          </div>
-          <div class="new-tab-config__groups" data-config-groups></div>
-        </section>
       </div>
 
-      <div class="new-tab-config__footer">
+      <div class="new-tab-config__footer flex flex-wrap items-center justify-start gap-3 border-t border-base-content/10 p-4">
         <input
           hidden
           type="file"
@@ -266,7 +275,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       return JSON.parse(JSON.stringify(value));
     };
 
-    const configVersion = 6;
+    const configVersion = 7;
     const defaultBackgroundOpacity = 60;
     const oldDefaultBackgroundOpacities = [34, 50];
     const defaultTextColors = {
@@ -291,6 +300,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     const storageKey = defaultPayload.config?.storageKey ?? "ethanz-new-tab-config";
     const settingsLabels = defaultPayload.config?.settings ?? {};
     let newTabState = defaultState();
+    let shortcutEditMode = false;
+    let activeDragPayload = null;
     let textColorSaveTimer = 0;
 
     const isPlainObject = (value) =>
@@ -454,6 +465,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         const parsedConfig = JSON.parse(storedConfig);
         const storedState = normalizeNewTabState(parsedConfig);
 
+        if (Number(parsedConfig?.version ?? 1) < configVersion) {
+          storedState.shortcutGroups = [];
+          window.localStorage.setItem(storageKey, JSON.stringify(storedState));
+        }
+
         if (
           Number(parsedConfig?.version ?? 1) < configVersion &&
           oldDefaultBackgroundOpacities.includes(storedState.backgroundOpacity)
@@ -486,30 +502,269 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const getShortcutInitial = (title) => title.trim().slice(0, 1).toUpperCase();
 
-    const getPrimaryLogoUrl = (shortcut) => {
-      if (shortcut.logo) {
-        return shortcut.logo;
+    const createDefaultShortcut = () => ({
+      title: "新入口",
+      url: "https://example.com",
+      description: "",
+    });
+
+    const createDefaultGroup = () => ({
+      title: "新分组",
+      shortcuts: [],
+    });
+
+    const moveArrayItem = (items, fromIndex, toIndex) => {
+      if (
+        fromIndex < 0 ||
+        fromIndex >= items.length ||
+        toIndex < 0 ||
+        fromIndex === toIndex
+      ) {
+        return false;
       }
 
-      return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(getShortcutHostname(shortcut.url))}&sz=64`;
+      if (toIndex > items.length) {
+        return false;
+      }
+
+      const adjustedTargetIndex = fromIndex < toIndex ? toIndex - 1 : toIndex;
+      if (adjustedTargetIndex === fromIndex) {
+        return false;
+      }
+
+      const [item] = items.splice(fromIndex, 1);
+      items.splice(Math.min(Math.max(adjustedTargetIndex, 0), items.length), 0, item);
+      return true;
     };
 
-    const getFallbackLogoUrl = (shortcut) =>
-      `https://icons.duckduckgo.com/ip3/${getShortcutHostname(shortcut.url)}.ico`;
+    const moveShortcutItem = (fromGroupIndex, fromShortcutIndex, toGroupIndex, toShortcutIndex) => {
+      const fromGroup = newTabState.shortcutGroups[fromGroupIndex];
+      const toGroup = newTabState.shortcutGroups[toGroupIndex];
+
+      if (
+        !fromGroup ||
+        !toGroup ||
+        fromShortcutIndex < 0 ||
+        fromShortcutIndex >= fromGroup.shortcuts.length ||
+        (fromGroupIndex === toGroupIndex && fromShortcutIndex === toShortcutIndex)
+      ) {
+        return false;
+      }
+
+      const [shortcut] = fromGroup.shortcuts.splice(fromShortcutIndex, 1);
+      const adjustedTargetIndex =
+        fromGroupIndex === toGroupIndex && fromShortcutIndex < toShortcutIndex
+          ? toShortcutIndex - 1
+          : toShortcutIndex;
+      const boundedTargetIndex = Math.min(Math.max(adjustedTargetIndex, 0), toGroup.shortcuts.length);
+
+      if (boundedTargetIndex === fromShortcutIndex && fromGroupIndex === toGroupIndex) {
+        return false;
+      }
+
+      toGroup.shortcuts.splice(boundedTargetIndex, 0, shortcut);
+      return true;
+    };
+
+    const readDragPayload = (event) => {
+      try {
+        const payload = event.dataTransfer?.getData("application/json");
+        if (payload) {
+          return JSON.parse(payload);
+        }
+      } catch {
+        // Fall through to the active payload.
+      }
+
+      return activeDragPayload;
+    };
+
+    const setDragPayload = (payload) => {
+      activeDragPayload = payload;
+    };
+
+    const clearDragPayload = () => {
+      activeDragPayload = null;
+    };
+
+    const dropContainerClasses = [
+      "rounded-[0.55rem]",
+      "outline",
+      "outline-1",
+      "outline-dashed",
+      "outline-base-content/30",
+      "outline-offset-[0.22rem]",
+    ];
+    const groupDropBeforeClasses = [
+      "before:content-['']",
+      "before:absolute",
+      "before:left-0",
+      "before:right-0",
+      "before:top-[-0.22rem]",
+      "before:z-[35]",
+      "before:h-0.5",
+      "before:rounded-full",
+      "before:bg-base-content/70",
+      "before:pointer-events-none",
+    ];
+    const groupDropAfterClasses = [
+      "after:content-['']",
+      "after:absolute",
+      "after:left-0",
+      "after:right-0",
+      "after:bottom-[-0.22rem]",
+      "after:z-[35]",
+      "after:h-0.5",
+      "after:rounded-full",
+      "after:bg-base-content/70",
+      "after:pointer-events-none",
+    ];
+    const itemDropBeforeClasses = [
+      "before:content-['']",
+      "before:absolute",
+      "before:left-[-0.24rem]",
+      "before:top-[0.22rem]",
+      "before:bottom-[0.22rem]",
+      "before:z-[35]",
+      "before:w-0.5",
+      "before:rounded-full",
+      "before:bg-base-content/70",
+      "before:pointer-events-none",
+    ];
+    const itemDropAfterClasses = [
+      "after:content-['']",
+      "after:absolute",
+      "after:right-[-0.24rem]",
+      "after:top-[0.22rem]",
+      "after:bottom-[0.22rem]",
+      "after:z-[35]",
+      "after:w-0.5",
+      "after:rounded-full",
+      "after:bg-base-content/70",
+      "after:pointer-events-none",
+    ];
+    const dropIndicatorClasses = [
+      ...dropContainerClasses,
+      ...groupDropBeforeClasses,
+      ...groupDropAfterClasses,
+      ...itemDropBeforeClasses,
+      ...itemDropAfterClasses,
+    ];
+
+    const clearDropElement = (element) => {
+      element.classList.remove(
+        "shortcut-drop-target",
+        "shortcut-drop-before",
+        "shortcut-drop-after",
+        ...dropIndicatorClasses,
+      );
+    };
+
+    const clearDropIndicators = (root) => {
+      clearDropElement(root);
+      root.querySelectorAll(".shortcut-drop-target, .shortcut-drop-before, .shortcut-drop-after").forEach(clearDropElement);
+    };
+
+    const getDropPosition = (event, element, axis = "x") => {
+      const rect = element.getBoundingClientRect();
+      const pointer = axis === "y" ? event.clientY : event.clientX;
+      const midpoint = axis === "y" ? rect.top + rect.height / 2 : rect.left + rect.width / 2;
+      return pointer < midpoint ? "before" : "after";
+    };
+
+    const setDropContainer = (element) => {
+      element.classList.add("shortcut-drop-target", ...dropContainerClasses);
+    };
+
+    const setDropPosition = (element, position, axis = "x") => {
+      const indicatorClasses = axis === "y"
+        ? position === "before"
+          ? groupDropBeforeClasses
+          : groupDropAfterClasses
+        : position === "before"
+          ? itemDropBeforeClasses
+          : itemDropAfterClasses;
+
+      element.classList.add("shortcut-drop-target", `shortcut-drop-${position}`);
+      element.classList.add(...indicatorClasses);
+    };
+
+    const dragHandleIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="h-3 w-3">
+        <path d="M5 3.5A1.5 1.5 0 1 1 2 3.5a1.5 1.5 0 0 1 3 0Zm0 4.5A1.5 1.5 0 1 1 2 8a1.5 1.5 0 0 1 3 0Zm-1.5 6A1.5 1.5 0 1 0 3.5 11a1.5 1.5 0 0 0 0 3Zm9-9A1.5 1.5 0 1 0 12.5 2a1.5 1.5 0 0 0 0 3Zm1.5 3A1.5 1.5 0 1 1 11 8a1.5 1.5 0 0 1 3 0Zm-1.5 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+      </svg>
+    `;
+
+    const faviconProxyUrl = "https://proxy.scalar.com";
+
+    const getProxyUrl = (url) => `${faviconProxyUrl}?scalar_url=${encodeURIComponent(url)}`;
+
+    const isRemoteUrl = (value) => /^https?:\/\//i.test(value);
+
+    const getShortcutLogoUrls = (shortcut) => {
+      if (shortcut.logo) {
+        return isRemoteUrl(shortcut.logo)
+          ? [getProxyUrl(shortcut.logo), shortcut.logo]
+          : [shortcut.logo];
+      }
+
+      const hostname = getShortcutHostname(shortcut.url);
+      const googleFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=64`;
+      const duckDuckGoFavicon = `https://icons.duckduckgo.com/ip3/${hostname}.ico`;
+      const directFavicon = `https://${hostname}/favicon.ico`;
+
+      return [
+        getProxyUrl(googleFavicon),
+        getProxyUrl(duckDuckGoFavicon),
+        directFavicon,
+      ];
+    };
+
+    const getNextLogoFallback = (image) => {
+      const fallbacks = image.dataset.logoFallbacks
+        ? JSON.parse(image.dataset.logoFallbacks)
+        : [];
+      const nextFallback = fallbacks.shift() ?? "";
+      image.dataset.logoFallbacks = JSON.stringify(fallbacks);
+      return nextFallback;
+    };
 
     const bindLogoFallback = (image) => {
       image.addEventListener("error", () => {
-        const fallback = image.dataset.logoFallback;
+        const fallback = getNextLogoFallback(image);
 
         if (fallback && image.src !== fallback) {
           image.src = fallback;
-          image.dataset.logoFallback = "";
           return;
         }
 
         image.hidden = true;
-        image.closest(".shortcut-item__icon")?.classList.add("shortcut-item__icon--fallback");
+        image.closest(".shortcut-item__icon")?.querySelector(".shortcut-item__initial")?.classList.remove("hidden");
       });
+    };
+
+    const syncShortcutEditToggle = () => {
+      const toggle = document.querySelector("[data-shortcut-edit-toggle]");
+
+      if (!(toggle instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      toggle.setAttribute("aria-pressed", String(shortcutEditMode));
+      toggle.title = shortcutEditMode ? "完成" : "编辑";
+      toggle.setAttribute("aria-label", shortcutEditMode ? "完成编辑" : "编辑快捷方式");
+      toggle.innerHTML = shortcutEditMode
+        ? `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        `
+        : `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+            <path d="m18 2 4 4-10 10H8v-4z" />
+            <path d="M2 22h20" />
+          </svg>
+        `;
     };
 
     const renderSearchEngines = () => {
@@ -569,30 +824,264 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
 
       stack.textContent = "";
+      stack.dataset.editing = String(shortcutEditMode);
+      syncShortcutEditToggle();
 
-      newTabState.shortcutGroups.forEach((group) => {
+      newTabState.shortcutGroups.forEach((group, groupIndex) => {
         const section = document.createElement("section");
-        section.className = "shortcut-group";
+        section.className = shortcutEditMode
+          ? "shortcut-group relative grid grid-cols-[minmax(7.5rem,8.5rem)_minmax(0,1fr)] items-start gap-4 py-2 max-sm:grid-cols-1 max-sm:gap-3"
+          : "shortcut-group relative grid grid-cols-[minmax(5rem,7rem)_minmax(0,1fr)] items-start gap-4 py-2 max-sm:grid-cols-1 max-sm:gap-3";
         section.setAttribute("aria-label", `${group.title}快捷方式`);
 
         const summary = document.createElement("div");
-        summary.className = "shortcut-group__summary";
+        summary.className = shortcutEditMode
+          ? "shortcut-group__summary grid justify-start gap-1 text-[0.88rem] font-bold text-base-content/65"
+          : "shortcut-group__summary flex items-center justify-between gap-2 text-[0.88rem] font-bold text-base-content/65 max-sm:justify-between";
 
         const title = document.createElement("span");
+        title.className = shortcutEditMode
+          ? "min-w-0 whitespace-nowrap text-[color:inherit]"
+          : "min-w-0 text-[color:inherit]";
         title.dataset.newTabColorTarget = "itemLabel";
         title.textContent = group.title;
 
+        const titleWrap = document.createElement("span");
+        titleWrap.className = "flex min-w-0 items-center gap-2";
+
+        if (shortcutEditMode) {
+          const groupDragHandle = document.createElement("span");
+          groupDragHandle.className = "shortcut-drag-handle grid h-5 w-4 shrink-0 cursor-grab place-items-center rounded border border-base-content/10 bg-base-100/80 text-base-content/35 transition hover:text-base-content/70 active:cursor-grabbing";
+          groupDragHandle.draggable = true;
+          groupDragHandle.title = "拖拽排序";
+          groupDragHandle.setAttribute("aria-label", `拖拽排序：${group.title}`);
+          groupDragHandle.innerHTML = dragHandleIcon;
+          groupDragHandle.addEventListener("dragstart", (event) => {
+            setDragPayload({
+              type: "group",
+              groupIndex,
+            });
+            if (event.dataTransfer) {
+              event.dataTransfer.setData("application/json", JSON.stringify(activeDragPayload));
+              event.dataTransfer.setData("text/plain", group.title);
+              event.dataTransfer.effectAllowed = "move";
+            }
+            section.classList.add("opacity-50");
+          });
+          groupDragHandle.addEventListener("dragend", () => {
+            section.classList.remove("opacity-50");
+            clearDropIndicators(stack);
+            clearDragPayload();
+          });
+          titleWrap.append(groupDragHandle);
+        }
+
+        titleWrap.append(title);
+
         const count = document.createElement("span");
+        count.className = "text-xs font-semibold text-base-content/40";
         count.textContent = String(group.shortcuts.length);
 
-        summary.append(title, count);
+        const actions = document.createElement("span");
+        actions.className = "shortcut-group__actions inline-flex items-center gap-1.5";
+        actions.append(count);
+
+        if (shortcutEditMode) {
+          const removeGroupButton = document.createElement("button");
+          removeGroupButton.className = "btn btn-square btn-ghost btn-xs shortcut-group__remove h-5 min-h-5 w-5 p-0 text-base-content/60 opacity-60 transition hover:text-base-content/80 hover:opacity-100 focus-visible:text-base-content/80 [&_svg]:h-3 [&_svg]:w-3";
+          removeGroupButton.type = "button";
+          removeGroupButton.title = settingsLabels.removeGroupLabel ?? "删除分组";
+          removeGroupButton.setAttribute("aria-label", `${settingsLabels.removeGroupLabel ?? "删除分组"}：${group.title}`);
+          removeGroupButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="M19 6l-1 14H6L5 6" />
+              <path d="M10 11v6" />
+              <path d="M14 11v6" />
+            </svg>
+          `;
+          removeGroupButton.addEventListener("click", () => {
+            const currentGroupIndex = newTabState.shortcutGroups.indexOf(group);
+
+            if (currentGroupIndex < 0) {
+              return;
+            }
+
+            newTabState.shortcutGroups.splice(currentGroupIndex, 1);
+            persistConfigChange("已删除");
+          });
+
+          actions.append(removeGroupButton);
+        }
+        summary.append(titleWrap, actions);
+
+        if (shortcutEditMode) {
+          section.addEventListener("dragover", (event) => {
+            const payload = readDragPayload(event);
+
+            if (payload?.type !== "group") {
+              return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.dataTransfer) {
+              event.dataTransfer.dropEffect = "move";
+            }
+            clearDropIndicators(stack);
+            const position = getDropPosition(event, section, "y");
+            setDropPosition(section, position, "y");
+          });
+          section.addEventListener("dragleave", () => {
+            clearDropElement(section);
+          });
+          section.addEventListener("drop", (event) => {
+            const payload = readDragPayload(event);
+
+            if (payload?.type !== "group") {
+              return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            clearDropIndicators(stack);
+
+            const position = getDropPosition(event, section, "y");
+            const targetIndex = groupIndex + (position === "after" ? 1 : 0);
+
+            if (moveArrayItem(newTabState.shortcutGroups, Number(payload.groupIndex), targetIndex)) {
+              persistConfigChange("已排序");
+            }
+          });
+        }
 
         const items = document.createElement("div");
-        items.className = "shortcut-group__items";
+        items.className = "shortcut-group__items grid w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] min-w-0 grid-cols-[repeat(auto-fill,2.75rem)] justify-start gap-2";
+        if (shortcutEditMode) {
+          items.addEventListener("dragover", (event) => {
+            const payload = readDragPayload(event);
 
-        group.shortcuts.forEach((shortcut) => {
+            if (payload?.type !== "shortcut") {
+              return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.dataTransfer) {
+              event.dataTransfer.dropEffect = "move";
+            }
+            clearDropIndicators(stack);
+            setDropContainer(items);
+          });
+          items.addEventListener("dragleave", () => {
+            clearDropElement(items);
+          });
+          items.addEventListener("drop", (event) => {
+            const payload = readDragPayload(event);
+
+            if (payload?.type !== "shortcut") {
+              return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            clearDropIndicators(stack);
+
+            if (
+              moveShortcutItem(
+                Number(payload.groupIndex),
+                Number(payload.shortcutIndex),
+                groupIndex,
+                group.shortcuts.length,
+              )
+            ) {
+              persistConfigChange("已排序");
+            }
+          });
+        }
+
+        group.shortcuts.forEach((shortcut, shortcutIndex) => {
+          const itemShell = document.createElement("div");
+          itemShell.className = shortcutEditMode
+            ? "shortcut-item-shell group relative h-11 w-11 cursor-grab active:cursor-grabbing"
+            : "shortcut-item-shell group relative h-11 w-11";
+
+          if (shortcutEditMode) {
+            itemShell.draggable = true;
+            itemShell.title = `拖拽排序：${shortcut.title}`;
+            itemShell.addEventListener("dragstart", (event) => {
+              if (event.target instanceof Element && event.target.closest("button")) {
+                event.preventDefault();
+                return;
+              }
+
+              setDragPayload({
+                type: "shortcut",
+                groupIndex,
+                shortcutIndex,
+              });
+              if (event.dataTransfer) {
+                event.dataTransfer.setData("application/json", JSON.stringify(activeDragPayload));
+                event.dataTransfer.setData("text/plain", shortcut.title);
+                event.dataTransfer.effectAllowed = "move";
+              }
+              itemShell.classList.add("opacity-50");
+            });
+            itemShell.addEventListener("dragend", () => {
+              itemShell.classList.remove("opacity-50");
+              clearDropIndicators(stack);
+              clearDragPayload();
+            });
+
+            itemShell.addEventListener("dragover", (event) => {
+              const payload = readDragPayload(event);
+
+              if (payload?.type !== "shortcut") {
+                return;
+              }
+
+              event.preventDefault();
+              event.stopPropagation();
+              if (event.dataTransfer) {
+                event.dataTransfer.dropEffect = "move";
+              }
+              clearDropIndicators(stack);
+              const position = getDropPosition(event, itemShell, "x");
+              setDropPosition(itemShell, position);
+            });
+            itemShell.addEventListener("dragleave", () => {
+              clearDropElement(itemShell);
+            });
+            itemShell.addEventListener("drop", (event) => {
+              const payload = readDragPayload(event);
+
+              if (payload?.type !== "shortcut") {
+                return;
+              }
+
+              event.preventDefault();
+              event.stopPropagation();
+              clearDropIndicators(stack);
+
+              const position = getDropPosition(event, itemShell, "x");
+              const targetIndex = shortcutIndex + (position === "after" ? 1 : 0);
+
+              if (
+                moveShortcutItem(
+                  Number(payload.groupIndex),
+                  Number(payload.shortcutIndex),
+                  groupIndex,
+                  targetIndex,
+                )
+              ) {
+                persistConfigChange("已排序");
+              }
+            });
+          }
+
           const item = document.createElement("a");
-          item.className = "shortcut-item";
+          item.className = "shortcut-item group/item relative grid h-full w-full place-items-center rounded-[0.45rem] border border-transparent bg-[color:color-mix(in_srgb,oklch(var(--b1))_96%,oklch(var(--bc))_4%)] p-0 font-[inherit] text-inherit no-underline transition duration-180 hover:z-20 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-200 focus-visible:z-20 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-200 focus-visible:outline-none";
           item.href = shortcut.url;
           item.target = "_blank";
           item.rel = "noopener noreferrer";
@@ -602,42 +1091,172 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           );
 
           const icon = document.createElement("span");
-          icon.className = "shortcut-item__icon";
+          icon.className = "shortcut-item__icon relative grid h-[1.7rem] w-[1.7rem] place-items-center overflow-hidden";
           icon.setAttribute("aria-hidden", "true");
 
           const image = document.createElement("img");
-          image.src = getPrimaryLogoUrl(shortcut);
+          const logoUrls = getShortcutLogoUrls(shortcut);
+          image.className = "h-full w-full object-contain";
+          image.src = logoUrls[0] ?? "";
           image.alt = "";
           image.loading = "lazy";
           image.decoding = "async";
           image.referrerPolicy = "no-referrer";
-          image.dataset.logoFallback = getFallbackLogoUrl(shortcut);
+          image.dataset.logoFallbacks = JSON.stringify(logoUrls.slice(1));
           bindLogoFallback(image);
 
           const initial = document.createElement("span");
+          initial.className = "shortcut-item__initial hidden text-[0.85rem] font-extrabold leading-none";
           initial.textContent = getShortcutInitial(shortcut.title);
 
           icon.append(image, initial);
 
           const tooltip = document.createElement("span");
-          tooltip.className = "shortcut-item__tooltip";
+          tooltip.className = "shortcut-item__tooltip pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-[0_1rem_2rem_color-mix(in_srgb,oklch(var(--bc))_10%,transparent)] transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
           tooltip.role = "tooltip";
 
           const tooltipTitle = document.createElement("strong");
+          tooltipTitle.className = "block overflow-hidden text-ellipsis whitespace-nowrap";
           tooltipTitle.dataset.newTabColorTarget = "itemLabel";
           tooltipTitle.textContent = shortcut.title;
 
           const tooltipText = document.createElement("small");
+          tooltipText.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-snug text-base-content/60";
           tooltipText.textContent = shortcut.description ?? getShortcutHostname(shortcut.url);
 
           tooltip.append(tooltipTitle, tooltipText);
           item.append(icon, tooltip);
-          items.append(item);
+
+          if (shortcutEditMode) {
+            const removeItemButton = document.createElement("button");
+            removeItemButton.className = "btn btn-square btn-ghost btn-xs shortcut-item__remove absolute -right-1 -top-1 z-20 h-[1.1rem] min-h-[1.1rem] w-[1.1rem] rounded-full border border-base-content/15 bg-base-100 p-0 text-base-content/70 opacity-80 transition hover:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 max-sm:opacity-100 [&_svg]:h-3 [&_svg]:w-3";
+            removeItemButton.type = "button";
+            removeItemButton.title = settingsLabels.removeShortcutLabel ?? "删除 item";
+            removeItemButton.setAttribute(
+              "aria-label",
+              `${settingsLabels.removeShortcutLabel ?? "删除 item"}：${shortcut.title}`,
+            );
+            removeItemButton.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            `;
+            removeItemButton.addEventListener("click", (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              const currentShortcutIndex = group.shortcuts.indexOf(shortcut);
+
+              if (currentShortcutIndex < 0) {
+                return;
+              }
+
+              group.shortcuts.splice(currentShortcutIndex, 1);
+              persistConfigChange("已删除");
+            });
+
+            itemShell.append(removeItemButton);
+          }
+
+          itemShell.append(item);
+          items.append(itemShell);
         });
+
+        if (shortcutEditMode) {
+          const addShortcutButton = document.createElement("button");
+          addShortcutButton.className = "shortcut-item shortcut-item--add group/item relative grid h-11 w-11 place-items-center rounded-[0.45rem] border border-dashed border-base-content/10 bg-transparent p-0 font-[inherit] text-base-content/40 opacity-60 transition duration-180 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-100/20 hover:opacity-80 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-100/20 focus-visible:opacity-80 focus-visible:outline-none";
+          addShortcutButton.type = "button";
+          addShortcutButton.title = settingsLabels.addShortcutLabel ?? "添加 item";
+          addShortcutButton.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加 item"}：${group.title}`);
+          const addShortcutIcon = document.createElement("span");
+          addShortcutIcon.className = "shortcut-item__icon relative grid h-[1.7rem] w-[1.7rem] place-items-center overflow-hidden";
+          addShortcutIcon.setAttribute("aria-hidden", "true");
+          const addShortcutMark = document.createElement("span");
+          addShortcutMark.className = "block text-[1.05rem] font-extrabold leading-none";
+          addShortcutMark.textContent = "+";
+          addShortcutIcon.append(addShortcutMark);
+
+          const addShortcutTooltip = document.createElement("span");
+          addShortcutTooltip.className = "shortcut-item__tooltip shortcut-item__tooltip--action pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-[0_1rem_2rem_color-mix(in_srgb,oklch(var(--bc))_10%,transparent)] transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
+          addShortcutTooltip.role = "tooltip";
+          const addShortcutTooltipTitle = document.createElement("strong");
+          addShortcutTooltipTitle.className = "block overflow-hidden text-ellipsis whitespace-nowrap";
+          addShortcutTooltipTitle.textContent = settingsLabels.addShortcutLabel ?? "添加 item";
+          const addShortcutTooltipText = document.createElement("small");
+          addShortcutTooltipText.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-snug text-base-content/60";
+          addShortcutTooltipText.textContent = `插入到 ${group.title}`;
+          addShortcutTooltip.append(addShortcutTooltipTitle, addShortcutTooltipText);
+          addShortcutButton.append(addShortcutIcon, addShortcutTooltip);
+          addShortcutButton.addEventListener("click", () => {
+            group.shortcuts.push(createDefaultShortcut());
+            persistConfigChange("已添加");
+          });
+
+          items.append(addShortcutButton);
+        }
 
         section.append(summary, items);
         stack.append(section);
       });
+
+      if (shortcutEditMode) {
+        if (stack.dataset.groupDropBound !== "true") {
+          stack.addEventListener("dragover", (event) => {
+            const payload = readDragPayload(event);
+
+            if (!shortcutEditMode || payload?.type !== "group") {
+              return;
+            }
+
+            event.preventDefault();
+            if (event.dataTransfer) {
+              event.dataTransfer.dropEffect = "move";
+            }
+            clearDropIndicators(stack);
+            setDropContainer(stack);
+          });
+          stack.addEventListener("dragleave", () => {
+            clearDropElement(stack);
+          });
+          stack.addEventListener("drop", (event) => {
+            const payload = readDragPayload(event);
+
+            if (!shortcutEditMode || payload?.type !== "group") {
+              return;
+            }
+
+            event.preventDefault();
+            clearDropIndicators(stack);
+
+            if (moveArrayItem(newTabState.shortcutGroups, Number(payload.groupIndex), newTabState.shortcutGroups.length)) {
+              persistConfigChange("已排序");
+            }
+          });
+          stack.dataset.groupDropBound = "true";
+        }
+
+        const addGroupButton = document.createElement("button");
+        addGroupButton.className = "shortcut-group shortcut-group--add grid grid-cols-[minmax(5rem,7rem)_minmax(0,1fr)] items-center border-0 bg-transparent px-0 py-1 text-base-content/45 opacity-50 transition duration-180 hover:-translate-y-0.5 hover:text-base-content/65 hover:opacity-75 focus-visible:-translate-y-0.5 focus-visible:text-base-content/65 focus-visible:opacity-75 focus-visible:outline-none max-sm:grid-cols-1";
+        addGroupButton.type = "button";
+        addGroupButton.setAttribute("aria-label", settingsLabels.addGroupLabel ?? "添加分组");
+        const addGroupSummary = document.createElement("span");
+        addGroupSummary.className = "shortcut-group__summary flex w-full items-center justify-between gap-2 text-[0.88rem] font-bold";
+        const addGroupTitle = document.createElement("span");
+        addGroupTitle.textContent = settingsLabels.addGroupLabel ?? "添加分组";
+        const addGroupMark = document.createElement("span");
+        addGroupMark.className = "text-[1.05rem] font-extrabold leading-none";
+        addGroupMark.textContent = "+";
+        addGroupSummary.append(addGroupTitle, addGroupMark);
+
+        addGroupButton.append(addGroupSummary);
+        addGroupButton.addEventListener("click", () => {
+          newTabState.shortcutGroups.push(createDefaultGroup());
+          persistConfigChange("已添加");
+        });
+
+        stack.append(addGroupButton);
+      }
     };
 
     const setStatus = (message) => {
@@ -711,25 +1330,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
     };
 
-    const createLabeledInput = ({ label, value, placeholder = "", inputType = "text", onInput }) => {
-      const control = document.createElement("label");
-      control.className = "new-tab-config-field";
-
-      const labelText = document.createElement("span");
-      labelText.textContent = label;
-
-      const input = document.createElement("input");
-      input.className = "input input-bordered input-sm";
-      input.type = inputType;
-      input.value = value ?? "";
-      input.placeholder = placeholder;
-      input.autocomplete = "off";
-      input.addEventListener("input", () => onInput(input.value));
-
-      control.append(labelText, input);
-      return control;
-    };
-
     const persistConfigChange = (message = "已保存") => {
       writeStoredState();
       renderGreeting();
@@ -750,163 +1350,18 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }, 500);
     };
 
-    const renderConfigGroups = () => {
-      const groupsContainer = document.querySelector("[data-config-groups]");
+    const applyBackground = () => {
+      const backgroundLayer = document.querySelector("[data-new-tab-background-layer]");
 
-      if (!(groupsContainer instanceof HTMLElement)) {
+      if (!(backgroundLayer instanceof HTMLElement)) {
         return;
       }
 
-      groupsContainer.textContent = "";
-
-      newTabState.shortcutGroups.forEach((group, groupIndex) => {
-        const groupElement = document.createElement("section");
-        groupElement.className = "new-tab-config-group";
-
-        const groupHeader = document.createElement("div");
-        groupHeader.className = "new-tab-config-group__header";
-
-        const titleControl = createLabeledInput({
-          label: settingsLabels.groupTitleLabel ?? "分组名",
-          value: group.title,
-          onInput: (value) => {
-            group.title = value;
-            persistConfigChange();
-          },
-        });
-
-        const removeGroupButton = document.createElement("button");
-        removeGroupButton.className = "btn btn-ghost btn-xs";
-        removeGroupButton.type = "button";
-        removeGroupButton.textContent = settingsLabels.removeGroupLabel ?? "删除分组";
-        removeGroupButton.addEventListener("click", () => {
-          newTabState.shortcutGroups.splice(groupIndex, 1);
-          writeStoredState();
-          renderAll();
-          renderConfigGroups();
-          setStatus("已删除");
-        });
-
-        groupHeader.append(titleControl, removeGroupButton);
-
-        const shortcuts = document.createElement("div");
-        shortcuts.className = "new-tab-config-group__items";
-
-        group.shortcuts.forEach((shortcut, shortcutIndex) => {
-          const item = document.createElement("details");
-          item.className = "new-tab-config-item";
-
-          const itemHeader = document.createElement("summary");
-          itemHeader.className = "new-tab-config-item__header";
-
-          const itemTitle = document.createElement("strong");
-          itemTitle.dataset.newTabColorTarget = "itemLabel";
-          itemTitle.textContent = shortcut.title || `Item ${shortcutIndex + 1}`;
-
-          const itemMeta = document.createElement("small");
-          itemMeta.textContent = shortcut.url || "未设置地址";
-
-          const itemIdentity = document.createElement("span");
-          itemIdentity.className = "new-tab-config-item__identity";
-          itemIdentity.append(itemTitle, itemMeta);
-
-          const removeItemButton = document.createElement("button");
-          removeItemButton.className = "btn btn-ghost btn-xs";
-          removeItemButton.type = "button";
-          removeItemButton.textContent = settingsLabels.removeShortcutLabel ?? "删除 item";
-          removeItemButton.addEventListener("click", (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            group.shortcuts.splice(shortcutIndex, 1);
-            writeStoredState();
-            renderAll();
-            renderConfigGroups();
-            setStatus("已删除");
-          });
-
-          const itemCue = document.createElement("span");
-          itemCue.className = "new-tab-config-item__cue";
-          itemCue.textContent = settingsLabels.editShortcutLabel ?? "编辑";
-
-          const itemActions = document.createElement("span");
-          itemActions.className = "new-tab-config-item__actions";
-          itemActions.append(itemCue, removeItemButton);
-
-          itemHeader.append(itemIdentity, itemActions);
-
-          const fields = document.createElement("div");
-          fields.className = "new-tab-config-item__fields";
-
-          fields.append(
-            createLabeledInput({
-              label: settingsLabels.shortcutTitleLabel ?? "名称",
-              value: shortcut.title,
-              onInput: (value) => {
-                shortcut.title = value;
-                itemTitle.textContent = value || `Item ${shortcutIndex + 1}`;
-                persistConfigChange();
-              },
-            }),
-            createLabeledInput({
-              label: settingsLabels.shortcutUrlLabel ?? "地址",
-              value: shortcut.url,
-              inputType: "url",
-              onInput: (value) => {
-                shortcut.url = value;
-                itemMeta.textContent = value || "未设置地址";
-                persistConfigChange();
-              },
-            }),
-            createLabeledInput({
-              label: settingsLabels.shortcutDescriptionLabel ?? "说明",
-              value: shortcut.description ?? "",
-              onInput: (value) => {
-                shortcut.description = value.trim() ? value : undefined;
-                persistConfigChange();
-              },
-            }),
-            createLabeledInput({
-              label: settingsLabels.shortcutLogoLabel ?? "图标 URL",
-              value: shortcut.logo ?? "",
-              inputType: "url",
-              placeholder: "可选",
-              onInput: (value) => {
-                shortcut.logo = value.trim() ? value : undefined;
-                persistConfigChange();
-              },
-            }),
-          );
-
-          item.append(itemHeader, fields);
-          shortcuts.append(item);
-        });
-
-        const addItemButton = document.createElement("button");
-        addItemButton.className = "btn btn-outline btn-xs new-tab-config-group__add";
-        addItemButton.type = "button";
-        addItemButton.textContent = settingsLabels.addShortcutLabel ?? "添加 item";
-        addItemButton.addEventListener("click", () => {
-          group.shortcuts.push({
-            title: "新入口",
-            url: "https://example.com",
-            description: "",
-          });
-          writeStoredState();
-          renderAll();
-          renderConfigGroups();
-          setStatus("已添加");
-        });
-
-        groupElement.append(groupHeader, shortcuts, addItemButton);
-        groupsContainer.append(groupElement);
-      });
-    };
-
-    const applyBackground = () => {
       if (!newTabState.backgroundImage) {
-        delete document.documentElement.dataset.newTabBackground;
-        document.documentElement.style.removeProperty("--new-tab-background-image");
-        document.documentElement.style.removeProperty("--new-tab-background-opacity");
+        backgroundLayer.hidden = true;
+        backgroundLayer.classList.add("hidden");
+        backgroundLayer.style.removeProperty("background-image");
+        backgroundLayer.style.opacity = "0";
         return;
       }
 
@@ -915,9 +1370,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         .replace(/"/g, '\\"')
         .replace(/\n/g, "");
 
-      document.documentElement.dataset.newTabBackground = "true";
-      document.documentElement.style.setProperty("--new-tab-background-image", `url("${cssUrl}")`);
-      document.documentElement.style.setProperty("--new-tab-background-opacity", String(newTabState.backgroundOpacity / 100));
+      backgroundLayer.hidden = false;
+      backgroundLayer.classList.remove("hidden");
+      backgroundLayer.style.backgroundImage = `url("${cssUrl}")`;
+      backgroundLayer.style.opacity = String(newTabState.backgroundOpacity / 100);
     };
 
     const getResolvedTextColors = () => {
@@ -945,17 +1401,32 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const applyTextColors = () => {
       const colors = getResolvedTextColors();
+      const colorTargets = document.querySelectorAll("[data-new-tab-color-target]");
 
       if (!colors) {
         delete document.documentElement.dataset.newTabTextColors;
         document.documentElement.style.removeProperty("--new-tab-navigation-color");
         document.documentElement.style.removeProperty("--new-tab-item-label-color");
+        colorTargets.forEach((target) => {
+          if (target instanceof HTMLElement) {
+            target.style.removeProperty("color");
+          }
+        });
         return;
       }
 
       document.documentElement.dataset.newTabTextColors = newTabState.textColors.mode;
       document.documentElement.style.setProperty("--new-tab-navigation-color", colors.navigationColor);
       document.documentElement.style.setProperty("--new-tab-item-label-color", colors.itemLabelColor);
+      colorTargets.forEach((target) => {
+        if (!(target instanceof HTMLElement)) {
+          return;
+        }
+
+        target.style.color = target.dataset.newTabColorTarget === "navigation"
+          ? colors.navigationColor
+          : colors.itemLabelColor;
+      });
     };
 
     const renderAll = () => {
@@ -988,7 +1459,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       newTabState = normalizeNewTabState(JSON.parse(text));
       writeStoredState();
       renderAll();
-      renderConfigGroups();
       setStatus("已导入");
     };
 
@@ -1034,6 +1504,22 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       form.dataset.searchBound = "true";
     };
 
+    const bindShortcutEditor = () => {
+      const toggle = document.querySelector("[data-shortcut-edit-toggle]");
+
+      if (!(toggle instanceof HTMLButtonElement) || toggle.dataset.shortcutEditBound === "true") {
+        return;
+      }
+
+      toggle.addEventListener("click", () => {
+        shortcutEditMode = !shortcutEditMode;
+        renderShortcutGroups();
+      });
+
+      toggle.dataset.shortcutEditBound = "true";
+      syncShortcutEditToggle();
+    };
+
     const bindSettings = () => {
       const settings = document.querySelector("[data-config-drawer]");
       const openButton = document.querySelector("[data-config-open]");
@@ -1057,20 +1543,35 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const exportButton = settings.querySelector("[data-config-export]");
       const clearBackgroundButton = settings.querySelector("[data-config-clear-background]");
       const resetButton = settings.querySelector("[data-config-reset]");
-      const addGroupButton = settings.querySelector("[data-config-add-group]");
+      const settingsBackdrop = settings.querySelector(".new-tab-config__backdrop");
+      const settingsSheet = settings.querySelector(".new-tab-config__sheet");
 
       const openSettings = () => {
         settings.hidden = false;
+        settings.classList.remove("hidden");
         window.requestAnimationFrame(() => {
           settings.dataset.open = "true";
+          settings.classList.remove("pointer-events-none", "opacity-0");
+          settings.classList.add("pointer-events-auto", "opacity-100");
+          settingsBackdrop?.classList.remove("opacity-0");
+          settingsBackdrop?.classList.add("opacity-100");
+          settingsSheet?.classList.remove("translate-x-full");
+          settingsSheet?.classList.add("translate-x-0");
         });
       };
 
       const closeSettings = () => {
         delete settings.dataset.open;
+        settings.classList.remove("pointer-events-auto", "opacity-100");
+        settings.classList.add("pointer-events-none", "opacity-0");
+        settingsBackdrop?.classList.remove("opacity-100");
+        settingsBackdrop?.classList.add("opacity-0");
+        settingsSheet?.classList.remove("translate-x-0");
+        settingsSheet?.classList.add("translate-x-full");
         window.setTimeout(() => {
           if (!settings.dataset.open) {
             settings.hidden = true;
+            settings.classList.add("hidden");
           }
         }, 180);
       };
@@ -1205,7 +1706,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           newTabState.backgroundImage = reader.result;
           writeStoredState();
           renderAll();
-          renderConfigGroups();
           backgroundFileInput.value = "";
           setStatus("背景已保存");
         });
@@ -1252,25 +1752,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         newTabState.backgroundImage = "";
         writeStoredState();
         renderAll();
-        renderConfigGroups();
         setStatus("背景已清除");
-      });
-
-      addGroupButton?.addEventListener("click", () => {
-        newTabState.shortcutGroups.push({
-          title: "新分组",
-          shortcuts: [
-            {
-              title: "新入口",
-              url: "https://example.com",
-              description: "",
-            },
-          ],
-        });
-        writeStoredState();
-        renderAll();
-        renderConfigGroups();
-        setStatus("已添加");
       });
 
       resetButton?.addEventListener("click", () => {
@@ -1283,11 +1765,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         }
 
         renderAll();
-        renderConfigGroups();
         setStatus("已恢复默认");
       });
-
-      renderConfigGroups();
       settings.dataset.settingsBound = "true";
     };
 
@@ -1295,16 +1774,26 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       newTabState = readStoredState();
       renderAll();
       bindSearch();
+      bindShortcutEditor();
       bindSettings();
     };
 
     const clearNewTabBackground = () => {
+      const backgroundLayer = document.querySelector("[data-new-tab-background-layer]");
+
       delete document.documentElement.dataset.newTabBackground;
       delete document.documentElement.dataset.newTabTextColors;
       document.documentElement.style.removeProperty("--new-tab-background-image");
       document.documentElement.style.removeProperty("--new-tab-background-opacity");
       document.documentElement.style.removeProperty("--new-tab-navigation-color");
       document.documentElement.style.removeProperty("--new-tab-item-label-color");
+
+      if (backgroundLayer instanceof HTMLElement) {
+        backgroundLayer.hidden = true;
+        backgroundLayer.classList.add("hidden");
+        backgroundLayer.style.removeProperty("background-image");
+        backgroundLayer.style.opacity = "0";
+      }
     };
 
     bindNewTab();
@@ -1312,843 +1801,4 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     document.addEventListener("astro:before-swap", clearNewTabBackground);
   </script>
 
-  <style is:global>
-    .new-tab-config[hidden] {
-      display: none;
-    }
-
-    .new-tab-config {
-      position: fixed;
-      inset: 0;
-      z-index: 80;
-      pointer-events: none;
-    }
-
-    .new-tab-config__backdrop {
-      position: absolute;
-      inset: 0;
-      border: 0;
-      background: color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      opacity: 0;
-      transition: opacity 180ms ease;
-    }
-
-    .new-tab-config__sheet {
-      position: absolute;
-      right: 0;
-      top: 0;
-      display: grid;
-      width: min(100vw, 31rem);
-      height: 100dvh;
-      grid-template-rows: auto minmax(0, 1fr) auto;
-      border-left: 1px solid color-mix(in srgb, oklch(var(--bc)) 14%, transparent);
-      background: oklch(var(--b1));
-      box-shadow: -1rem 0 2.5rem color-mix(in srgb, oklch(var(--bc)) 12%, transparent);
-      transform: translateX(100%);
-      transition: transform 180ms ease;
-    }
-
-    .new-tab-config[data-open="true"] {
-      pointer-events: auto;
-    }
-
-    .new-tab-config[data-open="true"] .new-tab-config__backdrop {
-      opacity: 1;
-    }
-
-    .new-tab-config[data-open="true"] .new-tab-config__sheet {
-      transform: translateX(0);
-    }
-
-    .new-tab-config__header,
-    .new-tab-config__footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      border-bottom: 1px solid color-mix(in srgb, oklch(var(--bc)) 12%, transparent);
-      padding: 1rem;
-    }
-
-    .new-tab-config__header h2 {
-      margin: 0;
-      font-size: 1rem;
-      font-weight: 800;
-      line-height: 1.2;
-    }
-
-    .new-tab-config__header p {
-      margin: 0.2rem 0 0;
-      color: color-mix(in srgb, oklch(var(--bc)) 50%, transparent);
-      font-size: 0.78rem;
-      line-height: 1.4;
-    }
-
-    .new-tab-config__header svg {
-      width: 1rem;
-      height: 1rem;
-    }
-
-    .new-tab-config__body {
-      display: grid;
-      align-content: start;
-      gap: 1.1rem;
-      overflow-y: auto;
-      padding: 1rem;
-    }
-
-    .new-tab-config__section {
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .new-tab-config__section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-    }
-
-    .new-tab-config__section-title {
-      color: oklch(var(--bc));
-      font-size: 0.9rem;
-      font-weight: 800;
-      line-height: 1.3;
-    }
-
-    .new-tab-config__grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.75rem;
-    }
-
-    .new-tab-config__wide {
-      grid-column: 1 / -1;
-    }
-
-    .new-tab-config-field {
-      display: grid;
-      min-width: 0;
-      gap: 0.35rem;
-    }
-
-    .new-tab-config-field > span {
-      color: color-mix(in srgb, oklch(var(--bc)) 62%, transparent);
-      font-size: 0.75rem;
-      font-weight: 600;
-      line-height: 1.3;
-    }
-
-    .new-tab-config-upload {
-      display: flex;
-      min-width: 0;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .new-tab-config-upload span {
-      overflow: hidden;
-      color: color-mix(in srgb, oklch(var(--bc)) 55%, transparent);
-      font-size: 0.78rem;
-      line-height: 1.4;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .new-tab-config__groups {
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .new-tab-config-group {
-      display: grid;
-      gap: 0.75rem;
-      border: 1px solid color-mix(in srgb, oklch(var(--bc)) 12%, transparent);
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-    }
-
-    .new-tab-config-group__header,
-    .new-tab-config-item__header {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 0.75rem;
-    }
-
-    .new-tab-config-group__header .new-tab-config-field {
-      flex: 1;
-    }
-
-    .new-tab-config-group__items {
-      display: grid;
-      gap: 0.35rem;
-    }
-
-    .new-tab-config-item {
-      display: grid;
-      gap: 0.55rem;
-      border-top: 1px solid color-mix(in srgb, oklch(var(--bc)) 10%, transparent);
-      padding-top: 0.45rem;
-    }
-
-    .new-tab-config-item__header {
-      cursor: pointer;
-      list-style: none;
-      padding-block: 0.15rem;
-    }
-
-    .new-tab-config-item__header::-webkit-details-marker {
-      display: none;
-    }
-
-    .new-tab-config-item__identity {
-      display: grid;
-      min-width: 0;
-      gap: 0.1rem;
-    }
-
-    .new-tab-config-item__actions {
-      display: inline-flex;
-      flex-shrink: 0;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .new-tab-config-item__cue {
-      color: color-mix(in srgb, oklch(var(--bc)) 42%, transparent);
-      font-size: 0.72rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .new-tab-config-item__header strong,
-    .new-tab-config-item__header small {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .new-tab-config-item__header strong {
-      color: color-mix(in srgb, oklch(var(--bc)) 82%, transparent);
-      font-size: 0.82rem;
-      line-height: 1.35;
-    }
-
-    .new-tab-config-item__header small {
-      color: color-mix(in srgb, oklch(var(--bc)) 45%, transparent);
-      font-size: 0.72rem;
-      line-height: 1.25;
-    }
-
-    .new-tab-config-item__fields {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-      gap: 0.45rem;
-      border-radius: 0.45rem;
-      background: color-mix(in srgb, oklch(var(--b2)) 68%, transparent);
-      margin-top: 0.25rem;
-      padding: 0.55rem;
-    }
-
-    .new-tab-config-item[open] .new-tab-config-item__cue {
-      color: color-mix(in srgb, oklch(var(--bc)) 72%, transparent);
-    }
-
-    .new-tab-config-item[open] .new-tab-config-item__header {
-      color: oklch(var(--bc));
-    }
-
-    .new-tab-config-item:not([open]) .new-tab-config-item__fields {
-      display: none;
-    }
-
-    .new-tab-config-item__fields .new-tab-config-field {
-      padding-bottom: 0.25rem;
-    }
-
-    .new-tab-config-group__add {
-      justify-self: start;
-    }
-
-    .new-tab-config__footer {
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      border-top: 1px solid color-mix(in srgb, oklch(var(--bc)) 12%, transparent);
-      border-bottom: 0;
-    }
-
-    @media (max-width: 639px) {
-      .new-tab-config__sheet {
-        width: min(100vw, 24rem);
-      }
-
-      .new-tab-config__grid,
-      .new-tab-config-item__fields {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .new-tab-shell .shortcut-stack {
-      display: grid;
-      gap: 0.55rem;
-    }
-
-    .new-tab-shell .shortcut-group {
-      display: grid;
-      grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr);
-      align-items: center;
-      gap: 1rem;
-      border-top: 0;
-      padding-block: 0.55rem;
-    }
-
-    .new-tab-shell .shortcut-group__summary {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 0.75rem;
-      color: color-mix(in srgb, oklch(var(--bc)) 64%, transparent);
-      font-size: 0.88rem;
-      font-weight: 700;
-    }
-
-    .new-tab-shell .shortcut-group__summary span:last-child {
-      color: color-mix(in srgb, oklch(var(--bc)) 38%, transparent);
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .new-tab-shell .shortcut-group__items {
-      display: flex;
-      min-width: 0;
-      align-items: center;
-      gap: 0;
-      isolation: isolate;
-    }
-
-    .new-tab-shell .shortcut-item {
-      position: relative;
-      display: grid;
-      width: 2.75rem;
-      height: 2.75rem;
-      place-items: center;
-      border: 1px solid transparent;
-      border-radius: 0.45rem;
-      background: color-mix(in srgb, oklch(var(--b1)) 96%, oklch(var(--bc)) 4%);
-      color: inherit;
-      text-decoration: none;
-      transform: translateX(calc(var(--shortcut-index, 0) * -1.05rem));
-      transition:
-        transform 180ms ease,
-        border-color 180ms ease,
-        background 180ms ease;
-    }
-
-    .new-tab-shell .shortcut-item:nth-child(1) {
-      --shortcut-index: 0;
-      z-index: 8;
-    }
-
-    .new-tab-shell .shortcut-item:nth-child(2) {
-      --shortcut-index: 1;
-      z-index: 7;
-    }
-
-    .new-tab-shell .shortcut-item:nth-child(3) {
-      --shortcut-index: 2;
-      z-index: 6;
-    }
-
-    .new-tab-shell .shortcut-item:nth-child(4) {
-      --shortcut-index: 3;
-      z-index: 5;
-    }
-
-    .new-tab-shell .shortcut-item:nth-child(5) {
-      --shortcut-index: 4;
-      z-index: 4;
-    }
-
-    .new-tab-shell .shortcut-item:nth-child(6) {
-      --shortcut-index: 5;
-      z-index: 3;
-    }
-
-    .new-tab-shell .shortcut-item:nth-child(n + 7) {
-      --shortcut-index: 6;
-      z-index: 2;
-    }
-
-    .new-tab-shell .shortcut-group:hover .shortcut-item,
-    .new-tab-shell .shortcut-group:focus-within .shortcut-item {
-      transform: translateX(0);
-    }
-
-    .new-tab-shell .shortcut-item:hover,
-    .new-tab-shell .shortcut-item:focus-visible {
-      z-index: 20;
-      border-color: color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      background: oklch(var(--b2));
-      outline: 0;
-      transform: translateY(-0.18rem);
-    }
-
-    .new-tab-shell .shortcut-item__icon {
-      position: relative;
-      display: grid;
-      width: 1.7rem;
-      height: 1.7rem;
-      place-items: center;
-      overflow: hidden;
-    }
-
-    .new-tab-shell .shortcut-item__icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .new-tab-shell .shortcut-item__icon span {
-      display: none;
-      font-size: 0.85rem;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .new-tab-shell .shortcut-item__icon--fallback span {
-      display: block;
-    }
-
-    .new-tab-shell .shortcut-item__tooltip {
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 0.55rem);
-      display: grid;
-      min-width: 9rem;
-      max-width: 14rem;
-      gap: 0.18rem;
-      border: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      border-radius: 0.45rem;
-      background: oklch(var(--b1));
-      color: oklch(var(--bc));
-      padding: 0.55rem 0.65rem;
-      box-shadow: 0 1rem 2rem color-mix(in srgb, oklch(var(--bc)) 10%, transparent);
-      opacity: 0;
-      pointer-events: none;
-      transform: translate(-50%, 0.35rem);
-      transition:
-        opacity 150ms ease,
-        transform 150ms ease;
-    }
-
-    .new-tab-shell .shortcut-item__tooltip::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 100%;
-      width: 0.6rem;
-      height: 0.6rem;
-      border-right: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      border-bottom: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      background: inherit;
-      transform: translate(-50%, -50%) rotate(45deg);
-    }
-
-    .new-tab-shell .shortcut-item__tooltip strong,
-    .new-tab-shell .shortcut-item__tooltip small {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .new-tab-shell .shortcut-item__tooltip small {
-      color: color-mix(in srgb, oklch(var(--bc)) 62%, transparent);
-      font-size: 0.75rem;
-      line-height: 1.35;
-    }
-
-    .new-tab-shell .shortcut-item:hover .shortcut-item__tooltip,
-    .new-tab-shell .shortcut-item:focus-visible .shortcut-item__tooltip {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    @media (hover: none) {
-      .new-tab-shell .shortcut-group {
-        align-items: start;
-      }
-
-      .new-tab-shell .shortcut-group__items {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-
-      .new-tab-shell .shortcut-item {
-        transform: none;
-      }
-
-      .new-tab-shell .shortcut-item__tooltip {
-        display: none;
-      }
-    }
-
-    @media (max-width: 639px) {
-      .new-tab-shell .shortcut-group {
-        grid-template-columns: 1fr;
-        gap: 0.65rem;
-      }
-
-      .new-tab-shell .shortcut-group__summary {
-        justify-content: flex-start;
-      }
-    }
-  </style>
-
-  <style>
-    :global(html[data-new-tab-background="true"] body:has(.new-tab-shell)::before) {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background-image: var(--new-tab-background-image);
-      background-position: center;
-      background-size: cover;
-      opacity: var(--new-tab-background-opacity, 0.6);
-      pointer-events: none;
-    }
-
-    :global(html[data-new-tab-background="true"] body:has(.new-tab-shell) > div),
-    :global(html[data-new-tab-background="true"] body:has(.new-tab-shell) > div > div) {
-      position: relative;
-      z-index: 1;
-      background: transparent;
-    }
-
-    :global(main:has(.new-tab-shell)) {
-      display: grid;
-      min-height: 100dvh;
-      place-items: start center;
-      max-width: 72rem;
-      padding-top: clamp(3.5rem, 10vh, 6.5rem);
-      padding-bottom: clamp(2rem, 5vh, 4rem);
-    }
-
-    .new-tab-shell {
-      width: min(100%, 58rem);
-      display: grid;
-      gap: clamp(1rem, 2.2vw, 1.75rem);
-    }
-
-    :global(html[data-new-tab-text-colors] body:has(.new-tab-shell) [data-new-tab-color-target="navigation"]) {
-      color: var(--new-tab-navigation-color) !important;
-    }
-
-    :global(html[data-new-tab-text-colors] body:has(.new-tab-shell) [data-new-tab-color-target="itemLabel"]) {
-      color: var(--new-tab-item-label-color) !important;
-    }
-
-    .new-tab-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      max-width: 48rem;
-    }
-
-    .new-tab-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.5rem;
-    }
-
-    .new-tab-greeting {
-      color: color-mix(in srgb, oklch(var(--bc)) 70%, transparent);
-      min-height: 1.5rem;
-    }
-
-    .new-tab-search {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto 3.1rem;
-      align-items: stretch;
-      max-width: 48rem;
-    }
-
-    .new-tab-search:focus-within {
-      box-shadow: 0 0 0 1px color-mix(in srgb, oklch(var(--bc)) 22%, transparent);
-    }
-
-    .new-tab-search__input {
-      min-width: 0;
-      height: 3.25rem;
-      font-size: 1rem;
-    }
-
-    .new-tab-search__engine {
-      max-width: 9rem;
-      height: 3.25rem;
-    }
-
-    .new-tab-search__submit {
-      min-height: 3.25rem;
-      width: 3.25rem;
-    }
-
-    .new-tab-search__submit svg {
-      width: 1.1rem;
-      height: 1.1rem;
-    }
-
-    .shortcut-stack {
-      display: grid;
-      gap: 0.55rem;
-    }
-
-    .shortcut-group {
-      display: grid;
-      grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr);
-      align-items: center;
-      gap: 1rem;
-      border-top: 0;
-      padding-block: 0.55rem;
-    }
-
-    .shortcut-group__summary {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 0.75rem;
-      color: color-mix(in srgb, oklch(var(--bc)) 64%, transparent);
-      font-size: 0.88rem;
-      font-weight: 700;
-    }
-
-    .shortcut-group__summary span:last-child {
-      color: color-mix(in srgb, oklch(var(--bc)) 38%, transparent);
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .shortcut-group__items {
-      display: flex;
-      min-width: 0;
-      align-items: center;
-      gap: 0;
-      isolation: isolate;
-    }
-
-    .shortcut-item {
-      position: relative;
-      display: grid;
-      width: 2.75rem;
-      height: 2.75rem;
-      place-items: center;
-      border: 1px solid transparent;
-      border-radius: 0.45rem;
-      background: color-mix(in srgb, oklch(var(--b1)) 96%, oklch(var(--bc)) 4%);
-      color: inherit;
-      text-decoration: none;
-      transform: translateX(calc(var(--shortcut-index, 0) * -1.05rem));
-      transition:
-        transform 180ms ease,
-        border-color 180ms ease,
-        background 180ms ease;
-    }
-
-    .shortcut-item:nth-child(1) {
-      --shortcut-index: 0;
-      z-index: 8;
-    }
-
-    .shortcut-item:nth-child(2) {
-      --shortcut-index: 1;
-      z-index: 7;
-    }
-
-    .shortcut-item:nth-child(3) {
-      --shortcut-index: 2;
-      z-index: 6;
-    }
-
-    .shortcut-item:nth-child(4) {
-      --shortcut-index: 3;
-      z-index: 5;
-    }
-
-    .shortcut-item:nth-child(5) {
-      --shortcut-index: 4;
-      z-index: 4;
-    }
-
-    .shortcut-item:nth-child(6) {
-      --shortcut-index: 5;
-      z-index: 3;
-    }
-
-    .shortcut-item:nth-child(n + 7) {
-      --shortcut-index: 6;
-      z-index: 2;
-    }
-
-    .shortcut-group:hover .shortcut-item,
-    .shortcut-group:focus-within .shortcut-item {
-      transform: translateX(0);
-    }
-
-    .shortcut-item:hover,
-    .shortcut-item:focus-visible {
-      z-index: 20;
-      border-color: color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      background: oklch(var(--b2));
-      outline: 0;
-      transform: translateY(-0.18rem);
-    }
-
-    .shortcut-item__icon {
-      position: relative;
-      display: grid;
-      width: 1.7rem;
-      height: 1.7rem;
-      place-items: center;
-      overflow: hidden;
-    }
-
-    .shortcut-item__icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .shortcut-item__icon span {
-      display: none;
-      font-size: 0.85rem;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .shortcut-item__icon--fallback span {
-      display: block;
-    }
-
-    .shortcut-item__tooltip {
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 0.55rem);
-      display: grid;
-      min-width: 9rem;
-      max-width: 14rem;
-      gap: 0.18rem;
-      border: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      border-radius: 0.45rem;
-      background: oklch(var(--b1));
-      color: oklch(var(--bc));
-      padding: 0.55rem 0.65rem;
-      box-shadow: 0 1rem 2rem color-mix(in srgb, oklch(var(--bc)) 10%, transparent);
-      opacity: 0;
-      pointer-events: none;
-      transform: translate(-50%, 0.35rem);
-      transition:
-        opacity 150ms ease,
-        transform 150ms ease;
-    }
-
-    .shortcut-item__tooltip::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 100%;
-      width: 0.6rem;
-      height: 0.6rem;
-      border-right: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      border-bottom: 1px solid color-mix(in srgb, oklch(var(--bc)) 18%, transparent);
-      background: inherit;
-      transform: translate(-50%, -50%) rotate(45deg);
-    }
-
-    .shortcut-item__tooltip strong,
-    .shortcut-item__tooltip small {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .shortcut-item__tooltip small {
-      color: color-mix(in srgb, oklch(var(--bc)) 62%, transparent);
-      font-size: 0.75rem;
-      line-height: 1.35;
-    }
-
-    .shortcut-item:hover .shortcut-item__tooltip,
-    .shortcut-item:focus-visible .shortcut-item__tooltip {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    @media (hover: none) {
-      .shortcut-group {
-        align-items: start;
-      }
-
-      .shortcut-group__items {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-
-      .shortcut-item {
-        transform: none;
-      }
-
-      .shortcut-item__tooltip {
-        display: none;
-      }
-    }
-
-    @media (max-width: 639px) {
-      :global(main:has(.new-tab-shell)) {
-        min-height: 100dvh;
-        place-items: start;
-        padding-top: 1.25rem;
-        padding-bottom: 2rem;
-      }
-
-      .new-tab-shell {
-        gap: 1.75rem;
-      }
-
-      .new-tab-toolbar {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-
-      .new-tab-actions {
-        justify-content: flex-start;
-      }
-
-      .new-tab-search {
-        grid-template-columns: minmax(0, 1fr) 3.1rem;
-      }
-
-      .new-tab-search__engine {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        width: 100%;
-        max-width: none;
-      }
-
-      .shortcut-group {
-        grid-template-columns: 1fr;
-        gap: 0.65rem;
-      }
-
-      .shortcut-group__summary {
-        justify-content: flex-start;
-      }
-    }
-  </style>
 </BaseLayout>
