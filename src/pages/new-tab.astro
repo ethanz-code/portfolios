@@ -32,6 +32,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     <h1 id="new-tab-title" class="sr-only">{newTabConfig.heading}</h1>
 
     <div
+      class="pointer-events-none fixed inset-0 z-[-20] hidden bg-slate-50"
+      aria-hidden="true"
+      data-new-tab-background-base
+    ></div>
+    <div
       class="pointer-events-none fixed inset-0 -z-10 hidden bg-center bg-cover bg-no-repeat opacity-0 transition-opacity duration-200"
       aria-hidden="true"
       data-new-tab-background-layer
@@ -39,7 +44,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     <div class="new-tab-toolbar flex max-w-[48rem] items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-3">
       <div
-        class="new-tab-greeting min-h-6 text-sm font-medium text-[color-mix(in_srgb,oklch(var(--bc))_70%,transparent)]"
+        class="new-tab-greeting min-h-6 text-sm font-medium text-base-content/70"
         data-new-tab-greeting
         data-new-tab-color-target="navigation"
       ></div>
@@ -65,7 +70,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </div>
 
     <form
-      class="new-tab-search join grid w-full max-w-[48rem] grid-cols-[minmax(0,1fr)_auto_3.1rem] items-stretch focus-within:shadow-[0_0_0_1px_color-mix(in_srgb,oklch(var(--bc))_22%,transparent)] max-sm:grid-cols-[minmax(0,1fr)_3.1rem]"
+      class="new-tab-search join grid w-full max-w-[48rem] grid-cols-[minmax(0,1fr)_auto_3.1rem] items-stretch focus-within:ring-1 focus-within:ring-base-content/20 max-sm:grid-cols-[minmax(0,1fr)_3.1rem]"
       role="search"
       data-new-tab-search
     >
@@ -120,8 +125,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   </section>
 
   <div class="new-tab-config fixed inset-0 z-[80] hidden pointer-events-none opacity-0 transition-opacity duration-200" data-config-drawer>
-    <button class="new-tab-config__backdrop absolute inset-0 border-0 bg-[color:color-mix(in_srgb,oklch(var(--bc))_18%,transparent)] opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
-    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] border-l border-base-content/10 bg-base-100 shadow-[-1rem_0_2.5rem_color-mix(in_srgb,oklch(var(--bc))_12%,transparent)] translate-x-full transition-transform duration-200" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
+    <button class="new-tab-config__backdrop absolute inset-0 border-0 bg-base-content/20 opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
+    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] border-l border-base-content/10 bg-base-100 shadow-2xl translate-x-full transition-transform duration-200" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
       <div class="new-tab-config__header flex items-center justify-between gap-3 border-b border-base-content/10 p-4">
         <div class="min-w-0">
           <h2 class="m-0 text-base font-extrabold leading-tight">{newTabConfig.settings.panelTitle}</h2>
@@ -198,7 +203,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                 class="range range-xs"
                 type="range"
                 min="0"
-                max="80"
+                max="100"
                 step="1"
                 data-config-background-opacity
               />
@@ -441,7 +446,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         userName: normalizeText(value.userName, fallback.userName),
         backgroundImage: typeof value.backgroundImage === "string" ? value.backgroundImage.trim() : "",
         backgroundOpacity: Number.isFinite(Number(value.backgroundOpacity))
-          ? Math.min(80, Math.max(0, Number(value.backgroundOpacity)))
+          ? Math.min(100, Math.max(0, Number(value.backgroundOpacity)))
           : fallback.backgroundOpacity,
         textColors: normalizeTextColors(value.textColors, fallback.textColors),
         defaultSearchEngineId: searchEngines.some((engine) => engine.id === defaultSearchEngineId)
@@ -841,8 +846,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
         const title = document.createElement("span");
         title.className = shortcutEditMode
-          ? "min-w-0 whitespace-nowrap text-[color:inherit]"
-          : "min-w-0 text-[color:inherit]";
+          ? "min-w-0 whitespace-nowrap text-inherit"
+          : "min-w-0 text-inherit";
         title.dataset.newTabColorTarget = "itemLabel";
         title.textContent = group.title;
 
@@ -1081,7 +1086,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           }
 
           const item = document.createElement("a");
-          item.className = "shortcut-item group/item relative grid h-full w-full place-items-center rounded-[0.45rem] border border-transparent bg-[color:color-mix(in_srgb,oklch(var(--b1))_96%,oklch(var(--bc))_4%)] p-0 font-[inherit] text-inherit no-underline transition duration-180 hover:z-20 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-200 focus-visible:z-20 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-200 focus-visible:outline-none";
+          item.className = "shortcut-item group/item relative grid h-full w-full place-items-center rounded-[0.45rem] border border-transparent bg-base-100/95 p-0 font-[inherit] text-inherit no-underline transition duration-180 hover:z-20 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-200 focus-visible:z-20 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-200 focus-visible:outline-none";
           item.href = shortcut.url;
           item.target = "_blank";
           item.rel = "noopener noreferrer";
@@ -1112,7 +1117,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           icon.append(image, initial);
 
           const tooltip = document.createElement("span");
-          tooltip.className = "shortcut-item__tooltip pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-[0_1rem_2rem_color-mix(in_srgb,oklch(var(--bc))_10%,transparent)] transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
+          tooltip.className = "shortcut-item__tooltip pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-xl transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
           tooltip.role = "tooltip";
 
           const tooltipTitle = document.createElement("strong");
@@ -1178,7 +1183,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           addShortcutIcon.append(addShortcutMark);
 
           const addShortcutTooltip = document.createElement("span");
-          addShortcutTooltip.className = "shortcut-item__tooltip shortcut-item__tooltip--action pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-[0_1rem_2rem_color-mix(in_srgb,oklch(var(--bc))_10%,transparent)] transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
+          addShortcutTooltip.className = "shortcut-item__tooltip shortcut-item__tooltip--action pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-xl transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
           addShortcutTooltip.role = "tooltip";
           const addShortcutTooltipTitle = document.createElement("strong");
           addShortcutTooltipTitle.className = "block overflow-hidden text-ellipsis whitespace-nowrap";
@@ -1351,13 +1356,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     };
 
     const applyBackground = () => {
+      const backgroundBase = document.querySelector("[data-new-tab-background-base]");
       const backgroundLayer = document.querySelector("[data-new-tab-background-layer]");
 
-      if (!(backgroundLayer instanceof HTMLElement)) {
+      if (!(backgroundBase instanceof HTMLElement) || !(backgroundLayer instanceof HTMLElement)) {
         return;
       }
 
       if (!newTabState.backgroundImage) {
+        backgroundBase.hidden = true;
+        backgroundBase.classList.add("hidden");
         backgroundLayer.hidden = true;
         backgroundLayer.classList.add("hidden");
         backgroundLayer.style.removeProperty("background-image");
@@ -1371,6 +1379,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         .replace(/\n/g, "");
 
       backgroundLayer.hidden = false;
+      backgroundBase.hidden = false;
+      backgroundBase.classList.remove("hidden");
       backgroundLayer.classList.remove("hidden");
       backgroundLayer.style.backgroundImage = `url("${cssUrl}")`;
       backgroundLayer.style.opacity = String(newTabState.backgroundOpacity / 100);
@@ -1405,8 +1415,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       if (!colors) {
         delete document.documentElement.dataset.newTabTextColors;
-        document.documentElement.style.removeProperty("--new-tab-navigation-color");
-        document.documentElement.style.removeProperty("--new-tab-item-label-color");
         colorTargets.forEach((target) => {
           if (target instanceof HTMLElement) {
             target.style.removeProperty("color");
@@ -1416,8 +1424,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
 
       document.documentElement.dataset.newTabTextColors = newTabState.textColors.mode;
-      document.documentElement.style.setProperty("--new-tab-navigation-color", colors.navigationColor);
-      document.documentElement.style.setProperty("--new-tab-item-label-color", colors.itemLabelColor);
       colorTargets.forEach((target) => {
         if (!(target instanceof HTMLElement)) {
           return;
@@ -1628,7 +1634,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           return;
         }
 
-        newTabState.backgroundOpacity = Math.min(80, Math.max(0, Number(backgroundOpacityInput.value)));
+        newTabState.backgroundOpacity = Math.min(100, Math.max(0, Number(backgroundOpacityInput.value)));
         persistConfigChange();
         syncSettingsControls();
       });
@@ -1779,14 +1785,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     };
 
     const clearNewTabBackground = () => {
+      const backgroundBase = document.querySelector("[data-new-tab-background-base]");
       const backgroundLayer = document.querySelector("[data-new-tab-background-layer]");
 
       delete document.documentElement.dataset.newTabBackground;
       delete document.documentElement.dataset.newTabTextColors;
-      document.documentElement.style.removeProperty("--new-tab-background-image");
-      document.documentElement.style.removeProperty("--new-tab-background-opacity");
-      document.documentElement.style.removeProperty("--new-tab-navigation-color");
-      document.documentElement.style.removeProperty("--new-tab-item-label-color");
+
+      if (backgroundBase instanceof HTMLElement) {
+        backgroundBase.hidden = true;
+        backgroundBase.classList.add("hidden");
+      }
 
       if (backgroundLayer instanceof HTMLElement) {
         backgroundLayer.hidden = true;
