@@ -17,15 +17,24 @@ const { title, img, imgLight, imgDark, desc, url, target = "_blank", compactMobi
 
 <div
   class:list={[
-    "project-card card w-full min-w-0 overflow-hidden border border-base-300/70 bg-base-100 shadow-sm transition ease-in-out md:border-0 md:shadow-none md:hover:scale-[102%] md:hover:shadow-xl",
-    compactMobile && "project-card--compact-mobile",
+    "card w-full min-w-0 overflow-hidden border border-base-300/70 bg-base-100 shadow-sm transition ease-in-out md:border-0 md:shadow-none md:hover:scale-[102%] md:hover:shadow-xl",
   ]}
 >
   <a class="block min-w-0" href={url} target={target}>
-    <div class="card-body min-w-0 flex-col gap-0 p-0 md:flex-row md:items-center md:gap-4 md:p-5">
+    <div
+      class:list={[
+        "card-body min-w-0 flex-col gap-0 p-0 md:flex-row md:items-center md:gap-4 md:p-5",
+        compactMobile && "max-md:grid max-md:grid-cols-[minmax(0,1fr)_5.75rem] max-md:items-center max-md:gap-4 max-md:p-4",
+      ]}
+    >
       {
         (imgLight || imgDark || img) && (
-          <figure class="project-card__media w-full min-w-0 shrink-0 bg-base-200 md:w-auto md:bg-transparent">
+          <figure
+            class:list={[
+              "h-[clamp(9.75rem,42vw,12rem)] w-full min-w-0 shrink-0 border-b border-[color-mix(in_srgb,oklch(var(--bc))_12%,transparent)] bg-base-200 md:h-auto md:w-auto md:border-b-0 md:bg-transparent",
+              compactMobile && "max-md:col-start-2 max-md:row-start-1 max-md:h-[5.75rem] max-md:w-[5.75rem] max-md:overflow-hidden max-md:border max-md:border-[color-mix(in_srgb,oklch(var(--bc))_12%,transparent)] max-md:bg-base-200",
+            ]}
+          >
             <ThemeImage
               light={imgLight ?? img}
               dark={imgDark}
@@ -41,11 +50,18 @@ const { title, img, imgLight, imgDark, desc, url, target = "_blank", compactMobi
           </figure>
         )
       }
-      <div class="project-card__content w-full min-w-0 grow p-4 md:p-0">
+      <div class:list={["w-full min-w-0 grow p-4 md:p-0", compactMobile && "max-md:col-start-1 max-md:row-start-1 max-md:p-0"]}>
         <div class="flex flex-wrap items-start gap-2.5">
           <h3 class="card-title min-w-0 break-words text-lg leading-snug sm:text-xl">{title}</h3>
         </div>
-        <p class="project-card__description mt-2 text-base leading-7 break-words opacity-80 sm:text-[1.05rem] md:py-1 md:opacity-100">{desc}</p>
+        <p
+          class:list={[
+            "mt-2 break-words text-base leading-7 opacity-80 sm:text-[1.05rem] md:py-1 md:opacity-100",
+            compactMobile && "max-md:line-clamp-2 max-md:text-[0.95rem] max-md:leading-[1.65]",
+          ]}
+        >
+          {desc}
+        </p>
       </div>
     </div>
   </a>

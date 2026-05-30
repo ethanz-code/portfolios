@@ -32,8 +32,8 @@ const fallback = light ?? dark;
 
 {
   light && dark ? (
-    <div class="theme-image-stack">
-      <div class="theme-image-variant theme-image-variant--light">
+    <div class="theme-image-stack block h-full">
+      <div class="theme-image-variant theme-image-variant--light block h-full">
         <ThemeImageSource
           src={light}
           alt={alt}
@@ -46,7 +46,7 @@ const fallback = light ?? dark;
           loading={loading}
         />
       </div>
-      <div class="theme-image-variant theme-image-variant--dark">
+      <div class="theme-image-variant theme-image-variant--dark block h-full">
         <ThemeImageSource
           src={dark}
           alt={alt}

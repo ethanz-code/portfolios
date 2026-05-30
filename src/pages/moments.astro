@@ -23,19 +23,25 @@ import { momentGroups, momentImages } from "../data/moments";
 
   {
     momentGroups.length > 0 && (
-      <section class="moments-archive" aria-label="分组影像">
-        <div class="moments-archive__divider" aria-hidden="true">
-          <span class="moments-archive__line" />
-          <span class="moments-archive__count">{momentGroups.length} 组 · {momentImages.length} 张</span>
+      <section class="mt-[clamp(3rem,8vw,5rem)]" aria-label="分组影像">
+        <div class="mb-[clamp(1.5rem,4vw,2.25rem)] flex items-center gap-4" aria-hidden="true">
+          <span class="h-px flex-1 bg-[color-mix(in_srgb,oklch(var(--bc))_16%,transparent)]" />
+          <span class="shrink-0 text-sm leading-6 text-[color-mix(in_srgb,oklch(var(--bc))_58%,transparent)]">
+            {momentGroups.length} 组 · {momentImages.length} 张
+          </span>
         </div>
 
-        <div class="moment-group-list">
+        <div class="grid gap-[clamp(2.75rem,7vw,4.5rem)]">
           {
             momentGroups.map((group) => (
-              <section class="moment-group" aria-label={group.title}>
-                <div class="moment-group__meta">
-                  {group.description && <p class="moment-group__description">{group.description}</p>}
-                  <div class="moment-group__facts">
+              <section class="grid gap-4" aria-label={group.title}>
+                <div class="flex items-end justify-between gap-4 border-t border-[color-mix(in_srgb,oklch(var(--bc))_16%,transparent)] pt-4 max-sm:flex-col-reverse max-sm:items-start max-sm:gap-2">
+                  {group.description && (
+                    <p class="m-0 max-w-[42rem] leading-7 text-[color-mix(in_srgb,oklch(var(--bc))_72%,transparent)]">
+                      {group.description}
+                    </p>
+                  )}
+                  <div class="flex shrink-0 gap-3 whitespace-nowrap text-sm leading-6 text-[color-mix(in_srgb,oklch(var(--bc))_58%,transparent)] max-sm:w-full max-sm:justify-between">
                     {group.date && <time datetime={group.date}>{group.date}</time>}
                     <span>{group.images.length} 张</span>
                   </div>
