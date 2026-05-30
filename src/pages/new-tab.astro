@@ -1,5 +1,14 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  Check,
+  GripVertical,
+  PencilLine,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from "lucide-astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import {
   newTabConfig,
@@ -97,20 +106,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         aria-label={newTabConfig.search.submitLabel}
         title={newTabConfig.search.submitLabel}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          class="h-[1.1rem] w-[1.1rem]"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-3.5-3.5" />
-        </svg>
+        <Search class="h-[1.1rem] w-[1.1rem]" aria-hidden="true" />
       </button>
     </form>
 
@@ -121,7 +117,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       aria-pressed="false"
       aria-label="编辑快捷方式"
       data-shortcut-edit-toggle
-    ></button>
+    >
+      <PencilLine class="h-4 w-4" aria-hidden="true" />
+    </button>
   </section>
 
   <div class="new-tab-config fixed inset-0 z-[80] hidden pointer-events-none opacity-0 transition-opacity duration-200" data-config-drawer>
@@ -133,19 +131,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <p class="mt-1 text-[0.78rem] leading-snug text-base-content/50" data-config-status>{newTabConfig.settings.statusReady}</p>
         </div>
         <button class="btn btn-square btn-ghost btn-sm" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path d="M18 6 6 18" />
-            <path d="m6 6 12 12" />
-          </svg>
+          <X class="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
@@ -263,6 +249,25 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </aside>
   </div>
 
+  <template data-new-tab-icon="check">
+    <Check class="h-3.5 w-3.5" aria-hidden="true" />
+  </template>
+  <template data-new-tab-icon="close">
+    <X class="h-3.5 w-3.5" aria-hidden="true" />
+  </template>
+  <template data-new-tab-icon="drag">
+    <GripVertical class="h-3.5 w-3.5" aria-hidden="true" />
+  </template>
+  <template data-new-tab-icon="edit">
+    <PencilLine class="h-4 w-4" aria-hidden="true" />
+  </template>
+  <template data-new-tab-icon="plus">
+    <Plus class="h-4 w-4" aria-hidden="true" />
+  </template>
+  <template data-new-tab-icon="trash">
+    <Trash2 class="h-3.5 w-3.5" aria-hidden="true" />
+  </template>
+
   <script is:inline type="application/json" id="new-tab-defaults" set:html={serializedDefaultNewTabPayload} />
 
   <script>
@@ -303,11 +308,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     });
 
     const storageKey = defaultPayload.config?.storageKey ?? "ethanz-new-tab-config";
+    const logoCacheStorageKey = `${storageKey}:logo-cache`;
+    const logoResolverVersion = 3;
     const settingsLabels = defaultPayload.config?.settings ?? {};
     let newTabState = defaultState();
     let shortcutEditMode = false;
     let activeDragPayload = null;
     let textColorSaveTimer = 0;
+    let shortcutLogoCache = {};
+    const shortcutLogoRequests = new Map();
+    const onePanelLogoDataUrl = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" fill="#3370ff"><path d="M19.42 4.842 7.785 11.56v10.064l7.539 4.353-2.921 1.686-7.54-4.353V9.874L16.5 3.156z"/><path d="m20.598 5.522-2.921 1.686 7.539 4.352v10.064l2.92 1.686V9.874zM16.922 9.328l.892.532v13.666l-.892.515zM12.523 11.862l4.399-2.534-.002 14.714-2.848-1.644v-8.82h-1.549z"/><path fill-rule="evenodd" d="M3 8.796 16.5 1 30 8.796v15.592l-13.5 7.796L3 24.388zm26.64.208L16.5 1.417V1.41L3.357 8.997v15.182L16.5 31.772l13.141-7.587z" clip-rule="evenodd"/></svg>')}`;
 
     const isPlainObject = (value) =>
       value !== null && typeof value === "object" && !Array.isArray(value);
@@ -412,7 +422,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                 .filter((shortcut) => shortcut.title && shortcut.url)
             : [],
         }))
-        .filter((group) => group.title && group.shortcuts.length);
+        .filter((group) => group.title);
 
       return normalized.length ? normalized : cloneValue(fallback);
     };
@@ -497,6 +507,24 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
     };
 
+    const readShortcutLogoCache = () => {
+      try {
+        const cache = JSON.parse(window.localStorage.getItem(logoCacheStorageKey) ?? "{}");
+
+        return isPlainObject(cache) ? cache : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeShortcutLogoCache = () => {
+      try {
+        window.localStorage.setItem(logoCacheStorageKey, JSON.stringify(shortcutLogoCache));
+      } catch {
+        // Logo discovery is an enhancement; shortcuts still work without the cache.
+      }
+    };
+
     const getShortcutHostname = (url) => {
       try {
         return new URL(url).hostname.replace(/^www\./, "");
@@ -507,16 +535,239 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const getShortcutInitial = (title) => title.trim().slice(0, 1).toUpperCase();
 
-    const createDefaultShortcut = () => ({
-      title: "新入口",
-      url: "https://example.com",
-      description: "",
-    });
+    const normalizeShortcutUrlInput = (value) => {
+      const url = normalizeText(value);
 
-    const createDefaultGroup = () => ({
-      title: "新分组",
-      shortcuts: [],
-    });
+      if (!url) {
+        return "";
+      }
+
+      if (/^(https?:|mailto:|tel:|\/|#)/i.test(url)) {
+        return url;
+      }
+
+      return `https://${url}`;
+    };
+
+    const isValidShortcutUrl = (url) => {
+      if (/^(\/|#)/.test(url)) {
+        return true;
+      }
+
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const focusFirstInput = (element) => {
+      window.requestAnimationFrame(() => {
+        element.querySelector("input")?.focus();
+      });
+    };
+
+    const setInlineFormError = (target, message) => {
+      target.textContent = message;
+      target.classList.remove("hidden");
+    };
+
+    const clearInlineFormError = (target) => {
+      target.textContent = "";
+      target.classList.add("hidden");
+    };
+
+    const getIconMarkup = (name) => {
+      const template = document.querySelector(`template[data-new-tab-icon="${name}"]`);
+
+      return template instanceof HTMLTemplateElement ? template.innerHTML.trim() : "";
+    };
+
+    const createIconButton = (label, iconName, extraClasses = "") => {
+      const button = document.createElement("button");
+      button.className = `btn btn-square btn-ghost btn-xs h-8 min-h-8 w-8 p-0 text-base-content/60 transition hover:text-base-content focus-visible:text-base-content [&_svg]:h-3.5 [&_svg]:w-3.5 ${extraClasses}`;
+      button.type = "button";
+      button.title = label;
+      button.setAttribute("aria-label", label);
+      button.innerHTML = getIconMarkup(iconName);
+      return button;
+    };
+
+    const createShortcutAddForm = (group) => {
+      const form = document.createElement("form");
+      form.className = "shortcut-item-add-form col-span-full grid w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 rounded-[0.45rem] border border-base-content/10 bg-base-100/80 p-1.5 shadow-sm backdrop-blur";
+      form.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加 item"}：${group.title}`);
+
+      const fields = document.createElement("div");
+      fields.className = "grid min-w-0 gap-1";
+
+      const titleLabel = document.createElement("label");
+      titleLabel.className = "sr-only";
+      titleLabel.textContent = settingsLabels.shortcutTitleLabel ?? "名称";
+      const titleInput = document.createElement("input");
+      titleInput.className = "input input-bordered input-xs h-8 min-w-0 bg-base-100/80 text-xs";
+      titleInput.type = "text";
+      titleInput.autocomplete = "off";
+      titleInput.setAttribute("aria-label", settingsLabels.shortcutTitleLabel ?? "名称");
+      titleInput.placeholder = settingsLabels.shortcutTitleLabel ?? "名称";
+
+      const urlLabel = document.createElement("label");
+      urlLabel.className = "sr-only";
+      urlLabel.textContent = settingsLabels.shortcutUrlLabel ?? "地址";
+      const urlInput = document.createElement("input");
+      urlInput.className = "input input-bordered input-xs h-8 min-w-0 bg-base-100/80 text-xs";
+      urlInput.type = "text";
+      urlInput.inputMode = "url";
+      urlInput.autocomplete = "off";
+      urlInput.setAttribute("aria-label", settingsLabels.shortcutUrlLabel ?? "地址");
+      urlInput.placeholder = settingsLabels.shortcutUrlLabel ?? "地址";
+
+      const error = document.createElement("p");
+      error.className = "hidden text-[0.72rem] leading-snug text-error";
+
+      fields.append(titleLabel, titleInput, urlLabel, urlInput, error);
+
+      const submitButton = createIconButton("创建", "check", "text-success/75 hover:text-success");
+      submitButton.type = "submit";
+      const cancelButton = createIconButton("取消", "close");
+      let shortcutMetadataRequestId = 0;
+
+      const syncShortcutMetadata = () => {
+        const url = normalizeShortcutUrlInput(urlInput.value);
+
+        if (!url || !isValidShortcutUrl(url) || !isRemoteUrl(url)) {
+          return;
+        }
+
+        const requestId = shortcutMetadataRequestId + 1;
+        shortcutMetadataRequestId = requestId;
+
+        fetchShortcutMetadata({ url }).then((metadata) => {
+          if (requestId !== shortcutMetadataRequestId || normalizeShortcutUrlInput(urlInput.value) !== url) {
+            return;
+          }
+
+          if (!normalizeText(titleInput.value) && metadata?.title) {
+            titleInput.value = metadata.title;
+            clearInlineFormError(error);
+          }
+        });
+      };
+
+      cancelButton.addEventListener("click", () => {
+        renderShortcutGroups();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const title = normalizeText(titleInput.value);
+        const url = normalizeShortcutUrlInput(urlInput.value);
+
+        if (!title) {
+          setInlineFormError(error, "先输入名称");
+          titleInput.focus();
+          return;
+        }
+
+        if (!url) {
+          setInlineFormError(error, "先输入地址");
+          urlInput.focus();
+          return;
+        }
+
+        if (!isValidShortcutUrl(url)) {
+          setInlineFormError(error, "地址格式不对");
+          urlInput.focus();
+          return;
+        }
+
+        group.shortcuts.push({
+          title,
+          url,
+        });
+        persistConfigChange("已添加");
+      });
+
+      [titleInput, urlInput].forEach((input) => {
+        input.addEventListener("input", () => {
+          clearInlineFormError(error);
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            renderShortcutGroups();
+          }
+        });
+      });
+
+      urlInput.addEventListener("blur", syncShortcutMetadata);
+      urlInput.addEventListener("change", syncShortcutMetadata);
+
+      form.append(fields, submitButton, cancelButton);
+      return form;
+    };
+
+    const createGroupAddForm = () => {
+      const form = document.createElement("form");
+      form.className = "shortcut-group shortcut-group--add-form grid grid-cols-[minmax(7.5rem,8.5rem)_minmax(0,1fr)] items-start gap-4 py-1 max-sm:grid-cols-1 max-sm:gap-2";
+      form.setAttribute("aria-label", settingsLabels.addGroupLabel ?? "添加分组");
+
+      const field = document.createElement("label");
+      field.className = "grid min-w-0 gap-1";
+      const srLabel = document.createElement("span");
+      srLabel.className = "sr-only";
+      srLabel.textContent = settingsLabels.groupTitleLabel ?? "分组名";
+      const input = document.createElement("input");
+      input.className = "input input-bordered input-xs h-8 w-full max-w-36 bg-base-100/80 text-xs";
+      input.type = "text";
+      input.autocomplete = "off";
+      input.placeholder = settingsLabels.groupTitleLabel ?? "分组名";
+      const error = document.createElement("span");
+      error.className = "hidden text-[0.72rem] leading-snug text-error";
+      field.append(srLabel, input, error);
+
+      const actions = document.createElement("span");
+      actions.className = "inline-flex items-center gap-1.5";
+      const submitButton = createIconButton("创建", "check", "text-success/75 hover:text-success");
+      submitButton.type = "submit";
+      const cancelButton = createIconButton("取消", "close");
+      actions.append(submitButton, cancelButton);
+
+      cancelButton.addEventListener("click", () => {
+        renderShortcutGroups();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const title = normalizeText(input.value);
+
+        if (!title) {
+          setInlineFormError(error, "先输入分组名");
+          input.focus();
+          return;
+        }
+
+        newTabState.shortcutGroups.push({
+          title,
+          shortcuts: [],
+        });
+        persistConfigChange("已添加");
+      });
+
+      input.addEventListener("input", () => {
+        clearInlineFormError(error);
+      });
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          renderShortcutGroups();
+        }
+      });
+
+      form.append(field, actions);
+      return form;
+    };
 
     const moveArrayItem = (items, fromIndex, toIndex) => {
       if (
@@ -694,11 +945,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       element.classList.add(...indicatorClasses);
     };
 
-    const dragHandleIcon = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="h-3 w-3">
-        <path d="M5 3.5A1.5 1.5 0 1 1 2 3.5a1.5 1.5 0 0 1 3 0Zm0 4.5A1.5 1.5 0 1 1 2 8a1.5 1.5 0 0 1 3 0Zm-1.5 6A1.5 1.5 0 1 0 3.5 11a1.5 1.5 0 0 0 0 3Zm9-9A1.5 1.5 0 1 0 12.5 2a1.5 1.5 0 0 0 0 3Zm1.5 3A1.5 1.5 0 1 1 11 8a1.5 1.5 0 0 1 3 0Zm-1.5 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
-      </svg>
-    `;
+    const dragHandleIcon = getIconMarkup("drag");
 
     const faviconProxyUrl = "https://proxy.scalar.com";
 
@@ -706,23 +953,418 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const isRemoteUrl = (value) => /^https?:\/\//i.test(value);
 
+    const getShortcutLogoCacheKey = (url) => {
+      try {
+        return new URL(url).origin;
+      } catch {
+        return url;
+      }
+    };
+
+    const canProxyUrl = (url) => {
+      try {
+        const { hostname } = new URL(url);
+        const normalizedHost = hostname.toLowerCase();
+
+        if (
+          normalizedHost === "localhost" ||
+          normalizedHost.endsWith(".local") ||
+          normalizedHost.endsWith(".lan") ||
+          normalizedHost.startsWith("10.") ||
+          normalizedHost.startsWith("192.168.")
+        ) {
+          return false;
+        }
+
+        const private172Match = normalizedHost.match(/^172\.(\d+)\./);
+        if (private172Match && Number(private172Match[1]) >= 16 && Number(private172Match[1]) <= 31) {
+          return false;
+        }
+
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const resolveShortcutAssetUrl = (assetUrl, baseUrl) => {
+      if (!assetUrl) {
+        return "";
+      }
+
+      if (/^[a-z]+:/i.test(assetUrl)) {
+        return assetUrl;
+      }
+
+      try {
+        return new URL(assetUrl, baseUrl).href;
+      } catch {
+        return assetUrl;
+      }
+    };
+
+    const pushLogoCandidate = (candidates, url, withProxy = true) => {
+      if (!url || candidates.includes(url)) {
+        return;
+      }
+
+      if (withProxy && canProxyUrl(url)) {
+        const proxyUrl = getProxyUrl(url);
+        if (!candidates.includes(proxyUrl)) {
+          candidates.push(proxyUrl);
+        }
+      }
+
+      candidates.push(url);
+    };
+
+    const pushLogoCandidates = (candidates, urls, withProxy = true) => {
+      urls.forEach((url) => {
+        pushLogoCandidate(candidates, url, withProxy);
+      });
+    };
+
+    const getCachedShortcutLogo = (shortcut) => {
+      const cached = shortcutLogoCache[getShortcutLogoCacheKey(shortcut.url)];
+
+      return isPlainObject(cached) ? cached : undefined;
+    };
+
     const getShortcutLogoUrls = (shortcut) => {
       if (shortcut.logo) {
-        return isRemoteUrl(shortcut.logo)
-          ? [getProxyUrl(shortcut.logo), shortcut.logo]
-          : [shortcut.logo];
+        const logoUrl = resolveShortcutAssetUrl(shortcut.logo, shortcut.url);
+
+        return isRemoteUrl(logoUrl)
+          ? [getProxyUrl(logoUrl), logoUrl]
+          : [logoUrl];
+      }
+
+      let originUrl = "";
+      try {
+        originUrl = new URL(shortcut.url).origin;
+      } catch {
+        originUrl = "";
       }
 
       const hostname = getShortcutHostname(shortcut.url);
-      const googleFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=64`;
+      const candidates = [];
+      const cachedLogo = getCachedShortcutLogo(shortcut);
+      const canUseCachedLogo = cachedLogo?.resolverVersion === logoResolverVersion;
+
+      if (canUseCachedLogo && cachedLogo?.logoUrl) {
+        pushLogoCandidate(candidates, cachedLogo.logoUrl, false);
+      }
+
       const duckDuckGoFavicon = `https://icons.duckduckgo.com/ip3/${hostname}.ico`;
+      pushLogoCandidate(candidates, duckDuckGoFavicon);
+
+      if (canUseCachedLogo && Array.isArray(cachedLogo?.candidates)) {
+        pushLogoCandidates(candidates, cachedLogo.candidates);
+      }
+
+      const commonPaths = [
+        "/favicon.svg",
+        "/favicon.png",
+        "/favicon.ico",
+        "/logo.svg",
+        "/logo.png",
+        "/icon.svg",
+        "/icon.png",
+        "/apple-touch-icon.png",
+        "/apple-touch-icon-precomposed.png",
+        "/assets/logo.svg",
+        "/assets/logo.png",
+        "/assets/favicon.svg",
+        "/assets/favicon.png",
+        "/images/logo.svg",
+        "/images/logo.png",
+        "/images/logo-blue.png",
+        "/images/logo-light.png",
+      ];
+
+      commonPaths.forEach((path) => {
+        if (!originUrl) {
+          return;
+        }
+
+        pushLogoCandidate(candidates, new URL(path, originUrl).href);
+      });
+
+      const googleFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=64`;
       const directFavicon = `https://${hostname}/favicon.ico`;
 
-      return [
-        getProxyUrl(googleFavicon),
-        getProxyUrl(duckDuckGoFavicon),
-        directFavicon,
-      ];
+      pushLogoCandidate(candidates, googleFavicon);
+      pushLogoCandidate(candidates, directFavicon, false);
+
+      return candidates;
+    };
+
+    const getShortcutSubtitle = (shortcut) =>
+      shortcut.description ?? getCachedShortcutLogo(shortcut)?.description ?? getShortcutHostname(shortcut.url);
+
+    const collectLogoUrlsFromHtml = (html, baseUrl) => {
+      const candidates = [];
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const pageTitle = normalizeText(
+        doc.querySelector('meta[property="og:site_name"]')?.getAttribute("content") ??
+        doc.querySelector("title")?.textContent,
+      );
+      const iconSelector = [
+        'link[rel~="icon"][href]',
+        'link[rel~="apple-touch-icon"][href]',
+        'link[rel~="apple-touch-icon-precomposed"][href]',
+        'link[rel~="mask-icon"][href]',
+        'meta[property="og:logo"][content]',
+        'meta[property="og:image"][content]',
+        'meta[name="twitter:image"][content]',
+      ].join(",");
+
+      doc.querySelectorAll(iconSelector).forEach((element) => {
+        const rawUrl = element.getAttribute("href") ?? element.getAttribute("content");
+        const logoUrl = resolveShortcutAssetUrl(rawUrl, baseUrl);
+
+        if (logoUrl && !candidates.includes(logoUrl)) {
+          candidates.push(logoUrl);
+        }
+      });
+
+      doc.querySelectorAll('script[type="application/ld+json"]').forEach((script) => {
+        try {
+          const data = JSON.parse(script.textContent ?? "null");
+          const nodes = Array.isArray(data) ? data : [data];
+
+          nodes.forEach((node) => {
+            const logo = node?.logo?.url ?? node?.logo;
+            const logoUrl = typeof logo === "string" ? resolveShortcutAssetUrl(logo, baseUrl) : "";
+
+            if (logoUrl && !candidates.includes(logoUrl)) {
+              candidates.push(logoUrl);
+            }
+          });
+        } catch {
+          // Ignore invalid structured data and keep other logo sources.
+        }
+      });
+
+      return {
+        candidates,
+        title: /^loading\.{0,3}$/i.test(pageTitle) ? "" : pageTitle,
+        description: normalizeText(
+          doc.querySelector('meta[name="description"]')?.getAttribute("content") ??
+          doc.querySelector('meta[property="og:description"]')?.getAttribute("content"),
+        ),
+      };
+    };
+
+    const collectAssetScriptUrlsFromHtml = (html, baseUrl) => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const urls = [];
+      const selector = [
+        "script[src]",
+        'link[rel="modulepreload"][href]',
+        'link[rel="preload"][as="script"][href]',
+      ].join(",");
+
+      doc.querySelectorAll(selector).forEach((element) => {
+        const rawUrl = element.getAttribute("src") ?? element.getAttribute("href");
+        const scriptUrl = resolveShortcutAssetUrl(rawUrl, baseUrl);
+
+        if (scriptUrl && !urls.includes(scriptUrl)) {
+          urls.push(scriptUrl);
+        }
+      });
+
+      return urls;
+    };
+
+    const collectBundledLogoUrls = async (html, baseUrl, signal) => {
+      const scriptUrls = collectAssetScriptUrlsFromHtml(html, baseUrl).slice(0, 2);
+      const candidates = [];
+
+      for (const scriptUrl of scriptUrls) {
+        try {
+          const response = await fetch(getProxyUrl(scriptUrl), { signal });
+          const script = response.ok ? await response.text() : "";
+
+          if (/assets\/js\/1panel-(?:menu-)?logo-[\w-]+\.js/.test(script)) {
+            candidates.push(onePanelLogoDataUrl);
+          }
+        } catch {
+          // Ignore optional bundle probing and keep the regular favicon chain.
+        }
+      }
+
+      return {
+        logoUrl: candidates[0],
+        candidates: candidates.filter((url, index, items) => items.indexOf(url) === index),
+      };
+    };
+
+    const hasUsefulCachedLogoMetadata = (cached) =>
+      Boolean(
+        cached?.resolverVersion === logoResolverVersion &&
+        (
+          cached.metadataResolved ||
+          (Array.isArray(cached.candidates) && cached.candidates.length) ||
+          cached.description ||
+          cached.failedAt
+        ),
+      );
+
+    const mergeShortcutLogoCache = (cacheKey, payload) => {
+      if (!cacheKey) {
+        return;
+      }
+
+      const existing = shortcutLogoCache[cacheKey] ?? {};
+      const candidates = [
+        ...(Array.isArray(existing.candidates) ? existing.candidates : []),
+        ...(Array.isArray(payload.candidates) ? payload.candidates : []),
+      ].filter((url, index, items) => url && items.indexOf(url) === index);
+
+      shortcutLogoCache = {
+        ...shortcutLogoCache,
+        [cacheKey]: {
+          ...existing,
+          ...payload,
+          candidates,
+          resolverVersion: logoResolverVersion,
+          updatedAt: Date.now(),
+        },
+      };
+      writeShortcutLogoCache();
+    };
+
+    const fetchShortcutMetadata = (shortcut) => {
+      const cacheKey = getShortcutLogoCacheKey(shortcut.url);
+      const cached = shortcutLogoCache[cacheKey];
+      const cachedAt = Number(cached?.updatedAt ?? cached?.failedAt ?? 0);
+      const isFresh = cachedAt && Date.now() - cachedAt < 7 * 24 * 60 * 60 * 1000;
+
+      if (!isRemoteUrl(shortcut.url) || !canProxyUrl(shortcut.url)) {
+        return Promise.resolve(cached);
+      }
+
+      if (isFresh && hasUsefulCachedLogoMetadata(cached)) {
+        return Promise.resolve(cached);
+      }
+
+      if (shortcutLogoRequests.has(cacheKey)) {
+        return shortcutLogoRequests.get(cacheKey);
+      }
+
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 5000);
+      const request = fetch(getProxyUrl(shortcut.url), {
+        signal: controller.signal,
+      })
+        .then((response) => (response.ok ? response.text() : ""))
+        .then(async (html) => {
+          if (!html) {
+            mergeShortcutLogoCache(cacheKey, {
+              candidates: [],
+              failedAt: Date.now(),
+            });
+            return shortcutLogoCache[cacheKey];
+          }
+
+          const discovered = collectLogoUrlsFromHtml(html, shortcut.url);
+          const bundled = discovered.candidates.length
+            ? { candidates: [] }
+            : await collectBundledLogoUrls(html, shortcut.url, controller.signal);
+          if (bundled.logoUrl) {
+            discovered.logoUrl = bundled.logoUrl;
+          }
+          discovered.candidates = [
+            ...discovered.candidates,
+            ...bundled.candidates,
+          ].filter((url, index, items) => url && items.indexOf(url) === index);
+
+          if (!discovered.candidates.length && !discovered.title && !discovered.description) {
+            mergeShortcutLogoCache(cacheKey, {
+              candidates: [],
+              failedAt: Date.now(),
+            });
+            return shortcutLogoCache[cacheKey];
+          }
+
+          mergeShortcutLogoCache(cacheKey, {
+            ...discovered,
+            metadataResolved: true,
+          });
+          return shortcutLogoCache[cacheKey];
+        })
+        .catch(() => {
+          mergeShortcutLogoCache(cacheKey, {
+            candidates: [],
+            failedAt: Date.now(),
+          });
+          return shortcutLogoCache[cacheKey];
+        })
+        .finally(() => {
+          window.clearTimeout(timeout);
+          shortcutLogoRequests.delete(cacheKey);
+        });
+
+      shortcutLogoRequests.set(cacheKey, request);
+      return request;
+    };
+
+    const refreshShortcutMetadataDisplay = (shortcut, image) => {
+      const item = image.closest(".shortcut-item");
+      const itemShell = image.closest(".shortcut-item-shell");
+
+      if (!(item instanceof HTMLElement)) {
+        return;
+      }
+
+      const subtitle = getShortcutSubtitle(shortcut);
+      const itemLabelText = item.querySelector(".shortcut-item__label small");
+      const tooltipText = itemShell?.querySelector(".shortcut-item__tooltip small");
+
+      item.setAttribute("aria-label", `${shortcut.title}：${subtitle}`);
+
+      if (itemLabelText instanceof HTMLElement) {
+        itemLabelText.textContent = subtitle;
+      }
+
+      if (tooltipText instanceof HTMLElement) {
+        tooltipText.textContent = subtitle;
+      }
+    };
+
+    const discoverShortcutLogo = (shortcut, image) => {
+      if (shortcut.logo || !isRemoteUrl(shortcut.url)) {
+        return;
+      }
+
+      fetchShortcutMetadata(shortcut).then((metadata) => {
+        refreshShortcutMetadataDisplay(shortcut, image);
+
+        if (!image.isConnected) {
+          return;
+        }
+
+        const nextUrls = getShortcutLogoUrls(shortcut);
+        const nextLogoUrl = nextUrls[0] ?? "";
+        const shouldReplaceLoadedLogo = Boolean(
+          metadata?.logoUrl &&
+          nextLogoUrl &&
+          image.src !== nextLogoUrl &&
+          image.currentSrc !== nextLogoUrl,
+        );
+
+        if (!shouldReplaceLoadedLogo && image.complete && image.naturalWidth > 0) {
+          return;
+        }
+
+        image.hidden = false;
+        image.closest(".shortcut-item__icon")?.querySelector(".shortcut-item__initial")?.classList.add("hidden");
+        image.dataset.logoFallbacks = JSON.stringify(nextUrls.slice(1));
+        image.src = nextLogoUrl;
+      });
     };
 
     const getNextLogoFallback = (image) => {
@@ -735,6 +1377,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     };
 
     const bindLogoFallback = (image) => {
+      image.addEventListener("load", () => {
+        if (image.currentSrc && image.naturalWidth > 0) {
+          mergeShortcutLogoCache(image.dataset.logoCacheKey, {
+            logoUrl: image.currentSrc,
+          });
+        }
+      });
+
       image.addEventListener("error", () => {
         const fallback = getNextLogoFallback(image);
 
@@ -758,18 +1408,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       toggle.setAttribute("aria-pressed", String(shortcutEditMode));
       toggle.title = shortcutEditMode ? "完成" : "编辑";
       toggle.setAttribute("aria-label", shortcutEditMode ? "完成编辑" : "编辑快捷方式");
-      toggle.innerHTML = shortcutEditMode
-        ? `
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        `
-        : `
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
-            <path d="m18 2 4 4-10 10H8v-4z" />
-            <path d="M2 22h20" />
-          </svg>
-        `;
+      toggle.innerHTML = getIconMarkup(shortcutEditMode ? "check" : "edit");
     };
 
     const renderSearchEngines = () => {
@@ -897,15 +1536,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           removeGroupButton.type = "button";
           removeGroupButton.title = settingsLabels.removeGroupLabel ?? "删除分组";
           removeGroupButton.setAttribute("aria-label", `${settingsLabels.removeGroupLabel ?? "删除分组"}：${group.title}`);
-          removeGroupButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
-              <path d="M3 6h18" />
-              <path d="M8 6V4h8v2" />
-              <path d="M19 6l-1 14H6L5 6" />
-              <path d="M10 11v6" />
-              <path d="M14 11v6" />
-            </svg>
-          `;
+          removeGroupButton.innerHTML = getIconMarkup("trash");
           removeGroupButton.addEventListener("click", () => {
             const currentGroupIndex = newTabState.shortcutGroups.indexOf(group);
 
@@ -962,7 +1593,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         }
 
         const items = document.createElement("div");
-        items.className = "shortcut-group__items grid w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] min-w-0 grid-cols-[repeat(auto-fill,2.75rem)] justify-start gap-2";
+        items.className = "shortcut-group__items flex w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] min-w-0 flex-wrap items-start justify-start gap-2";
         if (shortcutEditMode) {
           items.addEventListener("dragover", (event) => {
             const payload = readDragPayload(event);
@@ -1009,8 +1640,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         group.shortcuts.forEach((shortcut, shortcutIndex) => {
           const itemShell = document.createElement("div");
           itemShell.className = shortcutEditMode
-            ? "shortcut-item-shell group relative h-11 w-11 cursor-grab active:cursor-grabbing"
-            : "shortcut-item-shell group relative h-11 w-11";
+            ? "shortcut-item-shell group relative z-0 h-11 w-11 cursor-grab active:cursor-grabbing hover:z-30 focus-within:z-30"
+            : "shortcut-item-shell group relative z-0 h-11 w-11 hover:z-30 focus-within:z-30";
 
           if (shortcutEditMode) {
             itemShell.draggable = true;
@@ -1086,13 +1717,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           }
 
           const item = document.createElement("a");
-          item.className = "shortcut-item group/item relative grid h-full w-full place-items-center rounded-[0.45rem] border border-transparent bg-base-100/95 p-0 font-[inherit] text-inherit no-underline transition duration-180 hover:z-20 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-200 focus-visible:z-20 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-200 focus-visible:outline-none";
+          item.className = "shortcut-item group/item absolute left-0 top-0 grid h-11 w-11 grid-cols-[1.7rem_0fr] items-center justify-start gap-0 overflow-hidden rounded-[0.45rem] border border-transparent bg-base-100/95 px-2 font-[inherit] text-inherit no-underline transition-[transform,border-color,background-color] duration-180 hover:z-20 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-200 focus-visible:z-20 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-200 focus-visible:outline-none";
           item.href = shortcut.url;
           item.target = "_blank";
           item.rel = "noopener noreferrer";
           item.setAttribute(
             "aria-label",
-            `${shortcut.title}：${shortcut.description ?? getShortcutHostname(shortcut.url)}`,
+            `${shortcut.title}：${getShortcutSubtitle(shortcut)}`,
           );
 
           const icon = document.createElement("span");
@@ -1107,8 +1738,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           image.loading = "lazy";
           image.decoding = "async";
           image.referrerPolicy = "no-referrer";
+          image.dataset.logoCacheKey = getShortcutLogoCacheKey(shortcut.url);
           image.dataset.logoFallbacks = JSON.stringify(logoUrls.slice(1));
           bindLogoFallback(image);
+          discoverShortcutLogo(shortcut, image);
 
           const initial = document.createElement("span");
           initial.className = "shortcut-item__initial hidden text-[0.85rem] font-extrabold leading-none";
@@ -1116,8 +1749,23 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
           icon.append(image, initial);
 
+          const itemLabel = document.createElement("span");
+          itemLabel.className = "shortcut-item__label grid min-w-0 gap-[0.08rem] overflow-hidden opacity-0 transition-opacity duration-150 max-sm:hidden";
+          itemLabel.setAttribute("aria-hidden", "true");
+
+          const itemLabelTitle = document.createElement("strong");
+          itemLabelTitle.className = "block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[0.78rem] leading-tight";
+          itemLabelTitle.dataset.newTabColorTarget = "itemLabel";
+          itemLabelTitle.textContent = shortcut.title;
+
+          const itemLabelText = document.createElement("small");
+          itemLabelText.className = "block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[0.68rem] font-semibold leading-tight text-base-content/50";
+          itemLabelText.textContent = getShortcutSubtitle(shortcut);
+
+          itemLabel.append(itemLabelTitle, itemLabelText);
+
           const tooltip = document.createElement("span");
-          tooltip.className = "shortcut-item__tooltip pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-xl transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
+          tooltip.className = "shortcut-item__tooltip pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 z-40 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-xl transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 max-sm:hidden";
           tooltip.role = "tooltip";
 
           const tooltipTitle = document.createElement("strong");
@@ -1127,10 +1775,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
           const tooltipText = document.createElement("small");
           tooltipText.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-snug text-base-content/60";
-          tooltipText.textContent = shortcut.description ?? getShortcutHostname(shortcut.url);
+          tooltipText.textContent = getShortcutSubtitle(shortcut);
 
           tooltip.append(tooltipTitle, tooltipText);
-          item.append(icon, tooltip);
+          item.append(icon, itemLabel);
 
           if (shortcutEditMode) {
             const removeItemButton = document.createElement("button");
@@ -1141,12 +1789,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
               "aria-label",
               `${settingsLabels.removeShortcutLabel ?? "删除 item"}：${shortcut.title}`,
             );
-            removeItemButton.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            `;
+            removeItemButton.innerHTML = getIconMarkup("trash");
             removeItemButton.addEventListener("click", (event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -1164,23 +1807,20 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             itemShell.append(removeItemButton);
           }
 
-          itemShell.append(item);
+          itemShell.append(item, tooltip);
           items.append(itemShell);
         });
 
         if (shortcutEditMode) {
           const addShortcutButton = document.createElement("button");
-          addShortcutButton.className = "shortcut-item shortcut-item--add group/item relative grid h-11 w-11 place-items-center rounded-[0.45rem] border border-dashed border-base-content/10 bg-transparent p-0 font-[inherit] text-base-content/40 opacity-60 transition duration-180 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-100/20 hover:opacity-80 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-100/20 focus-visible:opacity-80 focus-visible:outline-none";
+          addShortcutButton.className = "shortcut-item shortcut-item--add group/item relative grid h-11 w-11 place-items-center rounded-[0.45rem] border border-dashed border-base-content/10 bg-transparent p-0 font-[inherit] text-base-content/40 opacity-60 transition-[transform,border-color,background-color,opacity] duration-180 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-100/20 hover:opacity-80 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-100/20 focus-visible:opacity-80 focus-visible:outline-none";
           addShortcutButton.type = "button";
           addShortcutButton.title = settingsLabels.addShortcutLabel ?? "添加 item";
           addShortcutButton.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加 item"}：${group.title}`);
           const addShortcutIcon = document.createElement("span");
           addShortcutIcon.className = "shortcut-item__icon relative grid h-[1.7rem] w-[1.7rem] place-items-center overflow-hidden";
           addShortcutIcon.setAttribute("aria-hidden", "true");
-          const addShortcutMark = document.createElement("span");
-          addShortcutMark.className = "block text-[1.05rem] font-extrabold leading-none";
-          addShortcutMark.textContent = "+";
-          addShortcutIcon.append(addShortcutMark);
+          addShortcutIcon.innerHTML = getIconMarkup("plus");
 
           const addShortcutTooltip = document.createElement("span");
           addShortcutTooltip.className = "shortcut-item__tooltip shortcut-item__tooltip--action pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-xl transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
@@ -1194,8 +1834,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           addShortcutTooltip.append(addShortcutTooltipTitle, addShortcutTooltipText);
           addShortcutButton.append(addShortcutIcon, addShortcutTooltip);
           addShortcutButton.addEventListener("click", () => {
-            group.shortcuts.push(createDefaultShortcut());
-            persistConfigChange("已添加");
+            const form = createShortcutAddForm(group);
+            addShortcutButton.replaceWith(form);
+            focusFirstInput(form);
           });
 
           items.append(addShortcutButton);
@@ -1250,14 +1891,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         const addGroupTitle = document.createElement("span");
         addGroupTitle.textContent = settingsLabels.addGroupLabel ?? "添加分组";
         const addGroupMark = document.createElement("span");
-        addGroupMark.className = "text-[1.05rem] font-extrabold leading-none";
-        addGroupMark.textContent = "+";
+        addGroupMark.className = "grid h-5 w-5 place-items-center [&_svg]:h-3.5 [&_svg]:w-3.5";
+        addGroupMark.setAttribute("aria-hidden", "true");
+        addGroupMark.innerHTML = getIconMarkup("plus");
         addGroupSummary.append(addGroupTitle, addGroupMark);
 
         addGroupButton.append(addGroupSummary);
         addGroupButton.addEventListener("click", () => {
-          newTabState.shortcutGroups.push(createDefaultGroup());
-          persistConfigChange("已添加");
+          const form = createGroupAddForm();
+          addGroupButton.replaceWith(form);
+          focusFirstInput(form);
         });
 
         stack.append(addGroupButton);
@@ -1778,6 +2421,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const bindNewTab = () => {
       newTabState = readStoredState();
+      shortcutLogoCache = readShortcutLogoCache();
       renderAll();
       bindSearch();
       bindShortcutEditor();
