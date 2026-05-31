@@ -14,7 +14,7 @@
 - 在构建期写入部署时间，用低透明度 `deploy` 角标展示，不依赖运行时接口。
 - 用客户端脚本延迟加载 GitHub 贡献图，空闲时请求数据，失败时降级展示，不阻塞首屏内容。
 - 用 Bun 管理依赖和构建流程，`bun run check` 做 Astro 类型检查，`bun run build` 输出静态文件。
-- 用 Docker 多阶段构建产物，最终由 Nginx 托管 `dist/`，GitHub Actions 构建 `linux/amd64` 镜像后通过 SSH 直传到服务器，再加载镜像并重启容器。
+- 用 Docker 多阶段构建产物，最终由 Nginx 托管 `dist/`，GitHub Actions 构建 `linux/amd64` 镜像并推送到 `docker.itcox.cn`，服务器拉取当前镜像后重建容器。
 
 ## 启动
 
@@ -52,7 +52,7 @@ bun run preview
 
 ## 部署
 
-推送到 `main` 后，GitHub Actions 会构建 `linux/amd64` 镜像，压缩成归档文件，通过 SSH 上传到服务器，执行 `docker load` 后重启容器。
+推送到 `main` 后，GitHub Actions 会构建 `linux/amd64` 镜像，推送到 `docker.itcox.cn` 的当前 commit 标签和 `latest` 标签，再通过 SSH 进入服务器，删除旧容器和旧镜像，拉取当前 commit 镜像并重新启动容器。
 
 部署流水线会把当前 UTC 时间写入 `DEPLOYED_AT` 构建参数，站点按北京时间显示低透明度 `deploy` 角标。
 
@@ -61,9 +61,12 @@ bun run preview
 - `SSH_HOST`
 - `SSH_USER`
 - `SSH_PRIVATE_KEY`
+- `REGISTRY_USERNAME`
+- `REGISTRY_PASSWORD`
 
 可选配置：
 
 - `SSH_PORT`：默认 `22`
+- `DEPLOY_IMAGE_NAME`：默认 `portfolios`，需要命名空间时可设为 `namespace/portfolios`
 - `DEPLOY_CONTAINER_NAME`：默认 `portfolios`
 - `DEPLOY_PORT_MAPPING`：默认 `10020:80`
