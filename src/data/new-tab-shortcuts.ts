@@ -43,6 +43,9 @@ export interface NewTabConfig {
     nameLabel: string;
     homeLinkLabel: string;
     homeHrefLabel: string;
+    shortcutOpenModeLabel: string;
+    shortcutOpenModeCurrentLabel: string;
+    shortcutOpenModeNewTabLabel: string;
     backgroundUrlLabel: string;
     backgroundFileLabel: string;
     backgroundOpacityLabel: string;
@@ -113,6 +116,9 @@ export const newTabConfig: NewTabConfig = {
     nameLabel: "名称",
     homeLinkLabel: "首页文案",
     homeHrefLabel: "首页地址",
+    shortcutOpenModeLabel: "item 打开方式",
+    shortcutOpenModeCurrentLabel: "当前标签页",
+    shortcutOpenModeNewTabLabel: "新标签页",
     backgroundUrlLabel: "背景图 URL",
     backgroundFileLabel: "本地背景图",
     backgroundOpacityLabel: "背景透明度",

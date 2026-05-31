@@ -159,6 +159,15 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             </label>
             <label class="form-control grid min-w-0 gap-1.5 col-span-full">
               <span class="label">
+                <span class="label-text">{newTabConfig.settings.shortcutOpenModeLabel}</span>
+              </span>
+              <select class="select select-bordered select-sm" data-config-shortcut-open-mode>
+                <option value="current">{newTabConfig.settings.shortcutOpenModeCurrentLabel}</option>
+                <option value="newTab">{newTabConfig.settings.shortcutOpenModeNewTabLabel}</option>
+              </select>
+            </label>
+            <label class="form-control grid min-w-0 gap-1.5 col-span-full">
+              <span class="label">
                 <span class="label-text">{newTabConfig.settings.backgroundUrlLabel}</span>
               </span>
               <input
@@ -302,6 +311,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       textColors: cloneValue(defaultTextColors),
       defaultSearchEngineId: defaultPayload.config?.search?.defaultEngineId ?? "google",
       homeLink: cloneValue(defaultPayload.config?.homeLink ?? { label: "资料卡首页", href: "/" }),
+      shortcutOpenMode: "current",
       greetings: cloneValue(defaultPayload.config?.greetings ?? []),
       searchEngines: cloneValue(defaultPayload.searchEngines ?? []),
       shortcutGroups: cloneValue(defaultPayload.shortcutGroups ?? []),
@@ -309,7 +319,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const storageKey = defaultPayload.config?.storageKey ?? "ethanz-new-tab-config";
     const logoCacheStorageKey = `${storageKey}:logo-cache`;
-    const logoResolverVersion = 3;
+    const logoResolverVersion = 4;
     const settingsLabels = defaultPayload.config?.settings ?? {};
     let newTabState = defaultState();
     let shortcutEditMode = false;
@@ -332,6 +342,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value.trim())
         ? value.trim()
         : fallback;
+
+    const normalizeShortcutOpenMode = (value, fallback = "current") =>
+      value === "newTab" || value === "current" ? value : fallback;
 
     const normalizeTextColors = (value, fallback) => {
       if (!isPlainObject(value)) {
@@ -463,6 +476,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           ? defaultSearchEngineId
           : searchEngines[0]?.id ?? fallback.defaultSearchEngineId,
         homeLink: normalizeHomeLink(value.homeLink, fallback.homeLink),
+        shortcutOpenMode: normalizeShortcutOpenMode(value.shortcutOpenMode, fallback.shortcutOpenMode),
         greetings: normalizeGreetings(value.greetings, fallback.greetings),
         searchEngines,
         shortcutGroups: normalizeShortcutGroups(value.shortcutGroups, fallback.shortcutGroups),
@@ -1055,9 +1069,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         pushLogoCandidate(candidates, cachedLogo.logoUrl, false);
       }
 
-      const duckDuckGoFavicon = `https://icons.duckduckgo.com/ip3/${hostname}.ico`;
-      pushLogoCandidate(candidates, duckDuckGoFavicon);
-
       if (canUseCachedLogo && Array.isArray(cachedLogo?.candidates)) {
         pushLogoCandidates(candidates, cachedLogo.candidates);
       }
@@ -1090,9 +1101,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         pushLogoCandidate(candidates, new URL(path, originUrl).href);
       });
 
+      const duckDuckGoFavicon = `https://icons.duckduckgo.com/ip3/${hostname}.ico`;
       const googleFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=64`;
       const directFavicon = `https://${hostname}/favicon.ico`;
 
+      pushLogoCandidate(candidates, duckDuckGoFavicon);
       pushLogoCandidate(candidates, googleFavicon);
       pushLogoCandidate(candidates, directFavicon, false);
 
@@ -1281,6 +1294,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             ...discovered.candidates,
             ...bundled.candidates,
           ].filter((url, index, items) => url && items.indexOf(url) === index);
+          discovered.logoUrl = discovered.logoUrl ?? discovered.candidates[0] ?? "";
 
           if (!discovered.candidates.length && !discovered.title && !discovered.description) {
             mergeShortcutLogoCache(cacheKey, {
@@ -1379,6 +1393,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     const bindLogoFallback = (image) => {
       image.addEventListener("load", () => {
         if (image.currentSrc && image.naturalWidth > 0) {
+          const existing = shortcutLogoCache[image.dataset.logoCacheKey];
+
+          if (
+            existing?.metadataResolved &&
+            existing?.logoUrl &&
+            existing.logoUrl !== image.currentSrc
+          ) {
+            return;
+          }
+
           mergeShortcutLogoCache(image.dataset.logoCacheKey, {
             logoUrl: image.currentSrc,
           });
@@ -1719,8 +1743,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           const item = document.createElement("a");
           item.className = "shortcut-item group/item absolute left-0 top-0 grid h-11 w-11 grid-cols-[1.7rem_0fr] items-center justify-start gap-0 overflow-hidden rounded-[0.45rem] border border-transparent bg-base-100/95 px-2 font-[inherit] text-inherit no-underline transition-[transform,border-color,background-color] duration-180 hover:z-20 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-200 focus-visible:z-20 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-200 focus-visible:outline-none";
           item.href = shortcut.url;
-          item.target = "_blank";
-          item.rel = "noopener noreferrer";
+          if (newTabState.shortcutOpenMode === "newTab") {
+            item.target = "_blank";
+            item.rel = "noopener noreferrer";
+          }
           item.setAttribute(
             "aria-label",
             `${shortcut.title}：${getShortcutSubtitle(shortcut)}`,
@@ -1919,6 +1945,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const nameInput = document.querySelector("[data-config-name]");
       const homeLabelInput = document.querySelector("[data-config-home-label]");
       const homeHrefInput = document.querySelector("[data-config-home-href]");
+      const shortcutOpenModeInput = document.querySelector("[data-config-shortcut-open-mode]");
       const backgroundInput = document.querySelector("[data-config-background]");
       const backgroundOpacityInput = document.querySelector("[data-config-background-opacity]");
       const backgroundOpacityValue = document.querySelector("[data-config-background-opacity-value]");
@@ -1937,6 +1964,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       if (homeHrefInput instanceof HTMLInputElement) {
         homeHrefInput.value = newTabState.homeLink.href;
+      }
+
+      if (shortcutOpenModeInput instanceof HTMLSelectElement) {
+        shortcutOpenModeInput.value = newTabState.shortcutOpenMode;
       }
 
       if (backgroundInput instanceof HTMLInputElement) {
@@ -2180,6 +2211,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const nameInput = settings.querySelector("[data-config-name]");
       const homeLabelInput = settings.querySelector("[data-config-home-label]");
       const homeHrefInput = settings.querySelector("[data-config-home-href]");
+      const shortcutOpenModeInput = settings.querySelector("[data-config-shortcut-open-mode]");
       const backgroundInput = settings.querySelector("[data-config-background]");
       const backgroundOpacityInput = settings.querySelector("[data-config-background-opacity]");
       const textColorModeInput = settings.querySelector("[data-config-text-color-mode]");
@@ -2261,6 +2293,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
         newTabState.homeLink.href = normalizeText(homeHrefInput.value, defaultPayload.config?.homeLink?.href ?? "/");
         persistConfigChange();
+      });
+
+      shortcutOpenModeInput?.addEventListener("change", () => {
+        if (!(shortcutOpenModeInput instanceof HTMLSelectElement)) {
+          return;
+        }
+
+        newTabState.shortcutOpenMode = normalizeShortcutOpenMode(shortcutOpenModeInput.value);
+        persistConfigChange();
+        syncSettingsControls();
       });
 
       backgroundInput?.addEventListener("input", () => {
