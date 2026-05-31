@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import {
   Check,
+  EllipsisVertical,
   GripVertical,
   PencilLine,
   Plus,
@@ -267,6 +268,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   <template data-new-tab-icon="drag">
     <GripVertical class="h-3.5 w-3.5" aria-hidden="true" />
   </template>
+  <template data-new-tab-icon="more">
+    <EllipsisVertical class="h-4 w-4" aria-hidden="true" />
+  </template>
   <template data-new-tab-icon="edit">
     <PencilLine class="h-4 w-4" aria-hidden="true" />
   </template>
@@ -326,6 +330,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     let activeDragPayload = null;
     let textColorSaveTimer = 0;
     let shortcutLogoCache = {};
+    let activeShortcutContextMenu = null;
     const shortcutLogoRequests = new Map();
     const onePanelLogoDataUrl = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" fill="#3370ff"><path d="M19.42 4.842 7.785 11.56v10.064l7.539 4.353-2.921 1.686-7.54-4.353V9.874L16.5 3.156z"/><path d="m20.598 5.522-2.921 1.686 7.539 4.352v10.064l2.92 1.686V9.874zM16.922 9.328l.892.532v13.666l-.892.515zM12.523 11.862l4.399-2.534-.002 14.714-2.848-1.644v-8.82h-1.549z"/><path fill-rule="evenodd" d="M3 8.796 16.5 1 30 8.796v15.592l-13.5 7.796L3 24.388zm26.64.208L16.5 1.417V1.41L3.357 8.997v15.182L16.5 31.772l13.141-7.587z" clip-rule="evenodd"/></svg>')}`;
 
@@ -608,6 +613,115 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       return button;
     };
 
+    const closeShortcutContextMenu = () => {
+      activeShortcutContextMenu?.remove();
+      activeShortcutContextMenu = null;
+    };
+
+    const getContextMenuPoint = (event, fallbackElement) => {
+      if (event instanceof MouseEvent && Number.isFinite(event.clientX) && Number.isFinite(event.clientY)) {
+        return {
+          x: event.clientX,
+          y: event.clientY,
+        };
+      }
+
+      const rect = fallbackElement?.getBoundingClientRect();
+      return {
+        x: rect ? rect.left + rect.width / 2 : window.innerWidth / 2,
+        y: rect ? rect.bottom + 8 : window.innerHeight / 2,
+      };
+    };
+
+    const positionShortcutContextMenu = (menu, point) => {
+      const margin = 12;
+      const rect = menu.getBoundingClientRect();
+      const maxLeft = Math.max(margin, window.innerWidth - rect.width - margin);
+      const maxTop = Math.max(margin, window.innerHeight - rect.height - margin);
+
+      menu.style.left = `${Math.min(Math.max(point.x, margin), maxLeft)}px`;
+      menu.style.top = `${Math.min(Math.max(point.y, margin), maxTop)}px`;
+    };
+
+    const openShortcutContextMenu = ({ event, fallbackElement, title, subtitle, actions }) => {
+      event?.preventDefault();
+      event?.stopPropagation();
+      closeShortcutContextMenu();
+
+      const menu = document.createElement("div");
+      menu.className = "shortcut-context-menu fixed z-[90] grid min-w-44 gap-1 rounded-[0.55rem] border border-base-content/15 bg-base-100 p-1.5 text-sm text-base-content shadow-xl outline-none max-sm:min-w-52";
+      menu.setAttribute("role", "menu");
+      menu.tabIndex = -1;
+
+      const header = document.createElement("div");
+      header.className = "grid border-b border-base-content/10 px-2 py-1.5";
+      const headerText = document.createElement("span");
+      headerText.className = "grid min-w-0 gap-0.5";
+      const headerTitle = document.createElement("strong");
+      headerTitle.className = "truncate text-xs font-bold leading-tight";
+      headerTitle.textContent = title;
+      headerText.append(headerTitle);
+
+      if (subtitle) {
+        const headerSubtitle = document.createElement("small");
+        headerSubtitle.className = "truncate text-[0.68rem] font-semibold leading-tight text-base-content/45";
+        headerSubtitle.textContent = subtitle;
+        headerText.append(headerSubtitle);
+      }
+
+      header.append(headerText);
+      menu.append(header);
+
+      actions.forEach((action) => {
+        const button = document.createElement("button");
+        button.className = action.danger
+          ? "grid h-9 grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 rounded-[0.4rem] border-0 bg-transparent px-2 text-left text-error/80 transition hover:bg-error/10 focus-visible:bg-error/10 focus-visible:outline-none"
+          : "grid h-9 grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 rounded-[0.4rem] border-0 bg-transparent px-2 text-left text-base-content/75 transition hover:bg-base-200 focus-visible:bg-base-200 focus-visible:outline-none";
+        button.type = "button";
+        button.setAttribute("role", "menuitem");
+        button.innerHTML = `<span class="grid h-4 w-4 place-items-center [&_svg]:h-3.5 [&_svg]:w-3.5">${getIconMarkup(action.icon)}</span><span class="truncate text-xs font-semibold">${action.label}</span>`;
+        button.addEventListener("click", () => {
+          closeShortcutContextMenu();
+          action.onSelect();
+        });
+        menu.append(button);
+      });
+
+      document.body.append(menu);
+      activeShortcutContextMenu = menu;
+
+      window.requestAnimationFrame(() => {
+        positionShortcutContextMenu(menu, getContextMenuPoint(event, fallbackElement));
+        menu.focus({ preventScroll: true });
+      });
+    };
+
+    const bindShortcutContextMenuDismissal = () => {
+      if (document.documentElement.dataset.newTabContextMenuBound === "true") {
+        return;
+      }
+
+      document.addEventListener("pointerdown", (event) => {
+        if (
+          activeShortcutContextMenu &&
+          event.target instanceof Node &&
+          !activeShortcutContextMenu.contains(event.target)
+        ) {
+          closeShortcutContextMenu();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeShortcutContextMenu();
+        }
+      });
+
+      window.addEventListener("resize", closeShortcutContextMenu);
+      window.addEventListener("scroll", closeShortcutContextMenu, true);
+      document.documentElement.dataset.newTabContextMenuBound = "true";
+    };
+
     const createShortcutAddForm = (group) => {
       const form = document.createElement("form");
       form.className = "shortcut-item-add-form col-span-full grid w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 rounded-[0.45rem] border border-base-content/10 bg-base-100/80 p-1.5 shadow-sm backdrop-blur";
@@ -754,6 +868,149 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       return form;
     };
 
+    const createShortcutEditForm = (group, shortcut) => {
+      const form = document.createElement("form");
+      form.className = "shortcut-item-edit-form grid w-full max-w-[min(100%,24rem)] grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 rounded-[0.45rem] border border-base-content/10 bg-base-100/90 p-1.5 shadow-sm backdrop-blur";
+      form.setAttribute("aria-label", `修改 item：${shortcut.title}`);
+
+      const fields = document.createElement("div");
+      fields.className = "grid min-w-0 gap-1";
+
+      const createInput = (label, value, inputMode = "text") => {
+        const inputLabel = document.createElement("label");
+        inputLabel.className = "sr-only";
+        inputLabel.textContent = label;
+        const input = document.createElement("input");
+        input.className = "input input-bordered input-xs h-8 min-w-0 bg-base-100/80 text-xs";
+        input.type = "text";
+        input.inputMode = inputMode;
+        input.autocomplete = "off";
+        input.placeholder = label;
+        input.value = value ?? "";
+        input.setAttribute("aria-label", label);
+        fields.append(inputLabel, input);
+        return input;
+      };
+
+      const titleInput = createInput(settingsLabels.shortcutTitleLabel ?? "名称", shortcut.title);
+      const urlInput = createInput(settingsLabels.shortcutUrlLabel ?? "地址", shortcut.url, "url");
+      const descriptionInput = createInput(settingsLabels.shortcutDescriptionLabel ?? "说明", shortcut.description ?? "");
+      const logoInput = createInput(settingsLabels.shortcutLogoLabel ?? "图标 URL", shortcut.logo ?? "", "url");
+
+      const error = document.createElement("p");
+      error.className = "hidden text-[0.72rem] leading-snug text-error";
+      fields.append(error);
+
+      const submitButton = createIconButton("保存", "check", "text-success/75 hover:text-success");
+      submitButton.type = "submit";
+      const cancelButton = createIconButton("取消", "close");
+      let shortcutMetadataRequestId = 0;
+      let shortcutMetadata = null;
+
+      const syncShortcutMetadata = () => {
+        const url = normalizeShortcutUrlInput(urlInput.value);
+
+        if (!url || !isValidShortcutUrl(url) || !isRemoteUrl(url)) {
+          return Promise.resolve(null);
+        }
+
+        const requestId = shortcutMetadataRequestId + 1;
+        shortcutMetadataRequestId = requestId;
+
+        return fetchShortcutMetadata({ url }).then((metadata) => {
+          if (requestId !== shortcutMetadataRequestId || normalizeShortcutUrlInput(urlInput.value) !== url) {
+            return null;
+          }
+
+          shortcutMetadata = metadata;
+          if (!normalizeText(titleInput.value) && metadata?.title) {
+            titleInput.value = metadata.title;
+            clearInlineFormError(error);
+          }
+          return metadata;
+        });
+      };
+
+      cancelButton.addEventListener("click", () => {
+        renderShortcutGroups();
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const url = normalizeShortcutUrlInput(urlInput.value);
+
+        if (!url) {
+          setInlineFormError(error, "先输入地址");
+          urlInput.focus();
+          return;
+        }
+
+        if (!isValidShortcutUrl(url)) {
+          setInlineFormError(error, "地址格式不对");
+          urlInput.focus();
+          return;
+        }
+
+        let title = normalizeText(titleInput.value);
+        let metadata = shortcutMetadata;
+
+        if (isRemoteUrl(url) && (!title || (!normalizeText(logoInput.value) && url !== shortcut.url))) {
+          submitButton.disabled = true;
+          setInlineFormError(error, title ? "正在解析图标" : "正在解析标题");
+          metadata = await syncShortcutMetadata();
+          title = normalizeText(titleInput.value, metadata?.title ?? "");
+          submitButton.disabled = false;
+        }
+
+        if (!title) {
+          setInlineFormError(error, "先输入名称");
+          titleInput.focus();
+          return;
+        }
+
+        shortcut.title = title;
+        shortcut.url = url;
+
+        const description = normalizeText(descriptionInput.value, metadata?.description ?? "");
+        const logo = normalizeText(logoInput.value, metadata?.logoUrl ?? "");
+
+        if (description) {
+          shortcut.description = description;
+        } else {
+          delete shortcut.description;
+        }
+
+        if (logo) {
+          shortcut.logo = logo;
+        } else {
+          delete shortcut.logo;
+        }
+
+        persistConfigChange("已修改");
+      });
+
+      [titleInput, urlInput, descriptionInput, logoInput].forEach((input) => {
+        input.addEventListener("input", () => {
+          clearInlineFormError(error);
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            renderShortcutGroups();
+          }
+        });
+      });
+
+      urlInput.addEventListener("input", () => {
+        shortcutMetadata = null;
+      });
+      urlInput.addEventListener("blur", syncShortcutMetadata);
+      urlInput.addEventListener("change", syncShortcutMetadata);
+
+      form.append(fields, submitButton, cancelButton);
+      return form;
+    };
+
     const createGroupAddForm = () => {
       const form = document.createElement("form");
       form.className = "shortcut-group shortcut-group--add-form grid grid-cols-[minmax(7.5rem,8.5rem)_minmax(0,1fr)] items-start gap-4 py-1 max-sm:grid-cols-1 max-sm:gap-2";
@@ -799,6 +1056,65 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           shortcuts: [],
         });
         persistConfigChange("已添加");
+      });
+
+      input.addEventListener("input", () => {
+        clearInlineFormError(error);
+      });
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          renderShortcutGroups();
+        }
+      });
+
+      form.append(field, actions);
+      return form;
+    };
+
+    const createGroupEditForm = (group) => {
+      const form = document.createElement("form");
+      form.className = "shortcut-group shortcut-group--edit-form grid grid-cols-[minmax(7.5rem,8.5rem)_minmax(0,1fr)] items-start gap-4 py-1 max-sm:grid-cols-1 max-sm:gap-2";
+      form.setAttribute("aria-label", `修改分组：${group.title}`);
+
+      const field = document.createElement("label");
+      field.className = "grid min-w-0 gap-1";
+      const srLabel = document.createElement("span");
+      srLabel.className = "sr-only";
+      srLabel.textContent = settingsLabels.groupTitleLabel ?? "分组名";
+      const input = document.createElement("input");
+      input.className = "input input-bordered input-xs h-8 w-full max-w-36 bg-base-100/80 text-xs";
+      input.type = "text";
+      input.autocomplete = "off";
+      input.placeholder = settingsLabels.groupTitleLabel ?? "分组名";
+      input.value = group.title;
+      const error = document.createElement("span");
+      error.className = "hidden text-[0.72rem] leading-snug text-error";
+      field.append(srLabel, input, error);
+
+      const actions = document.createElement("span");
+      actions.className = "inline-flex items-center gap-1.5";
+      const submitButton = createIconButton("保存", "check", "text-success/75 hover:text-success");
+      submitButton.type = "submit";
+      const cancelButton = createIconButton("取消", "close");
+      actions.append(submitButton, cancelButton);
+
+      cancelButton.addEventListener("click", () => {
+        renderShortcutGroups();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const title = normalizeText(input.value);
+
+        if (!title) {
+          setInlineFormError(error, "先输入分组名");
+          input.focus();
+          return;
+        }
+
+        group.title = title;
+        persistConfigChange("已修改");
       });
 
       input.addEventListener("input", () => {
@@ -1525,6 +1841,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       stack.textContent = "";
       stack.dataset.editing = String(shortcutEditMode);
+      closeShortcutContextMenu();
       syncShortcutEditToggle();
 
       newTabState.shortcutGroups.forEach((group, groupIndex) => {
@@ -1550,6 +1867,43 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         titleWrap.className = "flex min-w-0 items-center gap-2";
 
         if (shortcutEditMode) {
+          const openGroupEditForm = () => {
+            const form = createGroupEditForm(group);
+            section.replaceWith(form);
+            focusFirstInput(form);
+          };
+          const removeGroup = () => {
+            const currentGroupIndex = newTabState.shortcutGroups.indexOf(group);
+
+            if (currentGroupIndex < 0) {
+              return;
+            }
+
+            newTabState.shortcutGroups.splice(currentGroupIndex, 1);
+            persistConfigChange("已删除");
+          };
+          const openGroupMenu = (event) => {
+            openShortcutContextMenu({
+              event,
+              fallbackElement: section,
+              title: group.title,
+              subtitle: "分组操作",
+              actions: [
+                {
+                  label: "修改分组",
+                  icon: "edit",
+                  onSelect: openGroupEditForm,
+                },
+                {
+                  label: settingsLabels.removeGroupLabel ?? "删除分组",
+                  icon: "trash",
+                  danger: true,
+                  onSelect: removeGroup,
+                },
+              ],
+            });
+          };
+
           const groupDragHandle = document.createElement("span");
           groupDragHandle.className = "shortcut-drag-handle grid h-5 w-4 shrink-0 cursor-grab place-items-center rounded border border-base-content/10 bg-base-100/80 text-base-content/35 transition hover:text-base-content/70 active:cursor-grabbing";
           groupDragHandle.draggable = true;
@@ -1574,6 +1928,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             clearDragPayload();
           });
           titleWrap.append(groupDragHandle);
+          titleWrap.addEventListener("contextmenu", openGroupMenu);
         }
 
         titleWrap.append(title);
@@ -1587,24 +1942,48 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         actions.append(count);
 
         if (shortcutEditMode) {
-          const removeGroupButton = document.createElement("button");
-          removeGroupButton.className = "btn btn-square btn-ghost btn-xs shortcut-group__remove h-5 min-h-5 w-5 p-0 text-base-content/60 opacity-60 transition hover:text-base-content/80 hover:opacity-100 focus-visible:text-base-content/80 [&_svg]:h-3 [&_svg]:w-3";
-          removeGroupButton.type = "button";
-          removeGroupButton.title = settingsLabels.removeGroupLabel ?? "删除分组";
-          removeGroupButton.setAttribute("aria-label", `${settingsLabels.removeGroupLabel ?? "删除分组"}：${group.title}`);
-          removeGroupButton.innerHTML = getIconMarkup("trash");
-          removeGroupButton.addEventListener("click", () => {
-            const currentGroupIndex = newTabState.shortcutGroups.indexOf(group);
+          const groupMenuButton = document.createElement("button");
+          groupMenuButton.className = "btn btn-square btn-ghost btn-xs shortcut-group__menu h-6 min-h-6 w-6 p-0 text-base-content/55 opacity-65 transition hover:text-base-content/80 hover:opacity-100 focus-visible:text-base-content/80 [&_svg]:h-3.5 [&_svg]:w-3.5";
+          groupMenuButton.type = "button";
+          groupMenuButton.title = "分组操作";
+          groupMenuButton.setAttribute("aria-label", `分组操作：${group.title}`);
+          groupMenuButton.innerHTML = getIconMarkup("more");
+          groupMenuButton.addEventListener("click", (event) => {
+            openShortcutContextMenu({
+              event,
+              fallbackElement: groupMenuButton,
+              title: group.title,
+              subtitle: "分组操作",
+              actions: [
+                {
+                  label: "修改分组",
+                  icon: "edit",
+                  onSelect: () => {
+                    const form = createGroupEditForm(group);
+                    section.replaceWith(form);
+                    focusFirstInput(form);
+                  },
+                },
+                {
+                  label: settingsLabels.removeGroupLabel ?? "删除分组",
+                  icon: "trash",
+                  danger: true,
+                  onSelect: () => {
+                    const currentGroupIndex = newTabState.shortcutGroups.indexOf(group);
 
-            if (currentGroupIndex < 0) {
-              return;
-            }
+                    if (currentGroupIndex < 0) {
+                      return;
+                    }
 
-            newTabState.shortcutGroups.splice(currentGroupIndex, 1);
-            persistConfigChange("已删除");
+                    newTabState.shortcutGroups.splice(currentGroupIndex, 1);
+                    persistConfigChange("已删除");
+                  },
+                },
+              ],
+            });
           });
 
-          actions.append(removeGroupButton);
+          titleWrap.append(groupMenuButton);
         }
         summary.append(titleWrap, actions);
 
@@ -1649,7 +2028,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         }
 
         const items = document.createElement("div");
-        items.className = "shortcut-group__items flex w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] min-w-0 flex-wrap items-start justify-start gap-2";
+        items.className = shortcutEditMode
+          ? "shortcut-group__items flex w-full max-w-[min(100%,34rem)] min-w-0 flex-wrap items-start justify-start gap-2"
+          : "shortcut-group__items flex w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] min-w-0 flex-wrap items-start justify-start gap-2";
         if (shortcutEditMode) {
           items.addEventListener("dragover", (event) => {
             const payload = readDragPayload(event);
@@ -1700,8 +2081,46 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             : "shortcut-item-shell group relative z-0 h-11 w-11 hover:z-30 focus-within:z-30";
 
           if (shortcutEditMode) {
+            const openShortcutEditForm = () => {
+              const form = createShortcutEditForm(group, shortcut);
+              itemShell.replaceWith(form);
+              focusFirstInput(form);
+            };
+            const removeShortcut = () => {
+              const currentShortcutIndex = group.shortcuts.indexOf(shortcut);
+
+              if (currentShortcutIndex < 0) {
+                return;
+              }
+
+              group.shortcuts.splice(currentShortcutIndex, 1);
+              persistConfigChange("已删除");
+            };
+            const openShortcutMenu = (event) => {
+              openShortcutContextMenu({
+                event,
+                fallbackElement: itemShell,
+                title: shortcut.title,
+                subtitle: getShortcutSubtitle(shortcut),
+                actions: [
+                  {
+                    label: "修改 item",
+                    icon: "edit",
+                    onSelect: openShortcutEditForm,
+                  },
+                  {
+                    label: settingsLabels.removeShortcutLabel ?? "删除 item",
+                    icon: "trash",
+                    danger: true,
+                    onSelect: removeShortcut,
+                  },
+                ],
+              });
+            };
+
             itemShell.draggable = true;
             itemShell.title = `拖拽排序：${shortcut.title}`;
+            itemShell.addEventListener("contextmenu", openShortcutMenu);
             itemShell.addEventListener("dragstart", (event) => {
               if (event.target instanceof Element && event.target.closest("button")) {
                 event.preventDefault();
@@ -1839,30 +2258,48 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           item.append(icon, itemLabel);
 
           if (shortcutEditMode) {
-            const removeItemButton = document.createElement("button");
-            removeItemButton.className = "btn btn-square btn-ghost btn-xs shortcut-item__remove absolute -right-1 -top-1 z-20 h-[1.1rem] min-h-[1.1rem] w-[1.1rem] rounded-full border border-base-content/15 bg-base-100 p-0 text-base-content/70 opacity-80 transition hover:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 max-sm:opacity-100 [&_svg]:h-3 [&_svg]:w-3";
-            removeItemButton.type = "button";
-            removeItemButton.title = settingsLabels.removeShortcutLabel ?? "删除 item";
-            removeItemButton.setAttribute(
-              "aria-label",
-              `${settingsLabels.removeShortcutLabel ?? "删除 item"}：${shortcut.title}`,
-            );
-            removeItemButton.innerHTML = getIconMarkup("trash");
-            removeItemButton.addEventListener("click", (event) => {
-              event.preventDefault();
-              event.stopPropagation();
+            const itemMenuButton = document.createElement("button");
+            itemMenuButton.className = "btn btn-square btn-ghost btn-xs shortcut-item__menu absolute -right-1 -top-1 z-20 h-[1.15rem] min-h-[1.15rem] w-[1.15rem] rounded-full border border-base-content/15 bg-base-100 p-0 text-base-content/70 opacity-80 transition hover:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 max-sm:h-7 max-sm:min-h-7 max-sm:w-7 max-sm:opacity-100 [&_svg]:h-3 [&_svg]:w-3";
+            itemMenuButton.type = "button";
+            itemMenuButton.title = "item 操作";
+            itemMenuButton.setAttribute("aria-label", `item 操作：${shortcut.title}`);
+            itemMenuButton.innerHTML = getIconMarkup("more");
+            itemMenuButton.addEventListener("click", (event) => {
+              openShortcutContextMenu({
+                event,
+                fallbackElement: itemMenuButton,
+                title: shortcut.title,
+                subtitle: getShortcutSubtitle(shortcut),
+                actions: [
+                  {
+                    label: "修改 item",
+                    icon: "edit",
+                    onSelect: () => {
+                      const form = createShortcutEditForm(group, shortcut);
+                      itemShell.replaceWith(form);
+                      focusFirstInput(form);
+                    },
+                  },
+                  {
+                    label: settingsLabels.removeShortcutLabel ?? "删除 item",
+                    icon: "trash",
+                    danger: true,
+                    onSelect: () => {
+                      const currentShortcutIndex = group.shortcuts.indexOf(shortcut);
 
-              const currentShortcutIndex = group.shortcuts.indexOf(shortcut);
+                      if (currentShortcutIndex < 0) {
+                        return;
+                      }
 
-              if (currentShortcutIndex < 0) {
-                return;
-              }
-
-              group.shortcuts.splice(currentShortcutIndex, 1);
-              persistConfigChange("已删除");
+                      group.shortcuts.splice(currentShortcutIndex, 1);
+                      persistConfigChange("已删除");
+                    },
+                  },
+                ],
+              });
             });
 
-            itemShell.append(removeItemButton);
+            itemShell.append(itemMenuButton);
           }
 
           itemShell.append(item, tooltip);
@@ -2500,6 +2937,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       bindSearch();
       bindShortcutEditor();
       bindSettings();
+      bindShortcutContextMenuDismissal();
     };
 
     const clearNewTabBackground = () => {
@@ -2508,6 +2946,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       delete document.documentElement.dataset.newTabBackground;
       delete document.documentElement.dataset.newTabTextColors;
+      closeShortcutContextMenu();
 
       if (backgroundBase instanceof HTMLElement) {
         backgroundBase.hidden = true;
