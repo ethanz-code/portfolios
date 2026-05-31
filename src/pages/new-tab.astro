@@ -646,43 +646,50 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       submitButton.type = "submit";
       const cancelButton = createIconButton("取消", "close");
       let shortcutMetadataRequestId = 0;
+      let shortcutMetadataTimer = 0;
+      let shortcutMetadata = null;
+
+      const applyShortcutMetadata = (metadata) => {
+        shortcutMetadata = metadata;
+
+        if (!normalizeText(titleInput.value) && metadata?.title) {
+          titleInput.value = metadata.title;
+          clearInlineFormError(error);
+        }
+      };
 
       const syncShortcutMetadata = () => {
         const url = normalizeShortcutUrlInput(urlInput.value);
 
         if (!url || !isValidShortcutUrl(url) || !isRemoteUrl(url)) {
-          return;
+          return Promise.resolve(null);
         }
 
         const requestId = shortcutMetadataRequestId + 1;
         shortcutMetadataRequestId = requestId;
 
-        fetchShortcutMetadata({ url }).then((metadata) => {
+        return fetchShortcutMetadata({ url }).then((metadata) => {
           if (requestId !== shortcutMetadataRequestId || normalizeShortcutUrlInput(urlInput.value) !== url) {
-            return;
+            return null;
           }
 
-          if (!normalizeText(titleInput.value) && metadata?.title) {
-            titleInput.value = metadata.title;
-            clearInlineFormError(error);
-          }
+          applyShortcutMetadata(metadata);
+          return metadata;
         });
+      };
+
+      const scheduleShortcutMetadataSync = () => {
+        window.clearTimeout(shortcutMetadataTimer);
+        shortcutMetadataTimer = window.setTimeout(syncShortcutMetadata, 550);
       };
 
       cancelButton.addEventListener("click", () => {
         renderShortcutGroups();
       });
 
-      form.addEventListener("submit", (event) => {
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const title = normalizeText(titleInput.value);
         const url = normalizeShortcutUrlInput(urlInput.value);
-
-        if (!title) {
-          setInlineFormError(error, "先输入名称");
-          titleInput.focus();
-          return;
-        }
 
         if (!url) {
           setInlineFormError(error, "先输入地址");
@@ -696,9 +703,30 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           return;
         }
 
+        let title = normalizeText(titleInput.value);
+        let metadata = shortcutMetadata;
+
+        if (isRemoteUrl(url) && !metadata) {
+          submitButton.disabled = true;
+          setInlineFormError(error, title ? "正在解析图标" : "正在解析标题");
+          metadata = await syncShortcutMetadata();
+          title = normalizeText(titleInput.value, metadata?.title ?? "");
+          submitButton.disabled = false;
+        }
+
+        if (!title) {
+          setInlineFormError(error, "先输入名称");
+          titleInput.focus();
+          return;
+        }
+
+        const logo = metadata?.logoUrl;
+        const description = metadata?.description;
         group.shortcuts.push({
           title,
           url,
+          ...(description ? { description } : {}),
+          ...(logo ? { logo } : {}),
         });
         persistConfigChange("已添加");
       });
@@ -715,6 +743,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         });
       });
 
+      urlInput.addEventListener("input", () => {
+        shortcutMetadata = null;
+        scheduleShortcutMetadataSync();
+      });
       urlInput.addEventListener("blur", syncShortcutMetadata);
       urlInput.addEventListener("change", syncShortcutMetadata);
 
