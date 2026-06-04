@@ -137,6 +137,8 @@ const hasMermaid = entry.body?.includes("```mermaid") ?? false;
     const params = new URLSearchParams(window.location.search);
     const isAdmin = params.get('admin') === 'true';
     
+    document.body.classList.toggle('admin-mode', isAdmin);
+    
     const descEl = document.querySelector('[data-project-desc]');
     if (descEl) {
       const desc = descEl.getAttribute('data-desc') || '';

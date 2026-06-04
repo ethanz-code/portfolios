@@ -191,3 +191,11 @@ body {
         min-width: 30rem;
     }
 }
+
+[data-admin-only] {
+    display: none;
+}
+
+body.admin-mode [data-admin-only] {
+    display: block;
+}
