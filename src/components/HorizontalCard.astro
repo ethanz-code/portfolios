@@ -7,18 +7,21 @@ interface Props {
   imgLight?: string | ImageMetadata;
   imgDark?: string | ImageMetadata;
   desc: string;
+  visitorDesc?: string;
   url: string;
   target?: string;
   compactMobile?: boolean;
 }
 
-const { title, img, imgLight, imgDark, desc, url, target = "_blank", compactMobile = false } = Astro.props as Props;
+const { title, img, imgLight, imgDark, desc, visitorDesc, url, target = "_blank", compactMobile = false } = Astro.props as Props;
 ---
 
 <div
   class:list={[
     "card w-full min-w-0 overflow-hidden border border-base-300/70 bg-base-100 shadow-sm transition ease-in-out md:border-0 md:shadow-none md:hover:scale-[102%] md:hover:shadow-xl",
   ]}
+  data-desc={desc}
+  data-visitor-desc={visitorDesc || desc}
 >
   <a class="block min-w-0" href={url} target={target}>
     <div
@@ -66,3 +69,22 @@ const { title, img, imgLight, imgDark, desc, url, target = "_blank", compactMobi
     </div>
   </a>
 </div>
+
+<script>
+  function updateCardDescriptions() {
+    const params = new URLSearchParams(window.location.search);
+    const isAdmin = params.get('admin') === 'true';
+    
+    document.querySelectorAll('[data-desc]').forEach((card) => {
+      const descEl = card.querySelector('p');
+      if (descEl) {
+        const desc = card.getAttribute('data-desc') || '';
+        const visitorDesc = card.getAttribute('data-visitor-desc') || desc;
+        descEl.textContent = isAdmin ? desc : visitorDesc;
+      }
+    });
+  }
+  
+  updateCardDescriptions();
+  document.addEventListener('astro:page-load', updateCardDescriptions);
+</script>

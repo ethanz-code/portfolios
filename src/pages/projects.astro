@@ -68,6 +68,7 @@ const getProjectImageDark = (project: ProjectEntry) =>
             imgLight={getProjectImageLight(project)}
             imgDark={getProjectImageDark(project)}
             desc={project.data.description}
+            visitorDesc={project.data.visitorDescription}
             url={getProjectUrl(project)}
             target={project.data.detailPage ? "_self" : "_blank"}
           />
@@ -91,6 +92,7 @@ const getProjectImageDark = (project: ProjectEntry) =>
                   imgLight={getProjectImageLight(project)}
                   imgDark={getProjectImageDark(project)}
                   desc={project.data.description}
+                  visitorDesc={project.data.visitorDescription}
                   url={getProjectUrl(project)}
                   target={project.data.detailPage ? "_self" : "_blank"}
                   compactMobile={true}
