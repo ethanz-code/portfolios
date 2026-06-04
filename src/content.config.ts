@@ -10,6 +10,7 @@ const projectLinkSchema = z.object({
 const projectSchema = z.object({
     title: z.string(),
     description: z.string(),
+    visitorDescription: z.string().optional(),
     updatedDate: z.coerce.date(),
     category: z.enum(["featured", "content"]),
     order: z.number(),
