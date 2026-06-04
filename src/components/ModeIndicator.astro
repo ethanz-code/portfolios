@@ -81,7 +81,9 @@
     });
   }
   
-  initModeIndicator();
-  
+  if (!window.__modeIndicatorInit) {
+    window.__modeIndicatorInit = true;
+    initModeIndicator();
+  }
   document.addEventListener('astro:page-load', initModeIndicator);
 </script>

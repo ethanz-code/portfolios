@@ -10,3 +10,7 @@ declare const process: {
     readonly DEPLOYED_AT?: string;
   };
 };
+
+interface Window {
+  __modeIndicatorInit?: boolean;
+}
