@@ -28,7 +28,8 @@ const isArticle = section === "articles";
 const article = isArticle ? entry.data as ArticleSchema : null;
 const project = !isArticle ? entry.data as ProjectSchema : null;
 const title = article?.title ?? project?.title ?? "";
-const description = article?.description ?? project?.description ?? "";
+const description = article?.description ?? (project?.visitorDescription || project?.description) ?? "";
+const adminDescription = project?.description ?? "";
 const projectImage = !isArticle && entry.id === "ai-design-aigc"
   ? aiDesignEffectDisplayImage
   : !isArticle && entry.id === "newland-iot-technical-services"
@@ -82,11 +83,21 @@ const hasMermaid = entry.body?.includes("```mermaid") ?? false;
           isArticle ? (
             <p class="mt-4 text-base leading-7 opacity-80 sm:text-lg sm:leading-relaxed lg:text-xl">{description}</p>
           ) : (
-            project?.tags && (
-              <div class="mt-4 flex flex-wrap gap-2">
-                {project.tags.map((tag) => <span class="badge badge-ghost">{tag}</span>)}
-              </div>
-            )
+            <>
+              <p
+                data-project-desc
+                data-desc={adminDescription}
+                data-visitor-desc={project?.visitorDescription || project?.description || ""}
+                class="mt-4 text-base leading-7 opacity-80 sm:text-lg sm:leading-relaxed lg:text-xl"
+              >
+                {description}
+              </p>
+              {project?.tags && (
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {project.tags.map((tag) => <span class="badge badge-ghost">{tag}</span>)}
+                </div>
+              )}
+            </>
           )
         }
 
@@ -120,3 +131,20 @@ const hasMermaid = entry.body?.includes("```mermaid") ?? false;
     </article>
   </main>
 </BaseLayout>
+
+<script>
+  function updateDetailDescription() {
+    const params = new URLSearchParams(window.location.search);
+    const isAdmin = params.get('admin') === 'true';
+    
+    const descEl = document.querySelector('[data-project-desc]');
+    if (descEl) {
+      const desc = descEl.getAttribute('data-desc') || '';
+      const visitorDesc = descEl.getAttribute('data-visitor-desc') || desc;
+      descEl.textContent = isAdmin ? desc : visitorDesc;
+    }
+  }
+  
+  updateDetailDescription();
+  document.addEventListener('astro:page-load', updateDetailDescription);
+</script>
