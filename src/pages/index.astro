@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HorizontalCard from "../components/HorizontalCard.astro";
 import ContributionChart from "../components/ContributionChart.astro";
+import TechStackMarquee from "../components/TechStackMarquee.astro";
 import { getContentEntryPath } from "../lib/content-routes";
 import { type CollectionEntry, getCollection } from "astro:content";
 
@@ -13,7 +14,7 @@ const workStyle = [
 const deliveryPoints = [
   "能够独立完成从需求梳理、开发实现到部署上线。",
   "有多人协同开发经验，能够很好的沟通和配合，推动项目进展。",
-  "会用主流 AI 提高开发效率，但同时也会确保实际效果和可持续维护。必要时刻也能够帮助团队搭建 Token 中转服务。",
+  "会用主流 AI 提高开发效率，通过 AI 工作流进行 UI 设计还原，同时确保实际效果和可持续维护。必要时刻也能够帮助团队搭建 Token 中转服务。",
   "我并不会造轮子，比如说要我做克隆数字人，我并不会对于模型的开发训练相关技能，我最多只能帮忙去对接现有以及开源的模式去用。",
 ];
 
@@ -53,7 +54,7 @@ const getProjectUrl = (project: ProjectEntry): string => {
         在这里写一些自己的项目经历，技术积累以及所思所想。希望能让你对我有个更全面的了解。
       </p>
       <p class="mt-3 text-base leading-7 sm:text-lg sm:leading-relaxed lg:text-xl lg:leading-[1.6]">
-        我做过知识库教程分享、中转站、当过客服，目前在创业探究市场缺口。
+        我做过知识库教程分享、中转站、当过客服，目前在创业探究市场缺口。自学英语，能直接阅读英文开发文档。
       </p>
     </div>
     <div class="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:gap-4 lg:mt-12">
@@ -91,6 +92,8 @@ const getProjectUrl = (project: ProjectEntry): string => {
       </div>
     </div>
   </section>
+
+  <TechStackMarquee />
 
   <ContributionChart />
 

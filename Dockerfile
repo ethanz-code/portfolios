@@ -1,9 +1,7 @@
 FROM --platform=$BUILDPLATFORM oven/bun:1.3.10-alpine AS builder
 
 ARG BUILDPLATFORM
-ARG DEPLOYED_AT
 ENV ASTRO_TELEMETRY_DISABLED=1
-ENV DEPLOYED_AT=$DEPLOYED_AT
 
 WORKDIR /app
 
@@ -13,12 +11,23 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run check && bun run build
 
-FROM nginx:1.27-alpine
+FROM node:20-alpine
 
-COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-EXPOSE 80
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+
+RUN mkdir -p /app/data
+
+ENV HOST=0.0.0.0
+ENV PORT=4321
+ENV VISIT_DB_PATH=/app/data/visits.db
+
+EXPOSE 4321
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget -qO- http://127.0.0.1/ >/dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1:4321/ >/dev/null || exit 1
+
+CMD ["node", "dist/server/entry.mjs"]

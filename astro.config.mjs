@@ -7,10 +7,12 @@ import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeMermaidBlocks from "./src/lib/rehype-mermaid-blocks.mjs";
+import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://itcox.cn",
+  adapter: node({ mode: "standalone" }),
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [

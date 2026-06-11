@@ -1,26 +1,20 @@
 ---
-const today = new Date();
-const rawDeployedAt = process.env.DEPLOYED_AT || import.meta.env.DEPLOYED_AT || today.toISOString();
-const deployedAt = new Date(rawDeployedAt);
-const deployedAtLabel = Number.isNaN(deployedAt.valueOf())
-  ? rawDeployedAt
-  : new Intl.DateTimeFormat("zh-CN", {
-      timeZone: "Asia/Shanghai",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(deployedAt).replace(/\//g, "-");
-const deployedAtISOString = Number.isNaN(deployedAt.valueOf())
-  ? undefined
-  : deployedAt.toISOString();
+const now = new Date();
+const deployedAtLabel = new Intl.DateTimeFormat("zh-CN", {
+  timeZone: "Asia/Shanghai",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+}).format(now).replace(/\//g, "-");
+const deployedAtISOString = now.toISOString();
 ---
 
 <footer class="footer footer-center mt-auto block px-6 pb-8 pt-4 lg:px-12">
   <div class="flex flex-col items-center gap-1 pb-2 text-sm sm:flex-row sm:gap-2">
-    &copy; 2024-{today.getFullYear()} 张永鑫. All rights reserved.
+    &copy; 2024-{now.getFullYear()} 张永鑫. All rights reserved.
     <a
       href="https://beian.miit.gov.cn/"
       target="_blank"
@@ -32,9 +26,34 @@ const deployedAtISOString = Number.isNaN(deployedAt.valueOf())
   </div>
   <div
     class="pointer-events-none fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-30 flex items-center gap-1 whitespace-nowrap text-[10px] leading-none text-base-content/30 sm:right-4 lg:bottom-3 lg:right-4"
-    aria-label="Latest deployment time"
+    aria-label="Site stats"
   >
-    <span>deploy</span>
+    <span>last:</span>
     <time datetime={deployedAtISOString}>{deployedAtLabel}</time>
+    <span data-visit-separator class="hidden"> · </span>
+    <span data-visit-count class="hidden"></span>
   </div>
 </footer>
+
+<script>
+  function loadVisitCount() {
+    const separator = document.querySelector("[data-visit-separator]");
+    const countEl = document.querySelector("[data-visit-count]");
+    if (!separator || !countEl || countEl.dataset.loaded) return;
+
+    fetch("/api/visit", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data.count === "number") {
+          countEl.textContent = data.count.toLocaleString("zh-CN") + " 次访问";
+          separator.classList.remove("hidden");
+          countEl.classList.remove("hidden");
+          countEl.dataset.loaded = "true";
+        }
+      })
+      .catch((err) => console.error("visit fetch failed:", err));
+  }
+
+  loadVisitCount();
+  document.addEventListener("astro:page-load", loadVisitCount);
+</script>
