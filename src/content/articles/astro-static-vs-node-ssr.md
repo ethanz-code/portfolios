@@ -9,13 +9,10 @@ tags:
   - "SEO"
 ---
 
-<callout icon="📌" color="gray_bg">
-	整理来源：[Astro 官方文档（docs.astro.build）](https://docs.astro.build)、Docker BuildKit 文档 — 2026 年 6 月
-</callout>
-# Astro 静态部署 vs Node SSR
-<callout icon="💡" color="blue_bg">
-	结论先行：当前项目用静态部署即可。Astro 默认 output: "static"，构建产物是纯 HTML 文件，SEO 友好，不需要 Node runtime。只有需要登录态、实时数据或 Astro 自身承担 API 服务时，才切换到 Node SSR。
-</callout>
+> 📌 整理来源：[Astro 官方文档（docs.astro.build）](https://docs.astro.build)、Docker BuildKit 文档 — 2026 年 6 月
+
+> 💡 结论先行：当前项目用静态部署即可。Astro 默认 output: "static"，构建产物是纯 HTML 文件，SEO 友好，不需要 Node runtime。只有需要登录态、实时数据或 Astro 自身承担 API 服务时，才切换到 Node SSR。
+
 ---
 ## 一、两种部署模式对比
 <table header-row="true" header-column="false">
@@ -55,6 +52,7 @@ tags:
 <td>高（需要容器/VPS）</td>
 </tr>
 </table>
+
 ---
 ## 二、切换到 Node SSR 的方法
 官方文档：[@astrojs/node adapter](https://docs.astro.build/en/guides/integrations-guide/node/)
@@ -70,20 +68,22 @@ export default defineConfig({
 ```
 构建并启动：
 ```bash
+
 # 构建
 npm run build
 
 # 启动（standalone 模式）
 HOST=0.0.0.0 PORT=4321 node ./dist/server/entry.mjs
 ```
+
 ---
 ## 三、什么时候才需要 Node SSR
 - 登录态、用户面板、个性化内容、实时数据库查询
 - Astro API routes / Actions / Sessions 需在运行时执行
 - 直接连数据库、处理表单、鉴权、写入数据
-<callout icon="⚠️" color="orange_bg">
-	不一定要整站 SSR：动态能力可单独放后端 API / Serverless / Edge Function，作品集页面继续静态部署。只有你希望 Astro 自己同时承担页面 SSR 和 API 服务，才把项目切到 @astrojs/node。
-</callout>
+
+> ⚠️ 不一定要整站 SSR：动态能力可单独放后端 API / Serverless / Edge Function，作品集页面继续静态部署。只有你希望 Astro 自己同时承担页面 SSR 和 API 服务，才把项目切到 @astrojs/node。
+
 ---
 ## 四、Astro output 配置详解
 官方文档：[output 配置参考](https://docs.astro.build/en/reference/configuration-reference/#output)
@@ -105,12 +105,16 @@ HOST=0.0.0.0 PORT=4321 node ./dist/server/entry.mjs
 <td>混合模式：默认静态，单个页面可选择 SSR</td>
 </tr>
 </table>
+
 ---
 ## 五、Docker 多平台构建：BUILDPLATFORM 说明
 官方文档：[Docker BuildKit 内置变量](https://docs.docker.com/build/building/variables/)
 BUILDPLATFORM 是 Docker BuildKit 自动注入的内置参数，**无需手动配置**，由 BuildKit/Buildx 自动传入。
-```plain text
+
+```plaintext
+
 # Dockerfile 示例
+
 # 构建阶段用 GitHub Runner 的原生架构跑 Bun，避免跨架构 QEMU 崩溃
 FROM --platform=$BUILDPLATFORM oven/bun:1.3.10-alpine AS builder
 
@@ -131,12 +135,12 @@ FROM --platform=$TARGETPLATFORM node:20-alpine AS runner
 <td>最终镜像的目标架构（由 --platform 参数指定）</td>
 </tr>
 </table>
+
 ---
 ## 六、参考链接
 - Astro output 配置文档：[docs.astro.build/en/reference/configuration-reference/#output](https://docs.astro.build/en/reference/configuration-reference/#output)
 - @astrojs/node adapter 文档：[docs.astro.build/en/guides/integrations-guide/node/](https://docs.astro.build/en/guides/integrations-guide/node/)
 - Docker BuildKit 内置变量：[docs.docker.com/build/building/variables/](https://docs.docker.com/build/building/variables/)
+
 ---
-<callout icon="🗓️" color="gray_bg">
-	文档整理时间：2026 年 6 月  \|  来源：[Astro 官方文档](https://docs.astro.build) / [Docker BuildKit 文档](https://docs.docker.com/build/buildkit/)
-</callout>
+> 🗓️ 文档整理时间：2026 年 6 月 | 来源：[Astro 官方文档](https://docs.astro.build) / [Docker BuildKit 文档](https://docs.docker.com/build/buildkit/)

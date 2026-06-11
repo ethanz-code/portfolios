@@ -192,10 +192,3 @@ body {
     }
 }
 
-[data-admin-only] {
-    display: none;
-}
-
-body.admin-mode [data-admin-only] {
-    display: block;
-}

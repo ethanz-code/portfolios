@@ -4,8 +4,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import MermaidRenderer from "./MermaidRenderer.astro";
 import { type ArticleSchema, type ProjectSchema } from "../content.config";
 import { contentProseClass } from "../lib/prose";
-import aiDesignEffectDisplayImage from "../assets/projects/ai-design-aigc/effect-display.webp";
-import newlandKnowledgeBaseImage from "../assets/projects/newland-iot-technical-services/knowledge-base.webp";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
@@ -28,14 +26,8 @@ const isArticle = section === "articles";
 const article = isArticle ? entry.data as ArticleSchema : null;
 const project = !isArticle ? entry.data as ProjectSchema : null;
 const title = article?.title ?? project?.title ?? "";
-const description = article?.description ?? (project?.visitorDescription || project?.description) ?? "";
-const adminDescription = project?.description ?? "";
-const projectImage = !isArticle && entry.id === "ai-design-aigc"
-  ? aiDesignEffectDisplayImage
-  : !isArticle && entry.id === "newland-iot-technical-services"
-    ? newlandKnowledgeBaseImage
-    : project?.heroImageLight ?? project?.heroImage;
-const image = article?.heroImage ?? projectImage;
+const description = article?.description ?? project?.description ?? "";
+const image = article?.heroImage ?? project?.heroImageLight ?? project?.heroImage;
 const backHref = isArticle ? "/articles" : "/projects";
 const backLabel = isArticle ? "返回文章" : "返回项目";
 const sideBarActiveItemID = section;
@@ -85,9 +77,6 @@ const hasMermaid = entry.body?.includes("```mermaid") ?? false;
           ) : (
             <>
               <p
-                data-project-desc
-                data-desc={adminDescription}
-                data-visitor-desc={project?.visitorDescription || project?.description || ""}
                 class="mt-4 text-base leading-7 opacity-80 sm:text-lg sm:leading-relaxed lg:text-xl"
               >
                 {description}
@@ -131,22 +120,3 @@ const hasMermaid = entry.body?.includes("```mermaid") ?? false;
     </article>
   </main>
 </BaseLayout>
-
-<script>
-  function updateDetailDescription() {
-    const params = new URLSearchParams(window.location.search);
-    const isAdmin = params.get('admin') === 'true';
-    
-    document.body.classList.toggle('admin-mode', isAdmin);
-    
-    const descEl = document.querySelector('[data-project-desc]');
-    if (descEl) {
-      const desc = descEl.getAttribute('data-desc') || '';
-      const visitorDesc = descEl.getAttribute('data-visitor-desc') || desc;
-      descEl.textContent = isAdmin ? desc : visitorDesc;
-    }
-  }
-  
-  updateDetailDescription();
-  document.addEventListener('astro:page-load', updateDetailDescription);
-</script>

@@ -9,13 +9,10 @@ tags:
   - "SEO"
 ---
 
-<callout icon="📌" color="gray_bg">
-	整理来源：[Astro 官方文档（docs.astro.build）](https://docs.astro.build)、各 CMS 官方文档 — 2026 年 6 月
-</callout>
-# Astro 内容发布、CMS 与数据库 SEO
-<callout icon="💡" color="blue_bg">
-	先下结论：Astro 能做内容站、接 CMS、也能承担轻量全栈职责。但选型不要从「有没有 CMS」开始，而要先判断四件事：内容由谁维护、内容放在哪里、发布后多久生效、站点要不要在中国大陆稳定访问。
-</callout>
+> 📌 整理来源：[Astro 官方文档（docs.astro.build）](https://docs.astro.build)、各 CMS 官方文档 — 2026 年 6 月
+
+> 💡 先下结论：Astro 能做内容站、接 CMS、也能承担轻量全栈职责。但选型不要从「有没有 CMS」开始，而要先判断四件事：内容由谁维护、内容放在哪里、发布后多久生效、站点要不要在中国大陆稳定访问。
+
 ---
 ## 一、先分清你在解决哪个问题
 <table header-row="true" header-column="false">
@@ -40,18 +37,22 @@ tags:
 <td>海外平台 / 中国大陆需稳定访问</td>
 </tr>
 </table>
+
 ---
 ## 二、Astro 的四条内容路径
+
 ### 路径 1：仓库内文件（Git-based，最简单）
 内容以 Markdown / MDX / JSON 存在仓库，Astro 构建时读取并生成静态 HTML。
 官方文档：[Astro Content Collections](https://docs.astro.build/en/guides/content-collections/)
 - 适合：开发者维护、个人博客、文档站、版本可追踪的内容
 - 不适合：需要非技术编辑后台、更新需要立刻生效的场景
+
 ### 路径 2：Git-based CMS（降低非技术编辑门槛）
 Decap CMS 是典型代表。编辑者在后台填表单，内容写回 Markdown 文件并触发构建。底层仍是 Git，只是降低非技术编辑门槛。
 官方文档：[Decap CMS（原 Netlify CMS）](https://decapcms.org/docs/)
 - 适合：保留静态站结构，又需要给运营一个后台入口
 - 注意：编辑体验会受 GitHub / GitLab 影响，国内访问可能不稳定
+
 ### 路径 3：Headless CMS（内容建模与 API 输出）
 只负责内容建模、编辑权限、媒体管理和 API 输出，不负责页面渲染。
 <table header-row="true" header-column="false">
@@ -63,29 +64,31 @@ Decap CMS 是典型代表。编辑者在后台填表单，内容写回 Markdown 
 <tr>
 <td>Strapi</td>
 <td>开源自托管，灵活，需自己维护服务</td>
-<td>https://docs.strapi.io</td>
+<td>[docs.strapi.io](https://docs.strapi.io)</td>
 </tr>
 <tr>
 <td>Directus</td>
 <td>开源自托管，数据库优先，支持直连已有数据库</td>
-<td>https://docs.directus.io</td>
+<td>[docs.directus.io](https://docs.directus.io)</td>
 </tr>
 <tr>
 <td>Payload</td>
 <td>TypeScript 原生，代码即配置，适合开发者</td>
-<td>https://payloadcms.com/docs</td>
+<td>[payloadcms.com/docs](https://payloadcms.com/docs)</td>
 </tr>
 <tr>
 <td>Contentful / Sanity</td>
 <td>托管服务，省运维，按量付费</td>
-<td>https://www.contentful.com/developers/docs/</td>
+<td>[contentful.com/docs](https://www.contentful.com/developers/docs/)</td>
 </tr>
 </table>
 - 适合：多人协作、内容模型复杂、同一内容多端消费
+
 ### 路径 4：数据库 + SSR（内容立即生效）
 内容直接放在数据库，Astro 开启 SSR，每次请求实时查询并返回完整 HTML。更新无需重建，立刻生效。
 官方文档：[Astro 数据库集成](https://docs.astro.build/en/guides/backend/)
 - 适合：内容更新极频繁、需要即时生效、有个性化或登录态的场景
+
 ---
 ## 三、SEO 不是由数据库决定的
 影响 SEO 的是页面输出方式，不是数据存在哪里。真正关键因素：
@@ -94,14 +97,16 @@ Decap CMS 是典型代表。编辑者在后台填表单，内容写回 Markdown 
 - canonical 标签（避免重复内容）
 - sitemap 和内链发现路径
 用数据库 + SSR，只要服务端渲染返回完整 HTML，SEO 和静态站没有本质区别。
+
 ---
 ## 四、中国大陆访问要单独判断
-<callout icon="⚠️" color="orange_bg">
-	Vercel / Netlify 不是大陆稳定访问方案。面向大陆用户需要：国内对象存储（OSS/COS）、国内 CDN、源站位于境内服务器、ICP 备案。CMS 后台可在海外，但用户最终访问的前台必须解决网络路径。
-</callout>
+
+> ⚠️ Vercel / Netlify 不是大陆稳定访问方案。面向大陆用户需要：国内对象存储（OSS/COS）、国内 CDN、源站位于境内服务器、ICP 备案。CMS 后台可在海外，但用户最终访问的前台必须解决网络路径。
+
 ---
 ## 五、选型决策树
-```plain text
+
+```plaintext
 内容主要由开发者维护？
   └─ 是 → 仓库内 Markdown / MDX
   └─ 否 → 需要网页后台
@@ -112,9 +117,9 @@ Decap CMS 是典型代表。编辑者在后台填表单，内容写回 Markdown 
               └─ 是 → 数据库 + SSR
               └─ 否 → Headless CMS + 构建触发
 ```
-<callout icon="📝" color="gray_bg">
-	CMS 解决的是内容维护方式，部署方案解决的是访问路径，SEO 解决的是页面输出质量。这三件事不要混在一起判断。
-</callout>
+
+> 📝 CMS 解决的是内容维护方式，部署方案解决的是访问路径，SEO 解决的是页面输出质量。这三件事不要混在一起判断。
+
 ---
 ## 六、参考链接
 - Astro Content Collections：[docs.astro.build/en/guides/content-collections/](https://docs.astro.build/en/guides/content-collections/)
@@ -123,7 +128,6 @@ Decap CMS 是典型代表。编辑者在后台填表单，内容写回 Markdown 
 - Strapi 文档：[docs.strapi.io](https://docs.strapi.io)
 - Directus 文档：[docs.directus.io](https://docs.directus.io)
 - Payload CMS 文档：[payloadcms.com/docs](https://payloadcms.com/docs)
+
 ---
-<callout icon="🗓️" color="gray_bg">
-	文档整理时间：2026 年 6 月  \|  来源：[Astro 官方文档](https://docs.astro.build)
-</callout>
+> 🗓️ 文档整理时间：2026 年 6 月 | 来源：[Astro 官方文档](https://docs.astro.build)

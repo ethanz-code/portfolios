@@ -4,7 +4,6 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import SideBar from "../components/SideBar.astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
-import ModeIndicator from "../components/ModeIndicator.astro";
 import { ClientRouter } from "astro:transitions";
 
 import { SITE_TITLE, SITE_DESCRIPTION, TRANSITION_API } from "../config";
@@ -564,6 +563,5 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
         bindBackToTop();
       })();
     </script>
-    <ModeIndicator />
   </body>
 </html>

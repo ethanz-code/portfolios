@@ -4,11 +4,6 @@ import HorizontalCard from "../components/HorizontalCard.astro";
 import ContributionChart from "../components/ContributionChart.astro";
 import { getContentEntryPath } from "../lib/content-routes";
 import { type CollectionEntry, getCollection } from "astro:content";
-import aiDesignEffectDisplayImage from "../assets/projects/ai-design-aigc/effect-display.webp";
-import newlandKnowledgeBaseDarkImage from "../assets/projects/newland-iot-technical-services/knowledge-base-dark.webp";
-import newlandKnowledgeBaseImage from "../assets/projects/newland-iot-technical-services/knowledge-base.webp";
-import sxeasyHomeImage from "../assets/projects/sxeasy/home.webp";
-import sxeasyHomeDarkImage from "../assets/projects/sxeasy/home-dark.webp";
 
 const workStyle = [
   "先确认用户、场景和成本，再拆最短闭环，把产品推到可验证状态。",
@@ -42,22 +37,7 @@ const getProjectUrl = (project: ProjectEntry): string => {
   throw new Error(`Project "${project.id}" is missing externalUrl while detailPage is false.`);
 };
 
-const getProjectImageLight = (project: ProjectEntry) =>
-  project.id === "sxeasy"
-    ? sxeasyHomeImage
-    : project.id === "ai-design-aigc"
-      ? aiDesignEffectDisplayImage
-      : project.id === "newland-iot-technical-services"
-        ? newlandKnowledgeBaseImage
-        : project.data.heroImageLight ?? project.data.heroImage;
-const getProjectImageDark = (project: ProjectEntry) =>
-  project.id === "sxeasy"
-    ? sxeasyHomeDarkImage
-    : project.id === "ai-design-aigc"
-      ? aiDesignEffectDisplayImage
-      : project.id === "newland-iot-technical-services"
-        ? newlandKnowledgeBaseDarkImage
-        : project.data.heroImageDark ?? project.data.heroImage;
+
 ---
 
 <BaseLayout
@@ -125,10 +105,9 @@ const getProjectImageDark = (project: ProjectEntry) =>
           <>
             <HorizontalCard
               title={project.data.title}
-              imgLight={getProjectImageLight(project)}
-              imgDark={getProjectImageDark(project)}
+              imgLight={project.data.heroImageLight ?? project.data.heroImage}
+              imgDark={project.data.heroImageDark ?? project.data.heroImage}
               desc={project.data.description}
-              visitorDesc={project.data.visitorDescription}
               url={getProjectUrl(project)}
               target={project.data.detailPage ? "_self" : "_blank"}
             />

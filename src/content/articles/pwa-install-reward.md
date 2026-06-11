@@ -9,13 +9,10 @@ tags:
   - "风控"
 ---
 
-<callout icon="📌" color="gray_bg">
-	整理来源：[Web App Manifest W3C 规范（w3.org/TR/appmanifest）](https://www.w3.org/TR/appmanifest/)、[MDN Web Docs - beforeinstallprompt](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent) — 2026 年 6 月
-</callout>
-# 安装奖励技术方案：书签不可验真与 PWA 校验路径
-<callout icon="💡" color="blue_bg">
-	结论先行：浏览器书签属于用户隐私区，页面脚本无法读取书签状态，验真链路天然断裂。「收藏成功」不适合作为可信发奖触发条件。应改用 PWA 安装信号，配合服务端一次性校验和基础风控。
-</callout>
+> 📌 整理来源：[Web App Manifest W3C 规范（w3.org/TR/appmanifest）](https://www.w3.org/TR/appmanifest/)、[MDN Web Docs - beforeinstallprompt](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent) — 2026 年 6 月
+
+> 💡 结论先行：浏览器书签属于用户隐私区，页面脚本无法读取书签状态，验真链路天然断裂。「收藏成功」不适合作为可信发奖触发条件。应改用 PWA 安装信号，配合服务端一次性校验和基础风控。
+
 ---
 ## 一、为什么「书签收藏」验不了真
 浏览器没有 bookmarkadd 事件，也不会向页面脚本暴露书签列表、目录或收藏结果。能监听的边缘信号只有：
@@ -32,6 +29,7 @@ window.addEventListener('keydown', (event) => {
 });
 ```
 后端同样看不到书签。如果前端把 `tag: 'install_reward'` 直接 POST 给后端，用户可以在控制台直接调接口，完全不可信任。唯一能读到书签的方式是浏览器扩展（`chrome.bookmarks` API），移动端不支持，不适合奖励场景。
+
 ---
 ## 二、为什么改用 PWA 安装信号
 相关规范：[Web App Manifest](https://www.w3.org/TR/appmanifest/) / [beforeinstallprompt（MDN）](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)
@@ -63,6 +61,7 @@ window.addEventListener('keydown', (event) => {
 </tr>
 </table>
 这些信号仍然是客户端信号，不是银行级校验。但对低额一次性奖励而言，「能解释、能落库、能防重复」已经足够。
+
 ---
 ## 三、前端：收集安装信号
 ```typescript
@@ -100,6 +99,7 @@ if (!signal.standalone) {
 }
 await api.post('/app/user/reward/install/claim', signal);
 ```
+
 ---
 ## 四、后端：一次性发奖逻辑
 关键点：使用数据库悲观锁防止并发重复领取，保证幂等。
@@ -138,6 +138,7 @@ async claim(userId: number, signal?: InstallClaimSignal) {
   });
 }
 ```
+
 ---
 ## 五、边界与取舍
 <table header-row="true" header-column="false">
@@ -162,12 +163,12 @@ async claim(userId: number, signal?: InstallClaimSignal) {
 <td>发奖后写审计日志，方便事后核查异常领取</td>
 </tr>
 </table>
+
 ---
 ## 六、后续待验证
 - iOS 18+ 对 `navigator.standalone` 的支持是否有变化：[MDN 文档](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/standalone)
 - Android TWA 场景下 display-mode 信号是否可靠
 - 是否引入设备指纹服务（如 FingerprintJS）作为补充风控
+
 ---
-<callout icon="🗓️" color="gray_bg">
-	文档整理时间：2026 年 6 月  \|  来源：[W3C Web App Manifest](https://www.w3.org/TR/appmanifest/) / [MDN beforeinstallprompt](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)
-</callout>
+> 🗓️ 文档整理时间：2026 年 6 月 | 来源：[W3C Web App Manifest](https://www.w3.org/TR/appmanifest/) / [MDN beforeinstallprompt](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)
