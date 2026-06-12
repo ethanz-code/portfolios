@@ -37,8 +37,8 @@ const deployedAtISOString = now.toISOString();
 
 <script>
   function loadVisitCount() {
-    const separator = document.querySelector("[data-visit-separator]");
-    const countEl = document.querySelector("[data-visit-count]");
+    const separator = document.querySelector<HTMLElement>("[data-visit-separator]");
+    const countEl = document.querySelector<HTMLElement>("[data-visit-count]");
     if (!separator || !countEl || countEl.dataset.loaded) return;
 
     fetch("/api/visit", { method: "POST" })
