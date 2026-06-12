@@ -3,6 +3,8 @@ FROM --platform=$BUILDPLATFORM oven/bun:1.3.10-alpine AS builder
 ARG BUILDPLATFORM
 ENV ASTRO_TELEMETRY_DISABLED=1
 
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
 COPY package.json bun.lock ./
