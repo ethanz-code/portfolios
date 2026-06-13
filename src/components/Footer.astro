@@ -41,7 +41,7 @@ const deployedAtISOString = now.toISOString();
     const countEl = document.querySelector<HTMLElement>("[data-visit-count]");
     if (!separator || !countEl || countEl.dataset.loaded) return;
 
-    fetch("/api/visit", { method: "POST" })
+    fetch("/api/visit", { method: "POST", headers: { "X-Requested-With": "fetch" } })
       .then((res) => res.json())
       .then((data) => {
         if (typeof data.count === "number") {
