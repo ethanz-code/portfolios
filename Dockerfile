@@ -15,11 +15,15 @@ RUN bun run check && bun run build
 
 FROM node:20-alpine
 
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+
+RUN npm rebuild better-sqlite3
 
 RUN mkdir -p /app/data
 
