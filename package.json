@@ -14,11 +14,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "10.1.4",
     "@astrojs/tailwind": "^6.0.2",
     "@fontsource/noto-serif-sc": "^5.2.9",
     "astro": "^6.4.6",
-    "better-sqlite3": "^12.10.0",
     "daisyui": "^4.4.10",
     "dayjs": "^1.11.9",
     "lucide-astro": "^0.556.0",
@@ -30,7 +28,6 @@
     "@astrojs/check": "^0.9.9",
     "@astrojs/mdx": "^5.0.6",
     "@tailwindcss/typography": "^0.5.10",
-    "@types/better-sqlite3": "^7.6.13",
     "astro-expressive-code": "^0.42.0",
     "katex": "^0.17.0",
     "mermaid": "^11.15.0",

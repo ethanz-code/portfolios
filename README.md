@@ -69,4 +69,4 @@ bun run preview
 - `SSH_PORT`：默认 `22`
 - `DEPLOY_IMAGE_NAME`：默认 `portfolios`，需要命名空间时可设为 `namespace/portfolios`
 - `DEPLOY_CONTAINER_NAME`：默认 `portfolios`
-- `DEPLOY_PORT_MAPPING`：默认 `10020:80`
+- `DEPLOY_PORT_MAPPING`：默认 `10100:80`

@@ -15,8 +15,7 @@ env:
   IMAGE_REF: docker.itcox.cn/${{ vars.DEPLOY_IMAGE_NAME || 'portfolios' }}:${{ github.sha }}
   LATEST_IMAGE_REF: docker.itcox.cn/${{ vars.DEPLOY_IMAGE_NAME || 'portfolios' }}:latest
   CONTAINER_NAME: ${{ vars.DEPLOY_CONTAINER_NAME || 'portfolios' }}
-  PORT_MAPPING: ${{ vars.DEPLOY_PORT_MAPPING || '10020:4321' }}
-  VOLUME_NAME: ${{ vars.DEPLOY_VOLUME_NAME || 'deploy' }}
+  PORT_MAPPING: ${{ vars.DEPLOY_PORT_MAPPING || '10100:80' }}
 
 jobs:
   deploy:
@@ -76,7 +75,6 @@ jobs:
           LATEST_IMAGE_REF: ${{ env.LATEST_IMAGE_REF }}
           CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
           PORT_MAPPING: ${{ env.PORT_MAPPING }}
-          VOLUME_NAME: ${{ env.VOLUME_NAME }}
         run: |
           encode() {
             printf '%s' "$1" | base64 -w 0
@@ -89,7 +87,6 @@ jobs:
           LATEST_IMAGE_REF_B64="$(encode "$LATEST_IMAGE_REF")"
           CONTAINER_NAME_B64="$(encode "$CONTAINER_NAME")"
           PORT_MAPPING_B64="$(encode "$PORT_MAPPING")"
-          VOLUME_NAME_B64="$(encode "$VOLUME_NAME")"
 
           ssh \
             -i ~/.ssh/deploy_key \
@@ -105,7 +102,6 @@ jobs:
             LATEST_IMAGE_REF_B64="$LATEST_IMAGE_REF_B64" \
             CONTAINER_NAME_B64="$CONTAINER_NAME_B64" \
             PORT_MAPPING_B64="$PORT_MAPPING_B64" \
-            VOLUME_NAME_B64="$VOLUME_NAME_B64" \
             'sh -s' <<'EOF'
           set -eu
 
@@ -116,7 +112,6 @@ jobs:
           LATEST_IMAGE_REF="$(printf '%s' "$LATEST_IMAGE_REF_B64" | base64 -d)"
           CONTAINER_NAME="$(printf '%s' "$CONTAINER_NAME_B64" | base64 -d)"
           PORT_MAPPING="$(printf '%s' "$PORT_MAPPING_B64" | base64 -d)"
-          VOLUME_NAME="$(printf '%s' "$VOLUME_NAME_B64" | base64 -d)"
 
           : "${REGISTRY_USERNAME:?Missing REGISTRY_USERNAME secret}"
           : "${REGISTRY_PASSWORD:?Missing REGISTRY_PASSWORD secret}"
@@ -139,7 +134,6 @@ jobs:
           docker run -d \
             --name "$CONTAINER_NAME" \
             --restart unless-stopped \
-            -v "$VOLUME_NAME":/app/data \
             -p "$PORT_MAPPING" \
             "$IMAGE_REF"
 

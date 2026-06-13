@@ -30,30 +30,5 @@ const deployedAtISOString = now.toISOString();
   >
     <span>last:</span>
     <time datetime={deployedAtISOString}>{deployedAtLabel}</time>
-    <span data-visit-separator class="hidden"> · </span>
-    <span data-visit-count class="hidden"></span>
   </div>
 </footer>
-
-<script>
-  function loadVisitCount() {
-    const separator = document.querySelector<HTMLElement>("[data-visit-separator]");
-    const countEl = document.querySelector<HTMLElement>("[data-visit-count]");
-    if (!separator || !countEl || countEl.dataset.loaded) return;
-
-    fetch("/api/visit", { method: "POST", headers: { "X-Requested-With": "fetch" } })
-      .then((res) => res.json())
-      .then((data) => {
-        if (typeof data.count === "number") {
-          countEl.textContent = data.count.toLocaleString("zh-CN") + " 次访问";
-          separator.classList.remove("hidden");
-          countEl.classList.remove("hidden");
-          countEl.dataset.loaded = "true";
-        }
-      })
-      .catch((err) => console.error("visit fetch failed:", err));
-  }
-
-  loadVisitCount();
-  document.addEventListener("astro:page-load", loadVisitCount);
-</script>
