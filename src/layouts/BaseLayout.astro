@@ -24,7 +24,7 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
 ---
 
 <!doctype html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN">
   <head>
     <script is:inline>
       (() => {
@@ -46,6 +46,9 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
         }
       })();
     </script>
+    <style is:inline>
+      html:not([data-theme]) { visibility: hidden; }
+    </style>
     <BaseHead title={title} description={description} image={image} , ogType={ogType} />
     {enableClientRouter && <ClientRouter />}
   </head>
