@@ -22,18 +22,32 @@ export interface MomentGroup extends MomentGroupInfo {
 
 export const momentGroupInfo: MomentGroupInfo[] = [
   {
+    slug: "cuisine-26620",
+    title: "饮食记录",
+    date: "2026-06-20",
+    description: "2026-06-20 上传的一组日常饮食。",
+    order: 1,
+  },
+  {
+    slug: "fitness-26620",
+    title: "训练记录",
+    date: "2026-06-20",
+    description: "2026-06-20 上传的一组健身训练记录。",
+    order: 2,
+  },
+  {
     slug: "cuisine",
     title: "饮食记录",
     date: "2026-05-27",
     description: "近期吃到、拍到的一组日常饮食。",
-    order: 1,
+    order: 3,
   },
   {
     slug: "fitness",
     title: "训练记录",
     date: "2026-05-27",
     description: "健身和训练相关的阶段记录。",
-    order: 2,
+    order: 4,
   },
 ];
 
