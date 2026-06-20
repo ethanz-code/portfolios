@@ -9,6 +9,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.playwright-cli/
 
 
 # environment variables
@@ -17,6 +18,9 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# data
+data/
 
 # Astro
 .astro/

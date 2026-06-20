@@ -1,0 +1,24 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  eyebrow?: string;
+}
+
+import ProjectResourceLink from "./ProjectResourceLink.astro";
+
+const {
+  href,
+  title,
+  description,
+  eyebrow = "Demo Video",
+} = Astro.props as Props;
+---
+
+<ProjectResourceLink
+  href={href}
+  title={title}
+  description={description}
+  eyebrow={eyebrow}
+/>

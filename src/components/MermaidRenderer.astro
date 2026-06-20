@@ -1,0 +1,116 @@
+<script>
+  type MermaidRendererState = {
+    bound: boolean;
+    observer?: MutationObserver;
+    renderPromise?: Promise<void>;
+  };
+
+  const rendererWindow = window as Window & {
+    __mermaidRendererState?: MermaidRendererState;
+  };
+
+  const rendererState = rendererWindow.__mermaidRendererState ??= {
+    bound: false,
+  };
+
+  const getMermaidTheme = () =>
+    document.documentElement.dataset.theme === "black" ? "dark" : "default";
+
+  let mermaidApi: typeof import("mermaid").default | undefined;
+
+  const loadMermaid = async () => {
+    mermaidApi ??= (await import("mermaid")).default;
+    return mermaidApi;
+  };
+
+  const getSource = (diagram: Element) => {
+    if (!(diagram instanceof HTMLElement)) {
+      return "";
+    }
+
+    const storedSource = diagram.dataset.mermaidSource;
+    if (storedSource) {
+      return storedSource;
+    }
+
+    const source = diagram.textContent?.trim() ?? "";
+    diagram.dataset.mermaidSource = source;
+    return source;
+  };
+
+  const renderMermaid = async () => {
+    rendererState.renderPromise ??= (async () => {
+      const diagrams = Array.from(document.querySelectorAll(".mermaid-diagram"));
+      if (diagrams.length === 0) {
+        return;
+      }
+
+      const mermaid = await loadMermaid();
+      const theme = getMermaidTheme();
+      mermaid.initialize({
+        startOnLoad: false,
+        theme,
+        securityLevel: "strict",
+      });
+
+      await Promise.all(
+        diagrams.map(async (diagram, index) => {
+          if (!(diagram instanceof HTMLElement)) {
+            return;
+          }
+
+          const source = getSource(diagram);
+          if (!source || diagram.dataset.mermaidRenderedTheme === theme) {
+            return;
+          }
+
+          try {
+            const id = `mermaid-${Date.now()}-${index}`;
+            const { svg } = await mermaid.render(id, source);
+            diagram.innerHTML = svg;
+            diagram.dataset.mermaidRenderedTheme = theme;
+          } catch (error) {
+            console.error("Failed to render Mermaid diagram", error);
+            diagram.dataset.mermaidRenderedTheme = "";
+          }
+        }),
+      );
+    })().finally(() => {
+      rendererState.renderPromise = undefined;
+    });
+
+    await rendererState.renderPromise;
+  };
+
+  const bindMermaidRenderer = () => {
+    renderMermaid();
+
+    if (rendererState.observer) {
+      return;
+    }
+
+    rendererState.observer = new MutationObserver((mutations) => {
+      const themeChanged = mutations.some((mutation) => mutation.attributeName === "data-theme");
+      if (themeChanged) {
+        document.querySelectorAll(".mermaid-diagram").forEach((diagram) => {
+          if (diagram instanceof HTMLElement) {
+            diagram.dataset.mermaidRenderedTheme = "";
+          }
+        });
+        renderMermaid();
+      }
+    });
+
+    rendererState.observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+  };
+
+  if (!rendererState.bound) {
+    document.addEventListener("astro:page-load", bindMermaidRenderer);
+    rendererState.bound = true;
+  }
+
+  bindMermaidRenderer();
+</script>

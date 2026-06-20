@@ -1,0 +1,259 @@
+# 03. Content Collections 内容集合
+
+## 相关文件
+
+- `src/content.config.ts`
+- `src/content/articles/start-here.md`
+- `src/content/projects/sxeasy.mdx`
+- `src/pages/articles.astro`
+- `src/pages/projects.astro`
+- `src/pages/articles/[slug].astro`
+- `src/pages/projects/[slug].astro`
+- `src/components/ContentEntryDetail.astro`
+
+## 这个项目为什么用 Content Collections
+
+文章和项目不是普通页面。它们有共同字段：
+
+- 标题
+- 摘要
+- 日期
+- 标签
+- 封面图
+- 亮暗主题截图
+- 是否草稿
+- 是否生成详情页
+
+如果每篇都手写页面，后期很难维护。
+
+Content Collections 的作用是：
+
+1. 把 Markdown 内容组织成集合。
+2. 给 frontmatter 加类型校验。
+3. 让页面可以用 `getCollection()` 读取内容。
+4. 构建时发现字段错误。
+
+## 当前有哪些集合
+
+`src/content.config.ts`：
+
+```ts
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+
+const projectCollection = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
+  schema: projectSchema,
+});
+
+const articleCollection = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/articles" }),
+  schema: articleSchema,
+});
+
+export const collections = {
+  projects: projectCollection,
+  articles: articleCollection,
+};
+```
+
+对应目录：
+
+```text
+src/content/articles/
+src/content/projects/
+```
+
+集合名必须和页面里 `getCollection("articles")` 使用的名字对应。`glob()` loader 负责把目录里的 `.md` 和 `.mdx` 文件加载进集合。
+
+## 文章集合 schema
+
+```ts
+const articleSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  publishedDate: z.coerce.date(),
+  updatedDate: z.coerce.date().optional(),
+  tags: z.array(z.string()).optional(),
+  heroImage: z.string().optional(),
+  draft: z.boolean().default(false),
+});
+```
+
+字段说明：
+
+- `title`：文章标题，列表页和详情页都会展示。
+- `description`：一句话摘要，也会进入 meta description。
+- `publishedDate`：发布时间，必填。
+- `updatedDate`：更新时间，可选。
+- `tags`：标签，可选。
+- `heroImage`：头图，可选，路径一般来自 `public/`。
+- `draft`：是否草稿，默认 `false`。
+
+## 项目集合 schema
+
+```ts
+const projectSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  badge: z.string(),
+  updatedDate: z.coerce.date(),
+  category: z.enum(["featured", "content"]),
+  order: z.number(),
+  heroImage: z.string().optional(),
+  heroImageLight: z.string().optional(),
+  heroImageDark: z.string().optional(),
+  externalUrl: z.string().optional(),
+  detailPage: z.boolean().default(false),
+  links: z.array(projectLinkSchema).optional(),
+  tags: z.array(z.string()).optional(),
+});
+```
+
+字段说明：
+
+- `category`：项目分组，目前是重点项目和内容类项目。
+- `order`：列表排序。
+- `heroImageLight` / `heroImageDark`：项目卡片的亮暗主题图片路径。
+- `externalUrl`：没有详情页时跳外链。
+- `detailPage`：是否生成 `/projects/slug/` 详情页。
+- `links`：项目相关链接。
+- `tags`：项目标签。
+
+项目详情页正文里的截图直接写在 `.mdx` 里。需要 Astro Image 优化时，从 `src/assets/` 导入图片对象，再传给 `ArticleThemeImage`。
+
+示例：
+
+```mdx
+import ArticleThemeImage from "../../components/ArticleThemeImage.astro";
+import repositoryImage from "../../assets/projects/sxeasy/repository.webp";
+import repositoryDarkImage from "../../assets/projects/sxeasy/repository-dark.webp";
+
+<ArticleThemeImage
+  light={repositoryImage}
+  dark={repositoryDarkImage}
+  alt="实习轻松办仓库概览截图"
+/>
+```
+
+## 为什么用 `z.coerce.date()`
+
+Markdown frontmatter 里的日期通常是字符串：
+
+```yaml
+publishedDate: "2026-05-21"
+```
+
+`z.coerce.date()` 会把它转成 Date 对象，这样页面里可以直接排序：
+
+```ts
+.sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf())
+```
+
+如果用 `z.string()`，排序前还要自己转换。
+
+## 为什么导出类型
+
+```ts
+export type ProjectSchema = z.infer<typeof projectSchema>;
+export type ArticleSchema = z.infer<typeof articleSchema>;
+```
+
+详情页里使用：
+
+```ts
+const article: ArticleSchema = entry.data;
+```
+
+好处：
+
+- 页面里有类型提示。
+- 字段改名后更容易发现引用错误。
+- 读代码时知道数据结构来自 schema。
+
+## 读取集合内容
+
+列表页：
+
+```ts
+const articles = (await getCollection("articles"))
+  .filter((article) => !article.data.draft)
+  .sort((a, b) => b.data.publishedDate.valueOf() - a.data.publishedDate.valueOf());
+```
+
+详情页：
+
+```ts
+const articleEntries = await getCollection("articles");
+```
+
+`getCollection()` 返回的 entry 包含：
+
+- `entry.data`：frontmatter。
+- `entry.id`：由文件名生成的稳定 ID，用来拼 URL。
+- `render(entry)`：渲染 Markdown / MDX 正文。
+
+## 渲染 Markdown 正文
+
+详情页：
+
+```ts
+import { render } from "astro:content";
+
+const { Content } = await render(entry);
+```
+
+模板里：
+
+```astro
+<Content />
+```
+
+这样 Markdown 正文就会被渲染到页面里。
+
+## schema 带来的错误提醒
+
+如果文章缺少 `description`：
+
+```md
+---
+title: "标题"
+publishedDate: "2026-05-21"
+---
+```
+
+构建时会报错。这个错误比上线后页面空白更早暴露。
+
+如果 `tags` 写成字符串：
+
+```yaml
+tags: "复盘"
+```
+
+也会报错，因为 schema 要求的是字符串数组。
+
+正确写法：
+
+```yaml
+tags:
+  - "复盘"
+```
+
+## 可以动手试的事
+
+1. 故意删掉一篇文章的 `description`。
+2. 执行 `bun run build`。
+3. 看 Astro 如何提示内容字段错误。
+4. 修复字段，再构建一次。
+
+## 这一节要掌握的关键词
+
+- Content Collections
+- `src/content.config.ts`
+- `defineCollection`
+- `glob`
+- `zod`
+- `getCollection`
+- `entry.data`
+- `entry.id`
+- `render(entry)`

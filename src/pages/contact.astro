@@ -1,0 +1,135 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { Phone, Mail, MessageCircle, Globe, Copy, ExternalLink } from "lucide-astro";
+
+const contacts = [
+  {
+    icon: Phone,
+    label: "手机号",
+    value: "(+86) 131-9876-3535",
+    href: "tel:+8613198763535",
+    copyable: true,
+  },
+  {
+    icon: Mail,
+    label: "邮箱",
+    value: "service@htlabs.com.cn",
+    href: "mailto:service@htlabs.com.cn",
+    copyable: true,
+  },
+  {
+    icon: MessageCircle,
+    label: "QQ",
+    value: "57878778",
+    copyable: true,
+  },
+  {
+    icon: Globe,
+    label: "公司官网",
+    value: "htlabs.com.cn",
+    href: "https://htlabs.com.cn",
+    note: "上海宏途数创科技有限公司",
+    external: true,
+  },
+];
+---
+
+<BaseLayout
+  title="联系我"
+  description="项目合作、技术支持和交付接手可直接联系。"
+  sideBarActiveItemID="contact"
+>
+  <h1 class="sr-only">联系我</h1>
+
+  <section class="max-w-2xl">
+    <ul class="mt-4 divide-y divide-base-300">
+      {contacts.map((item) => (
+        <li class="flex items-center gap-4 py-4" data-contact-row>
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center bg-base-200">
+            <item.icon size={18} class="opacity-70" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-xs opacity-50">{item.label}</div>
+            <div class="mt-0.5 flex items-center gap-2">
+              {item.href ? (
+                <a
+                  href={item.href}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
+                  class="link link-hover font-medium"
+                >
+                  {item.value}
+                </a>
+              ) : (
+                <span class="font-medium">{item.value}</span>
+              )}
+              {item.note && (
+                <span class="hidden text-xs opacity-40 sm:inline">{item.note}</span>
+              )}
+            </div>
+          </div>
+          <div class="flex shrink-0 items-center gap-1">
+            {item.href && (
+              <a
+                href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
+                class="btn btn-ghost btn-sm btn-square rounded-none"
+                title={item.external ? "访问链接" : "打开"}
+              >
+                <ExternalLink size={14} />
+              </a>
+            )}
+            {item.copyable && (
+              <button
+                class="btn btn-ghost btn-sm btn-square rounded-none"
+                type="button"
+                title="复制"
+                data-copy-value={item.value}
+                data-copy-label={item.label}
+              >
+                <Copy size={14} />
+              </button>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    <p class="mt-4 min-h-5 text-sm opacity-60" data-copy-feedback></p>
+  </section>
+
+  <script is:inline>
+    (() => {
+      const buttons = Array.from(document.querySelectorAll("[data-copy-value]"));
+
+      if (!buttons.length) {
+        return;
+      }
+
+      const feedback = document.querySelector("[data-copy-feedback]");
+
+      buttons.forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        button.addEventListener("click", async () => {
+          const value = button.dataset.copyValue;
+          const label = button.dataset.copyLabel;
+
+          if (!value || !label || !(feedback instanceof HTMLElement)) {
+            return;
+          }
+
+          try {
+            await navigator.clipboard.writeText(value);
+            feedback.textContent = `${label}已复制`;
+          } catch {
+            feedback.textContent = `复制失败，请手动复制：${value}`;
+          }
+        });
+      });
+    })();
+  </script>
+</BaseLayout>

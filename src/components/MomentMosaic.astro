@@ -1,0 +1,238 @@
+---
+import { Image } from "astro:assets";
+import type { MomentImage } from "../data/moments";
+
+const {
+  images,
+  title = "近期影像",
+  description = "随机抽取近期上传的图片。",
+  ctaHref,
+  ctaLabel = "查看全部",
+  ariaLabel,
+  showMeta = true,
+  compact = false,
+  previewGrid = false,
+  galleryId = "moment-gallery",
+} = Astro.props as {
+  images: MomentImage[];
+  title?: string;
+  description?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+  ariaLabel?: string;
+  showMeta?: boolean;
+  compact?: boolean;
+  previewGrid?: boolean;
+  galleryId?: string;
+};
+
+const tileClasses = [
+  "col-span-2 row-span-2",
+  "col-span-2",
+  "row-span-2",
+  "",
+  "",
+  "col-span-2",
+  "",
+  "row-span-2",
+  "",
+];
+
+const previewTileClasses = [
+  "col-span-2 row-span-2",
+  "col-span-2",
+  "",
+  "",
+  "row-span-2",
+  "",
+  "col-span-2",
+  "",
+  "col-span-2",
+];
+
+const hasHeader = title || description || ctaHref;
+const mosaicLabel = ariaLabel || title || "影像九宫格";
+const visibleImages = previewGrid ? images.slice(0, 9) : images;
+const activeTileClasses = previewGrid ? previewTileClasses : tileClasses;
+---
+
+<section class:list={["mb-14", compact && "mb-0"]}>
+  {
+    hasHeader && (
+      <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between lg:pr-28">
+        <div>
+          {title && <h2 class="text-xl font-bold leading-tight sm:text-2xl lg:text-3xl">{title}</h2>}
+          {description && <p class="mt-3 max-w-2xl leading-7 opacity-80">{description}</p>}
+        </div>
+        {
+          ctaHref && (
+            <a class="btn btn-outline w-full sm:w-fit" href={ctaHref}>
+              {ctaLabel}
+            </a>
+          )
+        }
+      </div>
+    )
+  }
+
+  {
+    images.length > 0 ? (
+      <div
+        class:list={[
+          "grid grid-flow-dense grid-cols-2 gap-2.5 [grid-auto-rows:clamp(7.25rem,32vw,9rem)] sm:grid-cols-3 sm:[grid-auto-rows:clamp(7.5rem,24vw,9rem)] md:grid-cols-4 md:gap-3 md:[grid-auto-rows:clamp(9rem,18vw,10.5rem)] lg:gap-3.5 lg:[grid-auto-rows:clamp(9rem,12vw,11rem)]",
+          previewGrid && "max-sm:grid-cols-4 max-sm:gap-[0.45rem] max-sm:[grid-auto-rows:clamp(3.75rem,16vw,4.75rem)]",
+        ]}
+        aria-label={mosaicLabel}
+      >
+        {visibleImages.map((image, index) => (
+          <figure
+            class:list={[
+              "relative m-0 min-h-0 overflow-hidden border border-[color-mix(in_srgb,oklch(var(--bc))_16%,transparent)] bg-base-200",
+              activeTileClasses[index] ?? "",
+              previewGrid && index === visibleImages.length - 1 && index % 2 === 0 && index > 0 && "max-sm:col-span-2 max-sm:row-span-1",
+            ]}
+          >
+            <button
+              class="group relative block h-full w-full cursor-zoom-in overflow-hidden border-0 bg-transparent p-0 text-inherit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-primary"
+              type="button"
+              aria-label={`查看${image.alt}`}
+              data-moment-trigger={galleryId}
+              data-index={index}
+              data-full-src={image.src.src}
+              data-alt={image.alt}
+              data-caption={`${image.groupTitle} · ${image.fileName.replace(/\.[^.]+$/, "")}`}
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                class="h-full w-full object-cover transition duration-[220ms] ease-out group-hover:scale-[1.035] group-hover:saturate-[1.04] group-hover:contrast-[1.03] group-focus-visible:scale-[1.035] group-focus-visible:saturate-[1.04] group-focus-visible:contrast-[1.03]"
+                loading={index < 3 ? "eager" : "lazy"}
+                widths={[320, 640, 960]}
+                sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              />
+              {
+                showMeta && (
+                  <span
+                    class="absolute inset-x-0 bottom-0 bg-[linear-gradient(to_top,color-mix(in_srgb,oklch(var(--bc))_82%,transparent),color-mix(in_srgb,oklch(var(--bc))_52%,transparent)_58%,transparent)] p-4 text-[oklch(var(--b1))]"
+                    aria-hidden="true"
+                  >
+                    <span class="block text-xs opacity-85">{image.groupDate ?? image.groupTitle}</span>
+                    <span class="mt-1 block text-xl font-bold leading-tight">{image.groupTitle}</span>
+                  </span>
+                )
+              }
+            </button>
+          </figure>
+        ))}
+      </div>
+    ) : (
+      <div class="border border-dashed border-[color-mix(in_srgb,oklch(var(--bc))_24%,transparent)] bg-base-200 p-8">
+        <div class="font-bold">还没有图片</div>
+        <p class="mt-2 opacity-75">把图片放进 src/assets/moments/某一组/，这里会自动生成九宫格。</p>
+      </div>
+    )
+  }
+
+  {
+    visibleImages.length > 0 && (
+      <dialog
+        class="modal p-[clamp(1rem,5vw,4rem)] text-[oklch(var(--b1))] backdrop:bg-[color-mix(in_srgb,oklch(var(--bc))_72%,transparent)] backdrop:backdrop-blur-[10px] max-sm:p-0"
+        data-moment-lightbox={galleryId}
+        aria-label={mosaicLabel}
+      >
+        <div class="modal-box flex h-auto w-fit max-w-[min(94vw,76rem)] items-center justify-center overflow-visible rounded-none border-0 bg-transparent p-0 text-[oklch(var(--b1))] shadow-none max-h-[min(86dvh,52rem)] max-sm:w-[100vw] max-sm:max-w-[100vw] max-sm:max-h-[100dvh]">
+          <button
+            class="btn btn-circle btn-ghost absolute left-4 top-1/2 z-[1] size-12 min-h-12 -translate-y-1/2 overflow-hidden border border-[color-mix(in_srgb,oklch(var(--b1))_26%,transparent)] bg-[color-mix(in_srgb,oklch(var(--bc))_76%,transparent)] p-0 indent-[-999px] text-[oklch(var(--b1))] backdrop-blur-[12px] transition hover:bg-[color-mix(in_srgb,oklch(var(--bc))_72%,transparent)] focus-visible:bg-[color-mix(in_srgb,oklch(var(--bc))_72%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_srgb,oklch(var(--b1))_80%,transparent)] max-sm:bottom-3 max-sm:left-3 max-sm:top-auto max-sm:size-10 max-sm:min-h-10 max-sm:translate-y-0"
+            type="button"
+            data-lightbox-prev
+            aria-label="上一张图片"
+          >
+            <span class="pointer-events-none absolute inset-0 grid place-items-center indent-0 text-[2rem] leading-none before:content-['‹']" aria-hidden="true"></span>
+          </button>
+          <figure class="relative m-0 grid w-fit max-w-[inherit] max-h-[inherit] grid-rows-[minmax(0,1fr)_auto] max-sm:w-[100vw] max-sm:max-w-[100vw] max-sm:max-h-[100dvh]">
+            <button class="btn btn-sm absolute right-3 top-3 z-[1] h-9 min-h-9 border border-[color-mix(in_srgb,oklch(var(--b1))_26%,transparent)] bg-[color-mix(in_srgb,oklch(var(--bc))_76%,transparent)] px-3 font-bold text-[oklch(var(--b1))] backdrop-blur-[12px] transition hover:bg-[color-mix(in_srgb,oklch(var(--bc))_72%,transparent)] focus-visible:bg-[color-mix(in_srgb,oklch(var(--bc))_72%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_srgb,oklch(var(--b1))_80%,transparent)] max-sm:right-2.5 max-sm:top-2.5" type="button" data-lightbox-close aria-label="关闭图片查看">
+              关闭
+            </button>
+            <img class="block max-h-[calc(min(86dvh,52rem)-2.75rem)] w-auto max-w-[min(94vw,76rem)] min-h-0 object-contain max-sm:max-h-[calc(100dvh-3rem)] max-sm:w-[100vw] max-sm:max-w-[100vw]" data-lightbox-image alt="" />
+            <figcaption class="min-h-11 px-16 py-3 text-center text-sm leading-6 text-[color-mix(in_srgb,oklch(var(--b1))_78%,transparent)] [text-shadow:0_1px_1px_color-mix(in_srgb,oklch(var(--bc))_55%,transparent)] max-sm:min-h-12 max-sm:px-[4.25rem] max-sm:pb-3.5 max-sm:pt-3" data-lightbox-caption></figcaption>
+          </figure>
+          <button
+            class="btn btn-circle btn-ghost absolute right-4 top-1/2 z-[1] size-12 min-h-12 -translate-y-1/2 overflow-hidden border border-[color-mix(in_srgb,oklch(var(--b1))_26%,transparent)] bg-[color-mix(in_srgb,oklch(var(--bc))_76%,transparent)] p-0 indent-[-999px] text-[oklch(var(--b1))] backdrop-blur-[12px] transition hover:bg-[color-mix(in_srgb,oklch(var(--bc))_72%,transparent)] focus-visible:bg-[color-mix(in_srgb,oklch(var(--bc))_72%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_srgb,oklch(var(--b1))_80%,transparent)] max-sm:bottom-3 max-sm:right-3 max-sm:top-auto max-sm:size-10 max-sm:min-h-10 max-sm:translate-y-0"
+            type="button"
+            data-lightbox-next
+            aria-label="下一张图片"
+          >
+            <span class="pointer-events-none absolute inset-0 grid place-items-center indent-0 text-[2rem] leading-none before:content-['›']" aria-hidden="true"></span>
+          </button>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+          <button aria-label="关闭图片查看">关闭</button>
+        </form>
+      </dialog>
+    )
+  }
+</section>
+
+<script is:inline define:vars={{ galleryId }}>
+  (() => {
+    const dialog = document.querySelector(`[data-moment-lightbox="${galleryId}"]`);
+    const triggers = [...document.querySelectorAll(`[data-moment-trigger="${galleryId}"]`)];
+
+    if (!(dialog instanceof HTMLDialogElement) || triggers.length === 0) {
+      return;
+    }
+
+    const image = dialog.querySelector("[data-lightbox-image]");
+    const caption = dialog.querySelector("[data-lightbox-caption]");
+    const closeButton = dialog.querySelector("[data-lightbox-close]");
+    const prevButton = dialog.querySelector("[data-lightbox-prev]");
+    const nextButton = dialog.querySelector("[data-lightbox-next]");
+    let activeIndex = 0;
+
+    const setActiveImage = (index) => {
+      activeIndex = (index + triggers.length) % triggers.length;
+      const trigger = triggers[activeIndex];
+
+      if (image instanceof HTMLImageElement) {
+        image.src = trigger.dataset.fullSrc || "";
+        image.alt = trigger.dataset.alt || "";
+      }
+
+      if (caption instanceof HTMLElement) {
+        caption.textContent = trigger.dataset.caption || trigger.dataset.alt || "";
+      }
+    };
+
+    const openLightbox = (index) => {
+      setActiveImage(index);
+
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    };
+
+    triggers.forEach((trigger, index) => {
+      trigger.addEventListener("click", () => openLightbox(index));
+    });
+
+    closeButton?.addEventListener("click", () => dialog.close());
+    prevButton?.addEventListener("click", () => setActiveImage(activeIndex - 1));
+    nextButton?.addEventListener("click", () => setActiveImage(activeIndex + 1));
+
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
+
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        setActiveImage(activeIndex - 1);
+      }
+
+      if (event.key === "ArrowRight") {
+        setActiveImage(activeIndex + 1);
+      }
+    });
+  })();
+</script>

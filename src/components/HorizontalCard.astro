@@ -1,42 +1,67 @@
 ---
-const { title, img, desc, url, badge, tags, target = "_blank" } = Astro.props;
-import { Image } from "astro:assets";
-const tag_url = url.split("/").slice(0, -1).join("/") + "/tag";
+import ThemeImage from "./ThemeImage.astro";
+
+interface Props {
+  title: string;
+  img?: string | ImageMetadata;
+  imgLight?: string | ImageMetadata;
+  imgDark?: string | ImageMetadata;
+  desc: string;
+  url: string;
+  target?: string;
+  compactMobile?: boolean;
+}
+
+const { title, img, imgLight, imgDark, desc, url, target = "_blank", compactMobile = false } = Astro.props as Props;
 ---
 
 <div
-  class="rounded-lg bg-base-100 hover:shadow-xl transition ease-in-out hover:scale-[102%]"
+  class:list={[
+    "card w-full min-w-0 overflow-hidden border border-base-300/70 bg-base-100 shadow-sm transition ease-in-out md:border-0 md:shadow-none md:hover:scale-[102%] md:hover:shadow-xl",
+  ]}
 >
-  <a href={url} target={target}>
-    <div class="hero-content flex-col md:flex-row">
+  <a class="block min-w-0" href={url} target={target}>
+    <div
+      class:list={[
+        "card-body min-w-0 flex-col gap-0 p-0 md:flex-row md:items-center md:gap-4 md:p-5",
+        compactMobile && "max-md:grid max-md:grid-cols-[minmax(0,1fr)_5.75rem] max-md:items-center max-md:gap-4 max-md:p-4",
+      ]}
+    >
       {
-        img && (
-          <Image
-            src={img}
-            width={750}
-            height={422}
-            format="webp"
-            alt={title}
-            class="max-w-full md:max-w-[13rem] rounded-lg"
-          />
+        (imgLight || imgDark || img) && (
+          <figure
+            class:list={[
+              "h-[clamp(9.75rem,42vw,12rem)] w-full min-w-0 shrink-0 border-b border-[color-mix(in_srgb,oklch(var(--bc))_12%,transparent)] bg-base-200 md:h-auto md:w-auto md:border-b-0 md:bg-transparent",
+              compactMobile && "max-md:col-start-2 max-md:row-start-1 max-md:h-[5.75rem] max-md:w-[5.75rem] max-md:overflow-hidden max-md:border max-md:border-[color-mix(in_srgb,oklch(var(--bc))_12%,transparent)] max-md:bg-base-200",
+            ]}
+          >
+            <ThemeImage
+              light={imgLight ?? img}
+              dark={imgDark}
+              alt={title}
+              class="h-full w-full object-cover object-left-top md:aspect-video md:h-auto md:w-[13rem] md:rounded-lg"
+              width={750}
+              height={422}
+              format="webp"
+              sizes="(max-width: 768px) 100vw, 13rem"
+              widths={[320, 480, 750]}
+              loading="lazy"
+            />
+          </figure>
         )
       }
-      <div class="grow w-full">
-        <h1 class="text-xl font-bold">
-          {title}
-          {badge && <div class="badge badge-secondary mx-2">{badge}</div>}
-        </h1>
-        <p class="py-1 text-1xl">{desc}</p>
-        <div class="card-actions justify-end">
-          {
-            tags &&
-              tags.map((tag) => (
-                <a href={`${tag_url}/${tag}`} class="badge badge-outline">
-                  {tag}
-                </a>
-              ))
-          }
+      <div class:list={["w-full min-w-0 grow p-4 md:p-0", compactMobile && "max-md:col-start-1 max-md:row-start-1 max-md:p-0"]}>
+        <div class="flex flex-wrap items-start gap-2.5">
+          <h3 class="card-title min-w-0 break-words text-lg leading-snug sm:text-xl">{title}</h3>
         </div>
+        <p
+          class:list={[
+            "mt-2 break-words text-base leading-7 opacity-80 sm:text-[1.05rem] md:py-1 md:opacity-100",
+            compactMobile && "max-md:line-clamp-2 max-md:text-[0.95rem] max-md:leading-[1.65]",
+          ]}
+        >
+          {desc}
+        </p>
       </div>
     </div>
   </a>

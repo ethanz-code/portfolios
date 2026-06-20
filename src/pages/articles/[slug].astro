@@ -1,0 +1,24 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import ContentEntryDetail from "../../components/ContentEntryDetail.astro";
+import { getContentEntryRouteParams } from "../../lib/content-routes";
+
+export async function getStaticPaths() {
+  const articleEntries = await getCollection("articles");
+
+  return articleEntries
+    .filter((entry) => !entry.data.draft)
+    .map((entry) => ({
+      params: getContentEntryRouteParams(entry),
+      props: { entry },
+    }));
+}
+
+interface Props {
+  entry: CollectionEntry<"articles">;
+}
+
+const { entry } = Astro.props;
+---
+
+<ContentEntryDetail section="articles" entry={entry} />

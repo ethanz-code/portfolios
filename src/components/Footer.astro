@@ -1,15 +1,34 @@
 ---
-const today = new Date();
+const now = new Date();
+const deployedAtLabel = new Intl.DateTimeFormat("zh-CN", {
+  timeZone: "Asia/Shanghai",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+}).format(now).replace(/\//g, "-");
+const deployedAtISOString = now.toISOString();
 ---
 
-<footer class="footer footer-center block mb-5 pt-10">
-  <div class="pb-2">
-    &copy; {today.getFullYear()} Manuel Ernesto
+<footer class="footer footer-center mt-auto block px-6 pb-8 pt-4 lg:px-12">
+  <div class="flex flex-col items-center gap-1 pb-2 text-sm sm:flex-row sm:gap-2">
+    &copy; 2024-{now.getFullYear()} 张永鑫. All rights reserved.
+    <a
+      href="https://beian.miit.gov.cn/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="link-hover link"
+    >
+      鲁ICP备2024099705号
+    </a>
   </div>
-  <div class="inline opacity-75">
-    Developed by <a href="https://manuelernestog.github.io" target="_blank" class="font-bold">Manuel Ernesto</a> using
-    <!-- Thanks for using this template. You can keep this line to support my work :) -->
-    <a href="https://astrofy-template.netlify.app/" target="_blank" class="font-bold">Astrofy Template ⚡️</a>
+  <div
+    class="pointer-events-none fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-30 flex items-center gap-1 whitespace-nowrap text-[10px] leading-none text-base-content/30 sm:right-4 lg:bottom-3 lg:right-4"
+    aria-label="Site stats"
+  >
+    <span>last:</span>
+    <time datetime={deployedAtISOString}>{deployedAtLabel}</time>
   </div>
 </footer>
-<style></style>
