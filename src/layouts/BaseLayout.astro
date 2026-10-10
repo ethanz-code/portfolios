@@ -26,29 +26,32 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <script is:inline>
-      (() => {
-        const storageKey = "theme-preference";
-        const getSystemTheme = () =>
-          window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-        const getDaisyTheme = (theme) => (theme === "dark" ? "black" : "light");
-        const getColorScheme = (theme) => (theme === "dark" ? "dark" : "light");
-
-        try {
-          const storedTheme = window.localStorage.getItem(storageKey);
-          const theme = storedTheme === "light" || storedTheme === "dark" ? storedTheme : getSystemTheme();
-          document.documentElement.dataset.theme = getDaisyTheme(theme);
-          document.documentElement.style.colorScheme = getColorScheme(theme);
-        } catch {
-          const theme = getSystemTheme();
-          document.documentElement.dataset.theme = getDaisyTheme(theme);
-          document.documentElement.style.colorScheme = getColorScheme(theme);
-        }
-      })();
-    </script>
     <style is:inline>
       html:not([data-theme]) { visibility: hidden; }
     </style>
+    <script is:inline>
+      (() => {
+        var storageKey = "theme-preference";
+        var getSystemTheme = function () {
+          return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        };
+        var getDaisyTheme = function (theme) { return theme === "dark" ? "black" : "light"; };
+        var getColorScheme = function (theme) { return theme === "dark" ? "dark" : "light"; };
+
+        var theme;
+        try {
+          var storedTheme = window.localStorage.getItem(storageKey);
+          theme = storedTheme === "light" || storedTheme === "dark" ? storedTheme : getSystemTheme();
+        } catch (_) {
+          theme = getSystemTheme();
+        }
+
+        var root = document.documentElement;
+        root.dataset.theme = getDaisyTheme(theme);
+        root.style.colorScheme = getColorScheme(theme);
+        root.style.setProperty("background-color", theme === "dark" ? "#000000" : "#ffffff");
+      })();
+    </script>
     <BaseHead title={title} description={description} image={image} , ogType={ogType} />
     {enableClientRouter && <ClientRouter />}
   </head>

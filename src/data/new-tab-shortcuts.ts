@@ -46,6 +46,7 @@ export interface NewTabConfig {
     shortcutOpenModeLabel: string;
     shortcutOpenModeCurrentLabel: string;
     shortcutOpenModeNewTabLabel: string;
+    searchEngineLabel: string;
     backgroundUrlLabel: string;
     backgroundFileLabel: string;
     backgroundOpacityLabel: string;
@@ -54,9 +55,6 @@ export interface NewTabConfig {
     textColorDefaultLabel: string;
     textColorLightLabel: string;
     textColorDarkLabel: string;
-    textColorCustomLabel: string;
-    navigationTextColorLabel: string;
-    itemLabelTextColorLabel: string;
     backgroundPlaceholder: string;
     backgroundEmptyLabel: string;
     backgroundUploadedLabel: string;
@@ -119,6 +117,7 @@ export const newTabConfig: NewTabConfig = {
     shortcutOpenModeLabel: "item 打开方式",
     shortcutOpenModeCurrentLabel: "当前标签页",
     shortcutOpenModeNewTabLabel: "新标签页",
+    searchEngineLabel: "默认搜索引擎",
     backgroundUrlLabel: "背景图 URL",
     backgroundFileLabel: "本地背景图",
     backgroundOpacityLabel: "背景透明度",
@@ -127,9 +126,6 @@ export const newTabConfig: NewTabConfig = {
     textColorDefaultLabel: "默认",
     textColorLightLabel: "浅色文字",
     textColorDarkLabel: "深色文字",
-    textColorCustomLabel: "自定义",
-    navigationTextColorLabel: "导航栏",
-    itemLabelTextColorLabel: "分类与入口名称",
     backgroundPlaceholder: "留空则不显示背景图",
     backgroundEmptyLabel: "未设置背景",
     backgroundUploadedLabel: "已上传本地背景",

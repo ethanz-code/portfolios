@@ -1,12 +1,17 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import {
+  ArrowUpRight,
   Check,
+  ChevronDown,
+  Dices,
   EllipsisVertical,
   GripVertical,
-  Monitor,
+  Layers,
+  LayoutGrid,
   PencilLine,
   Plus,
+  Spline,
   Search,
   Trash2,
   X,
@@ -36,14 +41,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   showFloatingThemeToggle={false}
 >
   <section
-    class="new-tab-shell relative isolate z-10 grid w-[min(100%,58rem)] gap-[clamp(1rem,2.2vw,1.75rem)] max-sm:gap-7"
+    class="new-tab-shell relative isolate z-10 grid w-[min(100%,58rem)] gap-[clamp(1.5rem,3.5vh,2.25rem)] pt-[clamp(2rem,9vh,5.5rem)] max-sm:gap-7"
     aria-labelledby="new-tab-title"
     data-new-tab-page
   >
     <h1 id="new-tab-title" class="sr-only">{newTabConfig.heading}</h1>
 
     <div
-      class="pointer-events-none fixed inset-0 z-[-20] hidden bg-slate-50"
+      class="pointer-events-none fixed inset-0 z-[-20] hidden bg-base-100"
       aria-hidden="true"
       data-new-tab-background-base
     ></div>
@@ -53,24 +58,91 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       data-new-tab-background-layer
     ></div>
 
-    <div class="new-tab-toolbar flex max-w-[48rem] items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-3">
-      <div
-        class="new-tab-greeting min-h-6 text-sm font-medium text-base-content/70"
-        data-new-tab-greeting
-        data-new-tab-color-target="navigation"
-      ></div>
-      <div class="new-tab-actions flex flex-wrap items-center justify-end gap-2 max-sm:justify-start">
-        <ThemeToggle mobile={true} />
+    <div class="new-tab-toolbar flex items-end justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-3">
+      <div class="new-tab-greeting-block grid content-start gap-1.5">
+        <p
+          class="new-tab-greeting m-0 text-[clamp(1.45rem,3vw,1.9rem)] font-normal leading-[1.18] tracking-[-0.015em] [font-family:var(--font-reading)]"
+          data-new-tab-greeting
+          data-new-tab-color-target="navigation"
+        ></p>
+        <p
+          class="new-tab-date m-0 text-[0.82rem] font-medium tracking-[0.01em] text-base-content/45"
+          data-new-tab-date
+          data-new-tab-color-target="navigation"
+        ></p>
+      </div>
+      <div class="new-tab-actions flex flex-wrap items-center justify-end gap-1.5 max-sm:justify-start">
+        <div
+          class="new-tab-layout-switcher flex items-center gap-0.5 border border-base-content/10 bg-base-100/70 p-0.5"
+          role="group"
+          aria-label="item 布局"
+          data-layout-switcher
+        >
+          <button
+            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+            type="button"
+            title="网格布局"
+            aria-label="网格布局"
+            aria-pressed="true"
+            data-layout-option="grid"
+          >
+            <LayoutGrid aria-hidden="true" />
+          </button>
+          <button
+            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+            type="button"
+            title="堆叠布局"
+            aria-label="堆叠布局"
+            aria-pressed="false"
+            data-layout-option="stack"
+          >
+            <Layers aria-hidden="true" />
+          </button>
+          <button
+            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+            type="button"
+            title="弧形布局"
+            aria-label="弧形布局"
+            aria-pressed="false"
+            data-layout-option="ring"
+          >
+            <Spline aria-hidden="true" />
+          </button>
+          <button
+            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+            type="button"
+            title="随机布局（再点一次重新随机）"
+            aria-label="随机布局"
+            aria-pressed="false"
+            data-layout-option="scatter"
+          >
+            <Dices aria-hidden="true" />
+          </button>
+        </div>
+        <button
+          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+          type="button"
+          title="收起问候"
+          aria-label="收起问候"
+          aria-expanded="true"
+          data-header-collapse
+        >
+          <ChevronDown aria-hidden="true" />
+        </button>
+        <div class="[&_button]:h-9 [&_button]:min-h-9 [&_button]:w-9 [&_button]:p-0 [&_svg]:h-[1.05rem] [&_svg]:w-[1.05rem]">
+          <ThemeToggle mobile={true} />
+        </div>
         <a
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium text-base-content/60 hover:text-base-content"
           href={newTabConfig.homeLink.href}
           data-home-link
           data-new-tab-color-target="navigation"
         >
-          {newTabConfig.homeLink.label}
+          {newTabConfig.homeLink.label && <span data-home-link-label>{newTabConfig.homeLink.label}</span>}
+          <ArrowUpRight class="h-3.5 w-3.5 opacity-55" aria-hidden="true" />
         </a>
         <button
-          class="btn btn-outline btn-sm"
+          class="btn btn-ghost btn-sm h-9 min-h-9 px-3.5 text-[0.82rem] font-medium text-base-content/60 hover:text-base-content"
           type="button"
           data-config-open
           data-new-tab-color-target="navigation"
@@ -81,56 +153,55 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </div>
 
     <form
-      class="new-tab-search join grid w-full max-w-[48rem] grid-cols-[minmax(0,1fr)_auto_3.1rem] items-stretch focus-within:ring-1 focus-within:ring-base-content/20 max-sm:grid-cols-[minmax(0,1fr)_3.1rem]"
+      class="new-tab-search flex w-full max-w-[44rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:border-base-content/30"
       role="search"
       data-new-tab-search
     >
       <label class="sr-only" for="new-tab-query">搜索关键词</label>
+      <span class="grid w-11 shrink-0 place-items-center pl-3 text-base-content/35" aria-hidden="true">
+        <Search class="h-[1.05rem] w-[1.05rem]" />
+      </span>
       <input
         id="new-tab-query"
-        class="input input-bordered join-item new-tab-search__input h-[3.25rem] min-w-0 text-base"
+        class="new-tab-search__input h-[3.3rem] min-w-0 flex-1 border-0 bg-transparent px-2.5 text-base text-base-content outline-none placeholder:text-base-content/30 sm:text-[0.95rem]"
         type="search"
         name="q"
         autocomplete="off"
         placeholder={newTabConfig.search.placeholder}
         data-search-query
       />
-      <label class="sr-only" for="new-tab-engine">搜索引擎</label>
-      <select
-        id="new-tab-engine"
-        class="select select-bordered join-item new-tab-search__engine h-[3.25rem] max-w-36 max-sm:col-span-full max-sm:row-start-2 max-sm:w-full max-sm:max-w-none"
-        name="engine"
-        data-search-engine
-      ></select>
+      <span class="new-tab-search__divider my-[0.85rem] w-px shrink-0 bg-base-content/10" aria-hidden="true"></span>
       <button
-        class="btn btn-neutral join-item new-tab-search__submit min-h-[3.25rem] w-[3.25rem]"
+        class="btn h-auto min-h-0 w-[3.3rem] shrink-0 rounded-none border-0 bg-base-content text-base-100 hover:bg-base-content/85 focus-visible:bg-base-content/85 sm:w-auto sm:px-5"
         type="submit"
         aria-label={newTabConfig.search.submitLabel}
         title={newTabConfig.search.submitLabel}
       >
-        <Search class="h-[1.1rem] w-[1.1rem]" aria-hidden="true" />
+        <Search class="h-[1.05rem] w-[1.05rem]" aria-hidden="true" />
+        <span class="new-tab-search__submit-label hidden text-[0.82rem] font-medium sm:inline">{newTabConfig.search.submitLabel}</span>
       </button>
     </form>
 
-    <div class="shortcut-stack grid gap-[0.55rem]" aria-label="快捷网站" data-shortcut-stack></div>
+    <div class="shortcut-stack grid gap-6 max-sm:gap-5" aria-label="快捷网站" data-shortcut-stack></div>
+
     <button
-      class="shortcut-edit-toggle btn btn-ghost fixed bottom-4 right-4 z-40 h-10 min-h-10 w-10 rounded-full border border-base-content/10 bg-base-100/80 p-0 opacity-60 shadow-sm backdrop-blur transition hover:opacity-100 focus-visible:opacity-100"
+      class="new-tab-restore btn btn-square btn-sm fixed right-4 top-4 z-[70] h-9 min-h-9 w-9 border border-base-content/15 bg-base-100/85 p-0 text-base-content/70 shadow-[0_6px_20px_rgba(0,0,0,0.10)] backdrop-blur hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
       type="button"
-      aria-pressed="false"
-      aria-label="编辑快捷方式"
-      data-shortcut-edit-toggle
+      aria-label="展开问候与搜索"
+      title="展开问候与搜索（按 / 唤回搜索）"
+      data-header-restore
     >
-      <PencilLine class="h-4 w-4" aria-hidden="true" />
+      <ChevronDown aria-hidden="true" />
     </button>
   </section>
 
   <div class="new-tab-config fixed inset-0 z-[80] hidden pointer-events-none opacity-0 transition-opacity duration-200" data-config-drawer>
     <button class="new-tab-config__backdrop absolute inset-0 border-0 bg-base-content/20 opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
-    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] border-l border-base-content/10 bg-base-100 shadow-2xl translate-x-full transition-transform duration-200" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
+    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] border-l border-base-content/10 bg-base-100 shadow-[-16px_0_48px_rgba(0,0,0,0.10)] translate-x-full transition-transform duration-200" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
       <div class="new-tab-config__header flex items-center justify-between gap-3 border-b border-base-content/10 p-4">
         <div class="min-w-0">
-          <h2 class="m-0 text-base font-extrabold leading-tight">{newTabConfig.settings.panelTitle}</h2>
-          <p class="mt-1 text-[0.78rem] leading-snug text-base-content/50" data-config-status>{newTabConfig.settings.statusReady}</p>
+          <h2 class="m-0 text-[0.95rem] font-bold leading-tight">{newTabConfig.settings.panelTitle}</h2>
+          <p class="mt-1 text-xs leading-snug text-base-content/50" data-config-status>{newTabConfig.settings.statusReady}</p>
         </div>
         <button class="btn btn-square btn-ghost btn-sm" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close>
           <X class="h-4 w-4" aria-hidden="true" />
@@ -139,7 +210,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       <div class="new-tab-config__body grid content-start gap-4 overflow-y-auto p-4">
         <section class="new-tab-config__section grid gap-3">
-          <div class="new-tab-config__section-title text-sm font-extrabold leading-5 text-base-content">{newTabConfig.settings.generalLabel}</div>
+          <div class="new-tab-config__section-title text-xs font-semibold tracking-[0.12em] text-base-content/45">{newTabConfig.settings.generalLabel}</div>
           <div class="new-tab-config__grid grid grid-cols-2 gap-3 max-sm:grid-cols-1">
             <label class="form-control grid min-w-0 gap-1.5">
               <span class="label">
@@ -167,6 +238,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                 <option value="current">{newTabConfig.settings.shortcutOpenModeCurrentLabel}</option>
                 <option value="newTab">{newTabConfig.settings.shortcutOpenModeNewTabLabel}</option>
               </select>
+            </label>
+            <label class="form-control grid min-w-0 gap-1.5 col-span-full">
+              <span class="label">
+                <span class="label-text">{newTabConfig.settings.searchEngineLabel}</span>
+              </span>
+              <select class="select select-bordered select-sm" data-config-search-engine></select>
             </label>
             <label class="form-control grid min-w-0 gap-1.5 col-span-full">
               <span class="label">
@@ -205,7 +282,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                 data-config-background-opacity
               />
             </label>
-            <div class="new-tab-config__wide new-tab-config__section-title col-span-full text-sm font-extrabold leading-5 text-base-content">
+            <div class="new-tab-config__wide new-tab-config__section-title col-span-full mt-1 border-t border-base-content/10 pt-4 text-xs font-semibold tracking-[0.12em] text-base-content/45">
               {newTabConfig.settings.textColorLabel}
             </div>
             <label class="form-control grid min-w-0 gap-1.5 col-span-full">
@@ -216,20 +293,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                 <option value="default">{newTabConfig.settings.textColorDefaultLabel}</option>
                 <option value="light">{newTabConfig.settings.textColorLightLabel}</option>
                 <option value="dark">{newTabConfig.settings.textColorDarkLabel}</option>
-                <option value="custom">{newTabConfig.settings.textColorCustomLabel}</option>
               </select>
-            </label>
-            <label class="form-control grid min-w-0 gap-1.5">
-              <span class="label">
-                <span class="label-text">{newTabConfig.settings.navigationTextColorLabel}</span>
-              </span>
-              <input class="input input-bordered input-sm h-10 p-1" type="color" data-config-navigation-color />
-            </label>
-            <label class="form-control grid min-w-0 gap-1.5">
-              <span class="label">
-                <span class="label-text">{newTabConfig.settings.itemLabelTextColorLabel}</span>
-              </span>
-              <input class="input input-bordered input-sm h-10 p-1" type="color" data-config-item-label-color />
             </label>
           </div>
         </section>
@@ -275,9 +339,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   <template data-new-tab-icon="edit">
     <PencilLine class="h-4 w-4" aria-hidden="true" />
   </template>
-  <template data-new-tab-icon="desktop">
-    <Monitor class="h-4 w-4" aria-hidden="true" />
-  </template>
   <template data-new-tab-icon="plus">
     <Plus class="h-4 w-4" aria-hidden="true" />
   </template>
@@ -286,6 +347,294 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   </template>
 
   <script is:inline type="application/json" id="new-tab-defaults" set:html={serializedDefaultNewTabPayload} />
+
+  <style is:inline>
+    /* new-tab 动效（全局样式，绕过 Tailwind purge）：布局补间 / 入场 / 问候与搜索收起、挂起 */
+    [data-new-tab-page].new-tab-shell {
+      align-items: end;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        "toolbar"
+        "search"
+        "stack";
+      transition: padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-new-tab-page] .new-tab-toolbar {
+      grid-area: toolbar;
+    }
+
+    [data-new-tab-page] .new-tab-search {
+      grid-area: search;
+    }
+
+    [data-new-tab-page] [data-shortcut-stack] {
+      grid-area: stack;
+    }
+
+    /* 一段收起：搜索框上移，与功能按钮同一行（桌面宽度起） */
+    @media (min-width: 640px) {
+      [data-new-tab-page][data-header-state="collapsed"].new-tab-shell {
+        grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+        grid-template-areas:
+          "search toolbar"
+          "stack stack";
+      }
+
+      [data-new-tab-page][data-header-state="collapsed"] .new-tab-toolbar {
+        justify-content: flex-end;
+      }
+    }
+
+    [data-new-tab-page] .new-tab-toolbar {
+      max-height: 10rem;
+      transition:
+        opacity 0.3s ease,
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-new-tab-page] .new-tab-greeting-block {
+      max-height: 8rem;
+      transition:
+        opacity 0.32s ease,
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-new-tab-page] .new-tab-search {
+      max-height: 8rem;
+      transition:
+        max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease,
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.2s ease;
+    }
+
+    [data-new-tab-page] .new-tab-search__input {
+      transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-new-tab-page] [data-header-collapse] svg,
+    [data-new-tab-page] .new-tab-restore svg {
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-new-tab-page] .new-tab-restore {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-0.4rem);
+      transition:
+        opacity 0.25s ease,
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear 0.35s;
+    }
+
+    [data-new-tab-page][data-header-state="collapsed"].new-tab-shell {
+      padding-top: clamp(1.25rem, 4vh, 2.25rem);
+    }
+
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-greeting-block {
+      max-height: 0;
+      max-width: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(-0.75rem);
+      pointer-events: none;
+    }
+
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search {
+      max-width: 22rem;
+    }
+
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__input {
+      height: 2.5rem;
+    }
+
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__divider {
+      margin-top: 0.55rem;
+      margin-bottom: 0.55rem;
+    }
+
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__submit-label {
+      display: none;
+    }
+
+    [data-new-tab-page][data-header-state="collapsed"] [data-header-collapse] svg {
+      transform: rotate(180deg);
+    }
+
+    [data-new-tab-page][data-header-state="suspended"].new-tab-shell {
+      padding-top: clamp(0.75rem, 2vh, 1.5rem);
+    }
+
+    [data-new-tab-page][data-header-state="suspended"] .new-tab-toolbar,
+    [data-new-tab-page][data-header-state="suspended"] .new-tab-search {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(-1rem);
+      pointer-events: none;
+    }
+
+    [data-new-tab-page][data-header-state="suspended"] .new-tab-search {
+      border-color: transparent;
+    }
+
+    [data-new-tab-page][data-header-state="suspended"] .new-tab-restore {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      transition:
+        opacity 0.25s ease 0.12s,
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.12s,
+        visibility 0s;
+    }
+
+    [data-shortcut-stack] .shortcut-item-shell {
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* 弧形布局：拼接画布固定为底部弧形坞，吃满视口全宽 */
+    [data-new-tab-page] .new-tab-arc-dock {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      padding: 0 0.375rem 0.25rem;
+    }
+
+    /* item 卡片深浅由 data-item-tone 驱动：浅色文字配黑卡，深色文字配浅卡，默认跟随主题 */
+    html[data-item-tone="light"] [data-shortcut-stack] .shortcut-item {
+      background-color: rgba(0, 0, 0, 0.05) !important;
+      border-color: rgba(0, 0, 0, 0.08) !important;
+    }
+
+    html[data-item-tone="light"] [data-shortcut-stack] .shortcut-item:hover,
+    html[data-item-tone="light"] [data-shortcut-stack] .shortcut-item:focus-visible {
+      background-color: rgba(0, 0, 0, 0.09) !important;
+      border-color: rgba(0, 0, 0, 0.2) !important;
+    }
+
+    html[data-item-tone="dark"] [data-shortcut-stack] .shortcut-item {
+      background-color: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    html[data-item-tone="dark"] [data-shortcut-stack] .shortcut-item:hover,
+    html[data-item-tone="dark"] [data-shortcut-stack] .shortcut-item:focus-visible {
+      background-color: rgba(255, 255, 255, 0.13) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* 亮色页面上的黑卡用实底近纯黑，白 8% 提亮只在纯黑页面可见 */
+    html[data-item-tone="dark"][data-theme="light"] [data-shortcut-stack] .shortcut-item {
+      background-color: rgba(8, 9, 12, 0.97) !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    html[data-item-tone="dark"][data-theme="light"] [data-shortcut-stack] .shortcut-item:hover,
+    html[data-item-tone="dark"][data-theme="light"] [data-shortcut-stack] .shortcut-item:focus-visible {
+      background-color: rgba(28, 30, 37, 0.98) !important;
+      border-color: rgba(255, 255, 255, 0.22) !important;
+    }
+
+    /* 暗色页面上的浅卡用白色提亮，黑 5% 在纯黑上不可见 */
+    html[data-item-tone="light"][data-theme="black"] [data-shortcut-stack] .shortcut-item {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    html[data-item-tone="light"][data-theme="black"] [data-shortcut-stack] .shortcut-item:hover,
+    html[data-item-tone="light"][data-theme="black"] [data-shortcut-stack] .shortcut-item:focus-visible {
+      background-color: rgba(255, 255, 255, 0.16) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* 黑卡上的副标题改浅色，避免深灰小字压深卡看不清 */
+    html[data-item-tone="dark"] [data-shortcut-stack] .shortcut-item__label small {
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    /* 有背景图时改为半透明卡片：黑卡压暗照片、白卡提亮照片 */
+    html[data-item-tone="dark"][data-new-tab-background="true"] [data-shortcut-stack] .shortcut-item {
+      background-color: rgba(0, 0, 0, 0.6) !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    html[data-item-tone="dark"][data-new-tab-background="true"] [data-shortcut-stack] .shortcut-item:hover,
+    html[data-item-tone="dark"][data-new-tab-background="true"] [data-shortcut-stack] .shortcut-item:focus-visible {
+      background-color: rgba(0, 0, 0, 0.78) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    html[data-item-tone="light"][data-new-tab-background="true"] [data-shortcut-stack] .shortcut-item {
+      background-color: rgba(255, 255, 255, 0.65) !important;
+      border-color: rgba(0, 0, 0, 0.08) !important;
+    }
+
+    html[data-item-tone="light"][data-new-tab-background="true"] [data-shortcut-stack] .shortcut-item:hover,
+    html[data-item-tone="light"][data-new-tab-background="true"] [data-shortcut-stack] .shortcut-item:focus-visible {
+      background-color: rgba(255, 255, 255, 0.8) !important;
+      border-color: rgba(0, 0, 0, 0.16) !important;
+    }
+
+    /* 悬浮提示跟随 item 卡片深浅：文字颜色模式强制换色后，浮层底色同步切换，标题和说明都保持可读 */
+    html[data-item-tone="dark"] [data-shortcut-stack] .shortcut-item__tooltip {
+      background-color: rgba(8, 9, 12, 0.97) !important;
+      border-color: rgba(255, 255, 255, 0.16) !important;
+      color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    html[data-item-tone="dark"] [data-shortcut-stack] .shortcut-item__tooltip::after {
+      background-color: rgba(8, 9, 12, 0.97) !important;
+      border-color: rgba(255, 255, 255, 0.16) !important;
+    }
+
+    html[data-item-tone="dark"] [data-shortcut-stack] .shortcut-item__tooltip small {
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    html[data-item-tone="light"] [data-shortcut-stack] .shortcut-item__tooltip {
+      background-color: rgba(255, 255, 255, 0.97) !important;
+      border-color: rgba(0, 0, 0, 0.12) !important;
+      color: rgba(17, 24, 39, 0.92) !important;
+    }
+
+    html[data-item-tone="light"] [data-shortcut-stack] .shortcut-item__tooltip::after {
+      background-color: rgba(255, 255, 255, 0.97) !important;
+      border-color: rgba(0, 0, 0, 0.12) !important;
+    }
+
+    html[data-item-tone="light"] [data-shortcut-stack] .shortcut-item__tooltip small {
+      color: rgba(17, 24, 39, 0.6) !important;
+    }
+
+    [data-shortcut-stack] .ntab-pop > .shortcut-item,
+    [data-shortcut-stack] .shortcut-item.ntab-pop {
+      animation: ntab-pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+      animation-delay: var(--ntab-delay, 0ms);
+    }
+
+    @keyframes ntab-pop-in {
+      from {
+        opacity: 0;
+        transform: translateY(0.7rem) scale(0.94);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-new-tab-page] *,
+      [data-new-tab-page] *::before,
+      [data-new-tab-page] *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+      }
+    }
+  </style>
 
   <script>
     // @ts-nocheck
@@ -305,10 +654,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     const configVersion = 7;
     const defaultBackgroundOpacity = 60;
     const oldDefaultBackgroundOpacities = [34, 50];
+    const storageQuotaErrorMessage = "配置过大，超出本地存储上限，无法保存；请压缩背景图或精简数据";
     const defaultTextColors = {
       mode: "default",
-      navigationColor: "#f8fafc",
-      itemLabelColor: "#f8fafc",
     };
 
     const defaultState = () => ({
@@ -323,14 +671,17 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       greetings: cloneValue(defaultPayload.config?.greetings ?? []),
       searchEngines: cloneValue(defaultPayload.searchEngines ?? []),
       shortcutGroups: cloneValue(defaultPayload.shortcutGroups ?? []),
+      shortcutLayout: "grid",
+      scatterSeed: Math.floor(Math.random() * 1000000000) + 1,
+      headerCollapsed: false,
+      headerSuspended: false,
     });
 
     const storageKey = defaultPayload.config?.storageKey ?? "ethanz-new-tab-config";
     const logoCacheStorageKey = `${storageKey}:logo-cache`;
-    const logoResolverVersion = 4;
+    const logoResolverVersion = 5;
     const settingsLabels = defaultPayload.config?.settings ?? {};
     let newTabState = defaultState();
-    let shortcutEditMode = false;
     let activeDragPayload = null;
     let textColorSaveTimer = 0;
     let shortcutLogoCache = {};
@@ -347,34 +698,26 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     const normalizeMaybeText = (value) =>
       typeof value === "string" && value.trim() ? value.trim() : undefined;
 
-    const normalizeColor = (value, fallback) =>
-      typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value.trim())
-        ? value.trim()
-        : fallback;
-
     const normalizeShortcutOpenMode = (value, fallback = "current") =>
       value === "newTab" || value === "current" ? value : fallback;
 
-    const normalizeTextColors = (value, fallback) => {
-      if (!isPlainObject(value)) {
-        return cloneValue(fallback);
-      }
+    const shortcutLayoutIds = ["grid", "stack", "ring", "scatter"];
 
-      const mode = ["default", "light", "dark", "custom"].includes(value.mode)
+    const normalizeShortcutLayout = (value, fallback = "grid") =>
+      shortcutLayoutIds.includes(value) ? value : fallback;
+
+    const normalizeScatterSeed = (value, fallback = 1) => {
+      const seed = Number(value);
+
+      return Number.isFinite(seed) && seed > 0 ? Math.floor(seed) : fallback;
+    };
+
+    const normalizeTextColors = (value, fallback) => {
+      const mode = isPlainObject(value) && ["default", "light", "dark"].includes(value.mode)
         ? value.mode
         : fallback.mode;
 
-      return {
-        mode,
-        navigationColor: normalizeColor(
-          value.navigationColor ?? value.greetingColor ?? value.homeLinkColor,
-          fallback.navigationColor,
-        ),
-        itemLabelColor: normalizeColor(
-          value.itemLabelColor ?? value.shortcutLabelColor,
-          fallback.itemLabelColor,
-        ),
-      };
+      return { mode };
     };
 
     const normalizeGreetings = (greetings, fallback) => {
@@ -489,6 +832,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         greetings: normalizeGreetings(value.greetings, fallback.greetings),
         searchEngines,
         shortcutGroups: normalizeShortcutGroups(value.shortcutGroups, fallback.shortcutGroups),
+        shortcutLayout: normalizeShortcutLayout(value.shortcutLayout),
+        scatterSeed: normalizeScatterSeed(value.scatterSeed),
+        headerCollapsed: value.headerCollapsed === true,
+        headerSuspended: value.headerSuspended === true,
       };
     };
 
@@ -525,8 +872,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     const writeStoredState = () => {
       try {
         window.localStorage.setItem(storageKey, JSON.stringify(newTabState));
-      } catch {
+        return true;
+      } catch (error) {
+        if (error && error.name === "QuotaExceededError") {
+          return false;
+        }
+
         // The page still works with the in-memory config when storage is unavailable.
+        return true;
       }
     };
 
@@ -586,9 +939,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     };
 
     const focusFirstInput = (element) => {
-      window.requestAnimationFrame(() => {
-        element.querySelector("input")?.focus();
-      });
+      element.querySelector("input")?.focus();
     };
 
     const setInlineFormError = (target, message) => {
@@ -653,7 +1004,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       closeShortcutContextMenu();
 
       const menu = document.createElement("div");
-      menu.className = "shortcut-context-menu fixed z-[90] grid min-w-44 gap-1 rounded-[0.55rem] border border-base-content/15 bg-base-100 p-1.5 text-sm text-base-content shadow-xl outline-none max-sm:min-w-52";
+      menu.className = "shortcut-context-menu fixed z-[90] grid min-w-44 max-w-[18rem] gap-1 border border-base-content/15 bg-base-100 p-1.5 text-sm text-base-content shadow-[0_12px_36px_rgba(0,0,0,0.12)] outline-none";
       menu.setAttribute("role", "menu");
       menu.tabIndex = -1;
 
@@ -679,8 +1030,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       actions.forEach((action) => {
         const button = document.createElement("button");
         button.className = action.danger
-          ? "grid h-9 grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 rounded-[0.4rem] border-0 bg-transparent px-2 text-left text-error/80 transition hover:bg-error/10 focus-visible:bg-error/10 focus-visible:outline-none"
-          : "grid h-9 grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 rounded-[0.4rem] border-0 bg-transparent px-2 text-left text-base-content/75 transition hover:bg-base-200 focus-visible:bg-base-200 focus-visible:outline-none";
+          ? "grid h-9 grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 rounded-[0.15rem] border-0 bg-transparent px-2 text-left text-error/80 transition hover:bg-error/10 focus-visible:bg-error/10 focus-visible:outline-none"
+          : "grid h-9 grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 rounded-[0.15rem] border-0 bg-transparent px-2 text-left text-base-content/75 transition hover:bg-base-200 focus-visible:bg-base-200 focus-visible:outline-none";
         button.type = "button";
         button.setAttribute("role", "menuitem");
         button.innerHTML = `<span class="grid h-4 w-4 place-items-center [&_svg]:h-3.5 [&_svg]:w-3.5">${getIconMarkup(action.icon)}</span><span class="truncate text-xs font-semibold">${action.label}</span>`;
@@ -693,27 +1044,30 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       document.body.append(menu);
       activeShortcutContextMenu = menu;
-
-      window.requestAnimationFrame(() => {
-        positionShortcutContextMenu(menu, getContextMenuPoint(event, fallbackElement));
-        menu.focus({ preventScroll: true });
-      });
+      positionShortcutContextMenu(menu, getContextMenuPoint(event, fallbackElement));
+      menu.focus({ preventScroll: true });
     };
 
-    const createShortcutEditHint = () => {
-      const hint = document.createElement("div");
-      hint.className = "shortcut-edit-hint flex items-center gap-2 rounded-[0.5rem] border border-base-content/10 bg-base-100/70 px-3 py-2 text-[0.76rem] font-medium leading-snug text-base-content/55 backdrop-blur max-sm:flex-col max-sm:items-start max-sm:gap-1.5";
+    const createShortcutEmptyState = () => {
+      const empty = document.createElement("div");
+      empty.className = "shortcut-empty grid place-items-center gap-3.5 border border-dashed border-base-content/15 px-6 py-12 text-center";
 
-      const icon = document.createElement("span");
-      icon.className = "grid h-4 w-4 shrink-0 place-items-center text-base-content/45 [&_svg]:h-3.5 [&_svg]:w-3.5";
-      icon.innerHTML = getIconMarkup("desktop");
+      const title = document.createElement("p");
+      title.className = "m-0 text-sm font-medium leading-relaxed text-base-content/50";
+      title.textContent = "还没有快捷入口，先把常用的网站加进来";
 
-      const text = document.createElement("span");
-      text.className = "min-w-0";
-      text.textContent = "PC 端可右键分组或 item 修改、删除；移动端请点右上角菜单。";
+      const action = document.createElement("button");
+      action.className = "btn btn-sm h-9 min-h-9 gap-1.5 border border-base-content/20 bg-transparent px-4 text-[0.82rem] font-medium text-base-content/60 hover:border-base-content/40 hover:bg-transparent hover:text-base-content";
+      action.type = "button";
+      action.innerHTML = `<span class="grid h-3.5 w-3.5 place-items-center [&_svg]:h-3.5 [&_svg]:w-3.5">${getIconMarkup("plus")}</span><span>开始添加</span>`;
+      action.addEventListener("click", () => {
+        const form = createGroupAddForm();
+        empty.replaceWith(form);
+        focusFirstInput(form);
+      });
 
-      hint.append(icon, text);
-      return hint;
+      empty.append(title, action);
+      return empty;
     };
 
     const bindShortcutContextMenuDismissal = () => {
@@ -744,7 +1098,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const createShortcutAddForm = (group) => {
       const form = document.createElement("form");
-      form.className = "shortcut-item-add-form col-span-full grid w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 rounded-[0.45rem] border border-base-content/10 bg-base-100/80 p-1.5 shadow-sm backdrop-blur";
+      form.className = "shortcut-item-add-form col-span-full grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 border border-base-content/10 bg-base-100/90 p-2 backdrop-blur";
       form.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加 item"}：${group.title}`);
 
       const fields = document.createElement("div");
@@ -786,8 +1140,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const applyShortcutMetadata = (metadata) => {
         shortcutMetadata = metadata;
 
-        if (!normalizeText(titleInput.value) && metadata?.title) {
-          titleInput.value = metadata.title;
+        if (normalizeText(titleInput.value)) {
+          return;
+        }
+
+        const suggestedTitle = metadata?.title || getShortcutHostname(normalizeShortcutUrlInput(urlInput.value));
+
+        if (suggestedTitle) {
+          titleInput.value = suggestedTitle;
           clearInlineFormError(error);
         }
       };
@@ -890,7 +1250,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const createShortcutEditForm = (group, shortcut) => {
       const form = document.createElement("form");
-      form.className = "shortcut-item-edit-form grid w-full max-w-[min(100%,24rem)] grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 rounded-[0.45rem] border border-base-content/10 bg-base-100/90 p-1.5 shadow-sm backdrop-blur";
+      form.className = "shortcut-item-edit-form grid w-full max-w-[min(100%,24rem)] grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 border border-base-content/10 bg-base-100/90 p-2 backdrop-blur";
       form.setAttribute("aria-label", `修改 item：${shortcut.title}`);
 
       const fields = document.createElement("div");
@@ -943,9 +1303,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           }
 
           shortcutMetadata = metadata;
-          if (!normalizeText(titleInput.value) && metadata?.title) {
-            titleInput.value = metadata.title;
-            clearInlineFormError(error);
+          if (!normalizeText(titleInput.value)) {
+            const suggestedTitle = metadata?.title || getShortcutHostname(normalizeShortcutUrlInput(urlInput.value));
+            if (suggestedTitle) {
+              titleInput.value = suggestedTitle;
+              clearInlineFormError(error);
+            }
           }
           return metadata;
         });
@@ -1033,7 +1396,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const createGroupAddForm = () => {
       const form = document.createElement("form");
-      form.className = "shortcut-group shortcut-group--add-form grid grid-cols-[minmax(7.5rem,8.5rem)_minmax(0,1fr)] items-start gap-4 py-1 max-sm:grid-cols-1 max-sm:gap-2";
+      form.className = "shortcut-group shortcut-group--add-form flex items-start gap-2 py-1";
       form.setAttribute("aria-label", settingsLabels.addGroupLabel ?? "添加分组");
 
       const field = document.createElement("label");
@@ -1042,7 +1405,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       srLabel.className = "sr-only";
       srLabel.textContent = settingsLabels.groupTitleLabel ?? "分组名";
       const input = document.createElement("input");
-      input.className = "input input-bordered input-xs h-8 w-full max-w-36 bg-base-100/80 text-xs";
+      input.className = "input input-bordered input-xs h-8 w-56 bg-base-100 text-xs";
       input.type = "text";
       input.autocomplete = "off";
       input.placeholder = settingsLabels.groupTitleLabel ?? "分组名";
@@ -1094,7 +1457,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const createGroupEditForm = (group) => {
       const form = document.createElement("form");
-      form.className = "shortcut-group shortcut-group--edit-form grid grid-cols-[minmax(7.5rem,8.5rem)_minmax(0,1fr)] items-start gap-4 py-1 max-sm:grid-cols-1 max-sm:gap-2";
+      form.className = "shortcut-group shortcut-group--edit-form flex items-start gap-2 py-1";
       form.setAttribute("aria-label", `修改分组：${group.title}`);
 
       const field = document.createElement("label");
@@ -1103,7 +1466,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       srLabel.className = "sr-only";
       srLabel.textContent = settingsLabels.groupTitleLabel ?? "分组名";
       const input = document.createElement("input");
-      input.className = "input input-bordered input-xs h-8 w-full max-w-36 bg-base-100/80 text-xs";
+      input.className = "input input-bordered input-xs h-8 w-56 bg-base-100 text-xs";
       input.type = "text";
       input.autocomplete = "off";
       input.placeholder = settingsLabels.groupTitleLabel ?? "分组名";
@@ -1329,9 +1692,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const dragHandleIcon = getIconMarkup("drag");
 
-    const faviconProxyUrl = "https://proxy.scalar.com";
+    const faviconProxyUrl = "https://meta.itcox.cn";
 
-    const getProxyUrl = (url) => `${faviconProxyUrl}?scalar_url=${encodeURIComponent(url)}`;
+    const getProxyUrl = (url) => `${faviconProxyUrl}?url=${encodeURIComponent(url)}`;
 
     const isRemoteUrl = (value) => /^https?:\/\//i.test(value);
 
@@ -1469,12 +1832,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         pushLogoCandidate(candidates, new URL(path, originUrl).href);
       });
 
-      const duckDuckGoFavicon = `https://icons.duckduckgo.com/ip3/${hostname}.ico`;
       const googleFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=64`;
+      const duckDuckGoFavicon = `https://icons.duckduckgo.com/ip3/${hostname}.ico`;
       const directFavicon = `https://${hostname}/favicon.ico`;
 
-      pushLogoCandidate(candidates, duckDuckGoFavicon);
       pushLogoCandidate(candidates, googleFavicon);
+      pushLogoCandidate(candidates, duckDuckGoFavicon);
       pushLogoCandidate(candidates, directFavicon, false);
 
       return candidates;
@@ -1483,22 +1846,49 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     const getShortcutSubtitle = (shortcut) =>
       shortcut.description ?? getCachedShortcutLogo(shortcut)?.description ?? getShortcutHostname(shortcut.url);
 
+    const cleanShortcutTitle = (value) => {
+      const title = normalizeText(value);
+
+      if (!title) {
+        return "";
+      }
+
+      const shortTitle = title.slice(0, 80);
+      const match = shortTitle.match(/^(.*?)[\s]*[-–—·|:：][\s]*([^\-–—·|:：\n]{1,24})$/);
+
+      if (match && match[1].trim() && match[2].trim()) {
+        return match[1].trim();
+      }
+
+      return shortTitle;
+    };
+
+    const normalizePageTitle = (value) =>
+      normalizeText(value).replace(/\u2026/g, "...").replace(/\s+/g, " ");
+
+    // SPA 站点（如 1Panel）的静态 HTML 标题常是占位符，真实标题由前端渲染，服务端抓不到。
+    const isLoadingPageTitle = (value) =>
+      /^loading[.\s]*$/i.test(value) || /^(加载中|正在加载|请稍候)[.。\s]*$/.test(value);
+
     const collectLogoUrlsFromHtml = (html, baseUrl) => {
       const candidates = [];
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
-      const pageTitle = normalizeText(
-        doc.querySelector('meta[property="og:site_name"]')?.getAttribute("content") ??
-        doc.querySelector("title")?.textContent,
-      );
+      const pageTitle = cleanShortcutTitle(normalizePageTitle(doc.querySelector("title")?.textContent));
+      const fallbackTitle = cleanShortcutTitle(normalizePageTitle(
+        doc.querySelector('meta[property="og:title"]')?.getAttribute("content") ??
+        doc.querySelector('meta[name="application-name"]')?.getAttribute("content") ??
+        "",
+      ));
+      const resolvedTitle = [pageTitle, fallbackTitle].find(
+        (value) => value && !isLoadingPageTitle(value),
+      ) ?? "";
       const iconSelector = [
         'link[rel~="icon"][href]',
         'link[rel~="apple-touch-icon"][href]',
         'link[rel~="apple-touch-icon-precomposed"][href]',
         'link[rel~="mask-icon"][href]',
         'meta[property="og:logo"][content]',
-        'meta[property="og:image"][content]',
-        'meta[name="twitter:image"][content]',
       ].join(",");
 
       doc.querySelectorAll(iconSelector).forEach((element) => {
@@ -1528,9 +1918,17 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         }
       });
 
+      doc.querySelectorAll('meta[property="og:image"][content], meta[name="twitter:image"][content]').forEach((element) => {
+        const logoUrl = resolveShortcutAssetUrl(element.getAttribute("content") ?? "", baseUrl);
+
+        if (logoUrl && !candidates.includes(logoUrl)) {
+          candidates.push(logoUrl);
+        }
+      });
+
       return {
         candidates,
-        title: /^loading\.{0,3}$/i.test(pageTitle) ? "" : pageTitle,
+        title: resolvedTitle,
         description: normalizeText(
           doc.querySelector('meta[name="description"]')?.getAttribute("content") ??
           doc.querySelector('meta[property="og:description"]')?.getAttribute("content"),
@@ -1622,7 +2020,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const cacheKey = getShortcutLogoCacheKey(shortcut.url);
       const cached = shortcutLogoCache[cacheKey];
       const cachedAt = Number(cached?.updatedAt ?? cached?.failedAt ?? 0);
-      const isFresh = cachedAt && Date.now() - cachedAt < 7 * 24 * 60 * 60 * 1000;
+      // 成功解析的缓存保鲜 7 天；失败记录只保鲜 1 天，避免一次抖动导致长期不重试。
+      const hasResolvedLogoMetadata = Boolean(
+        cached?.metadataResolved ||
+        (Array.isArray(cached?.candidates) && cached.candidates.length > 0) ||
+        cached?.description,
+      );
+      const isFresh = cachedAt
+        && Date.now() - cachedAt < (hasResolvedLogoMetadata ? 7 : 1) * 24 * 60 * 60 * 1000;
 
       if (!isRemoteUrl(shortcut.url) || !canProxyUrl(shortcut.url)) {
         return Promise.resolve(cached);
@@ -1790,21 +2195,262 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       });
     };
 
-    const syncShortcutEditToggle = () => {
-      const toggle = document.querySelector("[data-shortcut-edit-toggle]");
+    // —— 布局引擎：网格走原生流式，堆叠/环形/随机走画布绝对定位；切换与增删用 FLIP 补间 ——
+    const shortcutPlacementMemory = new Map();
 
-      if (!(toggle instanceof HTMLButtonElement)) {
+    const getShortcutCanvasKey = (element) =>
+      element instanceof HTMLElement ? element.dataset.canvasKey ?? "" : "";
+
+    const hashShortcutKey = (value) => {
+      let hash = 5381;
+
+      for (let index = 0; index < value.length; index += 1) {
+        hash = ((hash << 5) + hash + value.charCodeAt(index)) | 0;
+      }
+
+      return Math.abs(hash);
+    };
+
+    const createScatterRandom = (seed) => {
+      let state = seed % 2147483647;
+
+      if (state <= 0) {
+        state += 2147483646;
+      }
+
+      return () => {
+        state = (state * 16807) % 2147483647;
+        return (state - 1) / 2147483646;
+      };
+    };
+
+    const layoutShortcutCanvas = (itemsEl, mode, placements) => {
+      const children = Array.from(itemsEl.children).filter((child) => child instanceof HTMLElement);
+
+      if (mode === "grid" || !children.length) {
+        itemsEl.style.removeProperty("height");
+        children.forEach((child) => {
+          child.style.removeProperty("position");
+          child.style.removeProperty("left");
+          child.style.removeProperty("top");
+          child.style.removeProperty("transform");
+          child.style.removeProperty("z-index");
+          delete child.dataset.canvasZ;
+          placements.set(getShortcutCanvasKey(child), {
+            x: child.offsetLeft,
+            y: child.offsetTop,
+            rot: 0,
+          });
+        });
         return;
       }
 
-      toggle.setAttribute("aria-pressed", String(shortcutEditMode));
-      toggle.title = shortcutEditMode ? "完成" : "编辑";
-      toggle.setAttribute("aria-label", shortcutEditMode ? "完成编辑" : "编辑快捷方式");
-      toggle.innerHTML = getIconMarkup(shortcutEditMode ? "check" : "edit");
+      const tileEl = children.find((child) => child.classList.contains("shortcut-item-shell")) ?? children[0];
+      const tileWidth = tileEl.offsetWidth || 96;
+      const tileHeight = tileEl.offsetHeight || 88;
+      const width = itemsEl.clientWidth || tileWidth;
+      const addIndex = children.length - 1;
+      const positions = [];
+
+      if (mode === "stack") {
+        // 竖向牌堆：卡片自上而下堆叠，每张露出头部条避免过度遮挡；dataset.fanTransform 存悬停时的向下铺开位
+        const maxColumnHeight = Math.max(tileHeight * 2.4, window.innerHeight * 0.52);
+        const steps = Math.max(0, children.length - 1);
+        const stepY = steps > 0
+          ? Math.min(tileHeight * 0.42, (maxColumnHeight - tileHeight) / steps)
+          : 0;
+        const startX = Math.max(0, (width - tileWidth) / 2);
+        const random = createScatterRandom(newTabState.scatterSeed + 17);
+        const spreadStep = steps > 0
+          ? Math.min(tileHeight * 0.62, (maxColumnHeight * 1.6 - tileHeight) / steps)
+          : 0;
+
+        children.forEach((child, index) => {
+          positions.push({
+            x: startX + (index === addIndex ? 0 : random() * 10 - 5),
+            y: index * stepY,
+            rot: index === addIndex ? 0 : random() * 3 - 1.5,
+            z: index + 1,
+          });
+
+          child.dataset.fanTransform = `translate(${startX}px, ${index * spreadStep}px) rotate(0deg)`;
+          child.dataset.fanZ = String(40 + index);
+        });
+      } else if (mode === "ring") {
+        // 弧形：沿一条开口向上的圆弧（中间低、两端高），瓦片随切线倾斜，末位是添加瓦片
+        const tileMax = Math.max(tileWidth, tileHeight);
+        const itemTotal = Math.max(0, children.length - 1);
+        const apexPad = 6;
+        const radius = Math.max(width * 0.72, tileMax * 1.4);
+        const spanFit = 2 * Math.asin(Math.min(1, Math.max(0, width - tileWidth) / (2 * radius)));
+        const spanFull = itemTotal * 2 * Math.asin(Math.min(1, (tileMax * 0.95) / (2 * radius)));
+        const span = Math.min(1.5, spanFull, spanFit);
+        const step = itemTotal > 0 ? span / itemTotal : 0;
+        const endDrop = radius * (1 - Math.cos(span / 2));
+
+        children.forEach((child, index) => {
+          const angle = (index - (children.length - 1) / 2) * step;
+
+          positions.push({
+            x: width / 2 + Math.sin(angle) * radius - tileWidth / 2,
+            y: apexPad + endDrop - radius * (1 - Math.cos(Math.abs(angle))),
+            rot: Math.max(-26, Math.min(26, (-angle * 180) / Math.PI)),
+            z: index + 1,
+          });
+        });
+      } else {
+        // 有机散布：最优采样挑离已放置瓦片最远的候选点，避免规则网格感
+        const canvasHeight = Math.max(
+          tileHeight * 1.9,
+          Math.ceil((children.length * tileWidth * tileHeight * 2.6) / Math.max(width, 1)),
+        );
+        const placedCenters = [];
+
+        children.forEach((child, index) => {
+          const key = getShortcutCanvasKey(child) || String(index);
+          const random = createScatterRandom((newTabState.scatterSeed ^ hashShortcutKey(key)) + 11);
+          const maxX = Math.max(0, width - tileWidth);
+          const maxY = Math.max(0, canvasHeight - tileHeight);
+          let best = { x: 0, y: 0, rot: 0 };
+          let bestScore = -1;
+
+          for (let attempt = 0; attempt < 12; attempt += 1) {
+            const x = random() * maxX;
+            const y = random() * maxY;
+            const cx = x + tileWidth / 2;
+            const cy = y + tileHeight / 2;
+            let nearest = Infinity;
+
+            placedCenters.forEach((center) => {
+              nearest = Math.min(nearest, Math.hypot(center.x - cx, center.y - cy));
+            });
+
+            const edgePull = Math.min(cx, width - cx, cy, canvasHeight - cy) * 0.35;
+            const score = (Number.isFinite(nearest) ? nearest : 0) + edgePull;
+
+            if (score > bestScore) {
+              bestScore = score;
+              best = { x, y, rot: random() * 32 - 16 };
+            }
+          }
+
+          placedCenters.push({ x: best.x + tileWidth / 2, y: best.y + tileHeight / 2 });
+          positions.push({ x: best.x, y: best.y, rot: best.rot, z: 0 });
+        });
+      }
+
+      const canvasHeight = positions.reduce((max, position) => Math.max(max, position.y), 0) + tileHeight + 4;
+
+      itemsEl.style.height = `${canvasHeight}px`;
+      children.forEach((child, index) => {
+        const position = positions[index];
+
+        child.style.position = "absolute";
+        child.style.left = "0";
+        child.style.top = "0";
+        child.style.transform = `translate(${position.x}px, ${position.y}px) rotate(${position.rot}deg)`;
+        child.style.zIndex = position.z ? String(position.z) : "";
+
+        if (position.z) {
+          child.dataset.canvasZ = String(position.z);
+        } else {
+          delete child.dataset.canvasZ;
+        }
+
+        if (mode !== "stack") {
+          delete child.dataset.fanTransform;
+          delete child.dataset.fanZ;
+        }
+
+        placements.set(getShortcutCanvasKey(child), {
+          x: position.x,
+          y: position.y,
+          rot: position.rot,
+        });
+      });
+    };
+
+    const applyShortcutLayouts = (previousPlacements, { animate = true } = {}) => {
+      const stack = document.querySelector("[data-shortcut-stack]");
+
+      if (!(stack instanceof HTMLElement)) {
+        return;
+      }
+
+      const mode = newTabState.shortcutLayout;
+      const stagger = animate && previousPlacements.size === 0;
+      let globalIndex = 0;
+
+      stack.querySelectorAll(".shortcut-group__items").forEach((itemsEl) => {
+        if (!(itemsEl instanceof HTMLElement)) {
+          return;
+        }
+
+        const placements = new Map();
+
+        layoutShortcutCanvas(itemsEl, mode, placements);
+
+        Array.from(itemsEl.children).forEach((child) => {
+          if (!(child instanceof HTMLElement)) {
+            return;
+          }
+
+          const key = getShortcutCanvasKey(child);
+          const target = placements.get(key);
+
+          if (!target) {
+            return;
+          }
+
+          const delay = stagger ? Math.min(globalIndex * 24, 360) : 0;
+
+          globalIndex += 1;
+          child.style.setProperty("--ntab-delay", `${delay}ms`);
+
+          const previous = animate ? previousPlacements.get(key) : undefined;
+
+          if (previous) {
+            const dx = previous.x - target.x;
+            const dy = previous.y - target.y;
+            const dr = (previous.rot ?? 0) - target.rot;
+
+            if (dx || dy || dr) {
+              // 起点先关过渡提交，再同步恢复过渡落到终点；不走 rAF（后台/遮挡标签页会节流导致终态不落地）。
+              child.style.transition = "none";
+              child.style.transform = `translate(${target.x + dx}px, ${target.y + dy}px) rotate(${target.rot + dr}deg)`;
+              child.getBoundingClientRect();
+              child.style.transition = "";
+              child.style.transform = mode === "grid"
+                ? ""
+                : `translate(${target.x}px, ${target.y}px) rotate(${target.rot}deg)`;
+            } else if (mode === "grid") {
+              child.style.transform = "";
+            } else {
+              child.style.transform = `translate(${target.x}px, ${target.y}px) rotate(${target.rot}deg)`;
+            }
+          } else if (animate && !previousPlacements.has(key)) {
+            child.classList.add("ntab-pop");
+            window.setTimeout(() => child.classList.remove("ntab-pop"), delay + 620);
+          }
+        });
+
+        placements.forEach((value, placementKey) => {
+          shortcutPlacementMemory.set(placementKey, value);
+        });
+      });
+    };
+
+    let shortcutLayoutResizeTimer = 0;
+
+    const scheduleShortcutRelayout = () => {
+      window.clearTimeout(shortcutLayoutResizeTimer);
+      shortcutLayoutResizeTimer = window.setTimeout(() => {
+        applyShortcutLayouts(shortcutPlacementMemory, { animate: false });
+      }, 140);
     };
 
     const renderSearchEngines = () => {
-      const select = document.querySelector("[data-search-engine]");
+      const select = document.querySelector("[data-config-search-engine]");
 
       if (!(select instanceof HTMLSelectElement)) {
         return;
@@ -1814,7 +2460,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       newTabState.searchEngines.forEach((engine) => {
         const option = document.createElement("option");
         option.value = engine.id;
-        option.dataset.searchUrl = engine.searchUrl;
         option.textContent = engine.label;
         select.append(option);
       });
@@ -1839,6 +2484,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       });
 
       greeting.textContent = `${greetingConfig?.label ?? "你好"}，${newTabState.userName}`;
+
+      const dateTarget = document.querySelector("[data-new-tab-date]");
+
+      if (dateTarget instanceof HTMLElement) {
+        const now = new Date();
+        dateTarget.textContent = [
+          new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric" }).format(now),
+          new Intl.DateTimeFormat("zh-CN", { weekday: "long" }).format(now),
+        ].join(" · ");
+      }
     };
 
     const renderHomeLink = () => {
@@ -1849,6 +2504,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
 
       homeLink.href = newTabState.homeLink.href;
+      const homeLinkLabel = homeLink.querySelector("[data-home-link-label]");
+
+      if (homeLinkLabel instanceof HTMLElement) {
+        homeLinkLabel.textContent = newTabState.homeLink.label;
+        homeLinkLabel.classList.toggle("hidden", !newTabState.homeLink.label);
+        return;
+      }
+
       homeLink.textContent = newTabState.homeLink.label;
     };
 
@@ -1859,199 +2522,383 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         return;
       }
 
-      stack.textContent = "";
-      stack.dataset.editing = String(shortcutEditMode);
-      closeShortcutContextMenu();
-      syncShortcutEditToggle();
+      const previousPlacements = new Map(shortcutPlacementMemory);
 
-      if (shortcutEditMode) {
-        stack.append(createShortcutEditHint());
+      shortcutPlacementMemory.clear();
+      stack.textContent = "";
+      closeShortcutContextMenu();
+
+      if (!newTabState.shortcutGroups.length) {
+        stack.append(createShortcutEmptyState());
+        applyTextColors();
+        return;
       }
 
+      const groupSections = [];
+
       newTabState.shortcutGroups.forEach((group, groupIndex) => {
+        let groupAddTile = null;
         const section = document.createElement("section");
-        section.className = shortcutEditMode
-          ? "shortcut-group relative grid grid-cols-[minmax(7.5rem,8.5rem)_minmax(0,1fr)] items-start gap-4 py-2 max-sm:grid-cols-1 max-sm:gap-3"
-          : "shortcut-group relative grid grid-cols-[minmax(5rem,7rem)_minmax(0,1fr)] items-start gap-4 py-2 max-sm:grid-cols-1 max-sm:gap-3";
+        section.className = "shortcut-group group/section relative flex flex-col gap-2.5 py-1";
         section.setAttribute("aria-label", `${group.title}快捷方式`);
 
         const summary = document.createElement("div");
-        summary.className = shortcutEditMode
-          ? "shortcut-group__summary grid justify-start gap-1 text-[0.88rem] font-bold text-base-content/65"
-          : "shortcut-group__summary flex items-center justify-between gap-2 text-[0.88rem] font-bold text-base-content/65 max-sm:justify-between";
+        summary.className = "shortcut-group__summary flex min-w-0 items-center gap-3";
 
         const title = document.createElement("span");
-        title.className = shortcutEditMode
-          ? "min-w-0 whitespace-nowrap text-inherit"
-          : "min-w-0 text-inherit";
+        title.className = "min-w-0 whitespace-nowrap text-[0.82rem] font-semibold tracking-[0.02em] text-base-content/55";
         title.dataset.newTabColorTarget = "itemLabel";
         title.textContent = group.title;
 
+        const openGroupEditForm = () => {
+          const form = createGroupEditForm(group);
+          section.replaceWith(form);
+          focusFirstInput(form);
+        };
+        const removeGroup = () => {
+          const currentGroupIndex = newTabState.shortcutGroups.indexOf(group);
+
+          if (currentGroupIndex < 0) {
+            return;
+          }
+
+          newTabState.shortcutGroups.splice(currentGroupIndex, 1);
+          persistConfigChange("已删除");
+        };
+        const openShortcutAddForm = (fallbackElement) => {
+          const form = createShortcutAddForm(group);
+          fallbackElement.replaceWith(form);
+          focusFirstInput(form);
+        };
+        const openGroupMenu = (event) => {
+          openShortcutContextMenu({
+            event,
+            fallbackElement: section,
+            title: group.title,
+            subtitle: "分组操作",
+            actions: [
+              {
+                label: "添加 item",
+                icon: "plus",
+                onSelect: () => {
+                  if (groupAddTile?.isConnected) {
+                    openShortcutAddForm(groupAddTile);
+                  }
+                },
+              },
+              {
+                label: "修改分组",
+                icon: "edit",
+                onSelect: openGroupEditForm,
+              },
+              {
+                label: settingsLabels.removeGroupLabel ?? "删除分组",
+                icon: "trash",
+                danger: true,
+                onSelect: removeGroup,
+              },
+            ],
+          });
+        };
+
         const titleWrap = document.createElement("span");
-        titleWrap.className = "flex min-w-0 items-center gap-2";
+        titleWrap.className = "group/title flex min-w-0 items-center gap-2";
 
-        if (shortcutEditMode) {
-          const openGroupEditForm = () => {
-            const form = createGroupEditForm(group);
-            section.replaceWith(form);
-            focusFirstInput(form);
-          };
-          const removeGroup = () => {
-            const currentGroupIndex = newTabState.shortcutGroups.indexOf(group);
+        const groupDragHandle = document.createElement("span");
+        groupDragHandle.className = "shortcut-drag-handle grid h-5 w-4 shrink-0 cursor-grab place-items-center border border-base-content/10 bg-base-100 text-base-content/35 opacity-0 transition hover:text-base-content/70 focus-visible:opacity-100 active:cursor-grabbing group-hover/title:opacity-100 max-sm:hidden";
+        groupDragHandle.draggable = true;
+        groupDragHandle.title = "拖拽排序";
+        groupDragHandle.setAttribute("aria-label", `拖拽排序：${group.title}`);
+        groupDragHandle.innerHTML = dragHandleIcon;
+        groupDragHandle.addEventListener("dragstart", (event) => {
+          setDragPayload({
+            type: "group",
+            groupIndex,
+          });
+          if (event.dataTransfer) {
+            event.dataTransfer.setData("application/json", JSON.stringify(activeDragPayload));
+            event.dataTransfer.setData("text/plain", group.title);
+            event.dataTransfer.effectAllowed = "move";
+          }
+          section.classList.add("opacity-50");
+        });
+        groupDragHandle.addEventListener("dragend", () => {
+          section.classList.remove("opacity-50");
+          clearDropIndicators(stack);
+          clearDragPayload();
+        });
+        titleWrap.append(groupDragHandle, title);
 
-            if (currentGroupIndex < 0) {
+        const groupMenuButton = document.createElement("button");
+        groupMenuButton.className = "btn btn-square btn-ghost btn-xs shortcut-group__menu h-6 min-h-6 w-6 shrink-0 p-0 text-base-content/45 opacity-0 transition hover:text-base-content/70 focus-visible:text-base-content/70 focus-visible:opacity-100 group-hover/title:opacity-100 max-sm:opacity-100 [&_svg]:h-3.5 [&_svg]:w-3.5";
+        groupMenuButton.type = "button";
+        groupMenuButton.title = "分组操作";
+        groupMenuButton.setAttribute("aria-label", `分组操作：${group.title}`);
+        groupMenuButton.innerHTML = getIconMarkup("more");
+        groupMenuButton.addEventListener("click", openGroupMenu);
+
+        titleWrap.append(groupMenuButton);
+        titleWrap.addEventListener("contextmenu", openGroupMenu);
+
+        const count = document.createElement("span");
+        count.className = "shrink-0 text-[0.68rem] font-medium text-base-content/30";
+        count.textContent = String(group.shortcuts.length);
+
+        const rule = document.createElement("span");
+        rule.className = "h-px min-w-6 flex-1 bg-base-content/10";
+        rule.setAttribute("aria-hidden", "true");
+
+        summary.append(titleWrap, count, rule);
+
+        section.addEventListener("dragover", (event) => {
+          const payload = readDragPayload(event);
+
+          if (payload?.type !== "group") {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+          }
+          clearDropIndicators(stack);
+          const position = getDropPosition(event, section, "y");
+          setDropPosition(section, position, "y");
+        });
+        section.addEventListener("dragleave", () => {
+          clearDropElement(section);
+        });
+        section.addEventListener("drop", (event) => {
+          const payload = readDragPayload(event);
+
+          if (payload?.type !== "group") {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+          clearDropIndicators(stack);
+
+          const position = getDropPosition(event, section, "y");
+          const targetIndex = groupIndex + (position === "after" ? 1 : 0);
+
+          if (moveArrayItem(newTabState.shortcutGroups, Number(payload.groupIndex), targetIndex)) {
+            persistConfigChange("已排序");
+          }
+        });
+
+        const items = document.createElement("div");
+        items.className = "shortcut-group__items relative flex w-full min-w-0 flex-wrap items-start justify-start gap-2 sm:gap-2.5";
+        items.addEventListener("dragover", (event) => {
+          const payload = readDragPayload(event);
+
+          if (payload?.type !== "shortcut") {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+          }
+          clearDropIndicators(stack);
+          setDropContainer(items);
+        });
+        items.addEventListener("dragleave", () => {
+          clearDropElement(items);
+        });
+        items.addEventListener("drop", (event) => {
+          const payload = readDragPayload(event);
+
+          if (payload?.type !== "shortcut") {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+          clearDropIndicators(stack);
+
+          if (
+            moveShortcutItem(
+              Number(payload.groupIndex),
+              Number(payload.shortcutIndex),
+              groupIndex,
+              group.shortcuts.length,
+            )
+          ) {
+            persistConfigChange("已排序");
+          }
+        });
+        items.addEventListener("contextmenu", (event) => {
+          if (event.target !== items || !groupAddTile?.isConnected) {
+            return;
+          }
+
+          event.preventDefault();
+          openShortcutAddForm(groupAddTile);
+        });
+        // 堆叠模式：悬停整组展开成扇面，移开复位（牌堆位来自布局内存）
+        items.addEventListener("pointerenter", () => {
+          if (newTabState.shortcutLayout !== "stack") {
+            return;
+          }
+
+          Array.from(items.children).forEach((child) => {
+            if (!(child instanceof HTMLElement) || !child.dataset.fanTransform) {
               return;
             }
 
-            newTabState.shortcutGroups.splice(currentGroupIndex, 1);
+            child.style.transitionDelay = `${Math.min(Number(child.dataset.canvasIndex ?? 0) * 26, 320)}ms`;
+            child.style.transform = child.dataset.fanTransform;
+            child.style.zIndex = child.dataset.fanZ ?? "";
+          });
+        });
+        items.addEventListener("pointerleave", () => {
+          if (newTabState.shortcutLayout !== "stack") {
+            return;
+          }
+
+          Array.from(items.children).forEach((child) => {
+            if (!(child instanceof HTMLElement) || !child.dataset.fanTransform) {
+              return;
+            }
+
+            child.style.transitionDelay = "";
+            const placement = shortcutPlacementMemory.get(getShortcutCanvasKey(child));
+
+            child.style.transform = placement
+              ? `translate(${placement.x}px, ${placement.y}px) rotate(${placement.rot}deg)`
+              : "";
+            child.style.zIndex = child.dataset.canvasZ ?? "";
+          });
+        });
+
+        group.shortcuts.forEach((shortcut, shortcutIndex) => {
+          const itemShell = document.createElement("div");
+          itemShell.className = "shortcut-item-shell group relative z-0 h-[5.75rem] w-[5rem] cursor-grab hover:z-30 focus-within:z-30 active:cursor-grabbing sm:h-[6.2rem] sm:w-[6rem]";
+          itemShell.dataset.canvasKey = `${shortcut.url}\n${shortcut.title}`;
+          itemShell.dataset.canvasIndex = String(shortcutIndex);
+
+          const openShortcutEditForm = () => {
+            const form = createShortcutEditForm(group, shortcut);
+            itemShell.replaceWith(form);
+            focusFirstInput(form);
+          };
+          const removeShortcut = () => {
+            const currentShortcutIndex = group.shortcuts.indexOf(shortcut);
+
+            if (currentShortcutIndex < 0) {
+              return;
+            }
+
+            group.shortcuts.splice(currentShortcutIndex, 1);
             persistConfigChange("已删除");
           };
-          const openGroupMenu = (event) => {
+          const openShortcutMenu = (event) => {
             openShortcutContextMenu({
               event,
-              fallbackElement: section,
-              title: group.title,
-              subtitle: "分组操作",
+              fallbackElement: itemShell,
+              title: shortcut.title,
+              subtitle: getShortcutSubtitle(shortcut),
               actions: [
                 {
-                  label: "修改分组",
+                  label: "修改 item",
                   icon: "edit",
-                  onSelect: openGroupEditForm,
+                  onSelect: openShortcutEditForm,
                 },
                 {
-                  label: settingsLabels.removeGroupLabel ?? "删除分组",
+                  label: settingsLabels.removeShortcutLabel ?? "删除 item",
                   icon: "trash",
                   danger: true,
-                  onSelect: removeGroup,
+                  onSelect: removeShortcut,
                 },
               ],
             });
           };
 
-          const groupDragHandle = document.createElement("span");
-          groupDragHandle.className = "shortcut-drag-handle grid h-5 w-4 shrink-0 cursor-grab place-items-center rounded border border-base-content/10 bg-base-100/80 text-base-content/35 transition hover:text-base-content/70 active:cursor-grabbing";
-          groupDragHandle.draggable = true;
-          groupDragHandle.title = "拖拽排序";
-          groupDragHandle.setAttribute("aria-label", `拖拽排序：${group.title}`);
-          groupDragHandle.innerHTML = dragHandleIcon;
-          groupDragHandle.addEventListener("dragstart", (event) => {
+          itemShell.draggable = true;
+          itemShell.classList.add("select-none");
+          itemShell.style.webkitTouchCallout = "none";
+          itemShell.addEventListener("pointerenter", () => {
+            if (newTabState.shortcutLayout === "stack") {
+              itemShell.style.zIndex = "60";
+            }
+          });
+          itemShell.addEventListener("pointerleave", () => {
+            if (newTabState.shortcutLayout === "stack") {
+              itemShell.style.zIndex = itemShell.dataset.canvasZ ?? "";
+            }
+          });
+          itemShell.addEventListener("contextmenu", openShortcutMenu);
+          let longPressTimer = 0;
+          let suppressNextClick = false;
+
+          itemShell.addEventListener("touchstart", (event) => {
+            if (event.touches.length !== 1 || activeShortcutContextMenu) {
+              return;
+            }
+
+            const touch = event.touches[0];
+            longPressTimer = window.setTimeout(() => {
+              longPressTimer = 0;
+              suppressNextClick = true;
+              openShortcutMenu({
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                preventDefault: () => {},
+                stopPropagation: () => {},
+              });
+            }, 500);
+          }, { passive: true });
+
+          itemShell.addEventListener("touchmove", () => {
+            window.clearTimeout(longPressTimer);
+          }, { passive: true });
+          itemShell.addEventListener("touchend", () => {
+            window.clearTimeout(longPressTimer);
+          });
+          itemShell.addEventListener("touchcancel", () => {
+            window.clearTimeout(longPressTimer);
+          });
+          itemShell.addEventListener(
+            "click",
+            (event) => {
+              if (!suppressNextClick) {
+                return;
+              }
+
+              event.preventDefault();
+              event.stopPropagation();
+              suppressNextClick = false;
+            },
+            true,
+          );
+          itemShell.addEventListener("dragstart", (event) => {
+            if (event.target instanceof Element && event.target.closest("button")) {
+              event.preventDefault();
+              return;
+            }
+
             setDragPayload({
-              type: "group",
+              type: "shortcut",
               groupIndex,
+              shortcutIndex,
             });
             if (event.dataTransfer) {
               event.dataTransfer.setData("application/json", JSON.stringify(activeDragPayload));
-              event.dataTransfer.setData("text/plain", group.title);
+              event.dataTransfer.setData("text/plain", shortcut.title);
               event.dataTransfer.effectAllowed = "move";
             }
-            section.classList.add("opacity-50");
+            itemShell.classList.add("opacity-50");
           });
-          groupDragHandle.addEventListener("dragend", () => {
-            section.classList.remove("opacity-50");
+          itemShell.addEventListener("dragend", () => {
+            itemShell.classList.remove("opacity-50");
             clearDropIndicators(stack);
             clearDragPayload();
           });
-          titleWrap.append(groupDragHandle);
-          titleWrap.addEventListener("contextmenu", openGroupMenu);
-        }
 
-        titleWrap.append(title);
-
-        const actions = document.createElement("span");
-        actions.className = "shortcut-group__actions inline-flex items-center gap-1.5";
-
-        if (shortcutEditMode) {
-          const groupMenuButton = document.createElement("button");
-          groupMenuButton.className = "btn btn-square btn-ghost btn-xs shortcut-group__menu h-6 min-h-6 w-6 p-0 text-base-content/55 opacity-65 transition hover:text-base-content/80 hover:opacity-100 focus-visible:text-base-content/80 [&_svg]:h-3.5 [&_svg]:w-3.5";
-          groupMenuButton.type = "button";
-          groupMenuButton.title = "分组操作";
-          groupMenuButton.setAttribute("aria-label", `分组操作：${group.title}`);
-          groupMenuButton.innerHTML = getIconMarkup("more");
-          groupMenuButton.addEventListener("click", (event) => {
-            openShortcutContextMenu({
-              event,
-              fallbackElement: groupMenuButton,
-              title: group.title,
-              subtitle: "分组操作",
-              actions: [
-                {
-                  label: "修改分组",
-                  icon: "edit",
-                  onSelect: () => {
-                    const form = createGroupEditForm(group);
-                    section.replaceWith(form);
-                    focusFirstInput(form);
-                  },
-                },
-                {
-                  label: settingsLabels.removeGroupLabel ?? "删除分组",
-                  icon: "trash",
-                  danger: true,
-                  onSelect: () => {
-                    const currentGroupIndex = newTabState.shortcutGroups.indexOf(group);
-
-                    if (currentGroupIndex < 0) {
-                      return;
-                    }
-
-                    newTabState.shortcutGroups.splice(currentGroupIndex, 1);
-                    persistConfigChange("已删除");
-                  },
-                },
-              ],
-            });
-          });
-
-          titleWrap.append(groupMenuButton);
-        }
-        summary.append(titleWrap, actions);
-
-        if (shortcutEditMode) {
-          section.addEventListener("dragover", (event) => {
-            const payload = readDragPayload(event);
-
-            if (payload?.type !== "group") {
-              return;
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-            if (event.dataTransfer) {
-              event.dataTransfer.dropEffect = "move";
-            }
-            clearDropIndicators(stack);
-            const position = getDropPosition(event, section, "y");
-            setDropPosition(section, position, "y");
-          });
-          section.addEventListener("dragleave", () => {
-            clearDropElement(section);
-          });
-          section.addEventListener("drop", (event) => {
-            const payload = readDragPayload(event);
-
-            if (payload?.type !== "group") {
-              return;
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-            clearDropIndicators(stack);
-
-            const position = getDropPosition(event, section, "y");
-            const targetIndex = groupIndex + (position === "after" ? 1 : 0);
-
-            if (moveArrayItem(newTabState.shortcutGroups, Number(payload.groupIndex), targetIndex)) {
-              persistConfigChange("已排序");
-            }
-          });
-        }
-
-        const items = document.createElement("div");
-        items.className = shortcutEditMode
-          ? "shortcut-group__items flex w-full max-w-[min(100%,34rem)] min-w-0 flex-wrap items-start justify-start gap-2"
-          : "shortcut-group__items flex w-full max-w-[calc((5*2.75rem)+(4*0.5rem))] min-w-0 flex-wrap items-start justify-start gap-2";
-        if (shortcutEditMode) {
-          items.addEventListener("dragover", (event) => {
+          itemShell.addEventListener("dragover", (event) => {
             const payload = readDragPayload(event);
 
             if (payload?.type !== "shortcut") {
@@ -2064,12 +2911,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
               event.dataTransfer.dropEffect = "move";
             }
             clearDropIndicators(stack);
-            setDropContainer(items);
+            const position = getDropPosition(event, itemShell, "x");
+            setDropPosition(itemShell, position);
           });
-          items.addEventListener("dragleave", () => {
-            clearDropElement(items);
+          itemShell.addEventListener("dragleave", () => {
+            clearDropElement(itemShell);
           });
-          items.addEventListener("drop", (event) => {
+          itemShell.addEventListener("drop", (event) => {
             const payload = readDragPayload(event);
 
             if (payload?.type !== "shortcut") {
@@ -2079,139 +2927,24 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             event.preventDefault();
             event.stopPropagation();
             clearDropIndicators(stack);
+
+            const position = getDropPosition(event, itemShell, "x");
+            const targetIndex = shortcutIndex + (position === "after" ? 1 : 0);
 
             if (
               moveShortcutItem(
                 Number(payload.groupIndex),
                 Number(payload.shortcutIndex),
                 groupIndex,
-                group.shortcuts.length,
+                targetIndex,
               )
             ) {
               persistConfigChange("已排序");
             }
           });
-        }
-
-        group.shortcuts.forEach((shortcut, shortcutIndex) => {
-          const itemShell = document.createElement("div");
-          itemShell.className = shortcutEditMode
-            ? "shortcut-item-shell group relative z-0 h-11 w-11 cursor-grab active:cursor-grabbing hover:z-30 focus-within:z-30"
-            : "shortcut-item-shell group relative z-0 h-11 w-11 hover:z-30 focus-within:z-30";
-
-          if (shortcutEditMode) {
-            const openShortcutEditForm = () => {
-              const form = createShortcutEditForm(group, shortcut);
-              itemShell.replaceWith(form);
-              focusFirstInput(form);
-            };
-            const removeShortcut = () => {
-              const currentShortcutIndex = group.shortcuts.indexOf(shortcut);
-
-              if (currentShortcutIndex < 0) {
-                return;
-              }
-
-              group.shortcuts.splice(currentShortcutIndex, 1);
-              persistConfigChange("已删除");
-            };
-            const openShortcutMenu = (event) => {
-              openShortcutContextMenu({
-                event,
-                fallbackElement: itemShell,
-                title: shortcut.title,
-                subtitle: getShortcutSubtitle(shortcut),
-                actions: [
-                  {
-                    label: "修改 item",
-                    icon: "edit",
-                    onSelect: openShortcutEditForm,
-                  },
-                  {
-                    label: settingsLabels.removeShortcutLabel ?? "删除 item",
-                    icon: "trash",
-                    danger: true,
-                    onSelect: removeShortcut,
-                  },
-                ],
-              });
-            };
-
-            itemShell.draggable = true;
-            itemShell.title = `拖拽排序：${shortcut.title}`;
-            itemShell.addEventListener("contextmenu", openShortcutMenu);
-            itemShell.addEventListener("dragstart", (event) => {
-              if (event.target instanceof Element && event.target.closest("button")) {
-                event.preventDefault();
-                return;
-              }
-
-              setDragPayload({
-                type: "shortcut",
-                groupIndex,
-                shortcutIndex,
-              });
-              if (event.dataTransfer) {
-                event.dataTransfer.setData("application/json", JSON.stringify(activeDragPayload));
-                event.dataTransfer.setData("text/plain", shortcut.title);
-                event.dataTransfer.effectAllowed = "move";
-              }
-              itemShell.classList.add("opacity-50");
-            });
-            itemShell.addEventListener("dragend", () => {
-              itemShell.classList.remove("opacity-50");
-              clearDropIndicators(stack);
-              clearDragPayload();
-            });
-
-            itemShell.addEventListener("dragover", (event) => {
-              const payload = readDragPayload(event);
-
-              if (payload?.type !== "shortcut") {
-                return;
-              }
-
-              event.preventDefault();
-              event.stopPropagation();
-              if (event.dataTransfer) {
-                event.dataTransfer.dropEffect = "move";
-              }
-              clearDropIndicators(stack);
-              const position = getDropPosition(event, itemShell, "x");
-              setDropPosition(itemShell, position);
-            });
-            itemShell.addEventListener("dragleave", () => {
-              clearDropElement(itemShell);
-            });
-            itemShell.addEventListener("drop", (event) => {
-              const payload = readDragPayload(event);
-
-              if (payload?.type !== "shortcut") {
-                return;
-              }
-
-              event.preventDefault();
-              event.stopPropagation();
-              clearDropIndicators(stack);
-
-              const position = getDropPosition(event, itemShell, "x");
-              const targetIndex = shortcutIndex + (position === "after" ? 1 : 0);
-
-              if (
-                moveShortcutItem(
-                  Number(payload.groupIndex),
-                  Number(payload.shortcutIndex),
-                  groupIndex,
-                  targetIndex,
-                )
-              ) {
-                persistConfigChange("已排序");
-              }
-            });
-          }
 
           const item = document.createElement("a");
-          item.className = "shortcut-item group/item absolute left-0 top-0 grid h-11 w-11 grid-cols-[1.7rem_0fr] items-center justify-start gap-0 overflow-hidden rounded-[0.45rem] border border-transparent bg-base-100/95 px-2 font-[inherit] text-inherit no-underline transition-[transform,border-color,background-color] duration-180 hover:z-20 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-200 focus-visible:z-20 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-200 focus-visible:outline-none";
+          item.className = "shortcut-item group/item absolute inset-0 flex flex-col items-center justify-center gap-[0.4rem] overflow-hidden border border-transparent px-1 py-2 font-[inherit] text-inherit no-underline transition-[transform,border-color,background-color] duration-200 hover:z-20 hover:-translate-y-0.5 focus-visible:z-20 focus-visible:-translate-y-0.5 focus-visible:outline-none";
           item.href = shortcut.url;
           if (newTabState.shortcutOpenMode === "newTab") {
             item.target = "_blank";
@@ -2223,12 +2956,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           );
 
           const icon = document.createElement("span");
-          icon.className = "shortcut-item__icon relative grid h-[1.7rem] w-[1.7rem] place-items-center overflow-hidden";
+          icon.className = "shortcut-item__icon relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden";
           icon.setAttribute("aria-hidden", "true");
 
           const image = document.createElement("img");
           const logoUrls = getShortcutLogoUrls(shortcut);
-          image.className = "h-full w-full object-contain";
+          image.className = "h-full w-full object-contain p-[0.3rem]";
           image.src = logoUrls[0] ?? "";
           image.alt = "";
           image.loading = "lazy";
@@ -2240,186 +2973,229 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           discoverShortcutLogo(shortcut, image);
 
           const initial = document.createElement("span");
-          initial.className = "shortcut-item__initial hidden text-[0.85rem] font-extrabold leading-none";
+          initial.className = "shortcut-item__initial hidden text-[0.95rem] font-bold leading-none text-base-content/60";
           initial.textContent = getShortcutInitial(shortcut.title);
 
           icon.append(image, initial);
 
           const itemLabel = document.createElement("span");
-          itemLabel.className = "shortcut-item__label grid min-w-0 gap-[0.08rem] overflow-hidden opacity-0 transition-opacity duration-150 max-sm:hidden";
+          itemLabel.className = "shortcut-item__label grid w-full min-w-0 justify-items-center gap-[0.12rem]";
           itemLabel.setAttribute("aria-hidden", "true");
 
           const itemLabelTitle = document.createElement("strong");
-          itemLabelTitle.className = "block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[0.78rem] leading-tight";
+          itemLabelTitle.className = "block w-full truncate text-center text-[0.72rem] font-medium leading-tight sm:text-[0.76rem]";
           itemLabelTitle.dataset.newTabColorTarget = "itemLabel";
           itemLabelTitle.textContent = shortcut.title;
 
           const itemLabelText = document.createElement("small");
-          itemLabelText.className = "block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[0.68rem] font-semibold leading-tight text-base-content/50";
+          itemLabelText.className = "block w-full truncate text-center text-[0.63rem] font-medium leading-tight text-base-content/45 sm:text-[0.66rem]";
           itemLabelText.textContent = getShortcutSubtitle(shortcut);
 
           itemLabel.append(itemLabelTitle, itemLabelText);
 
           const tooltip = document.createElement("span");
-          tooltip.className = "shortcut-item__tooltip pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 z-40 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-xl transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 max-sm:hidden";
+          tooltip.className = "shortcut-item__tooltip pointer-events-none absolute bottom-[calc(100%+0.6rem)] left-1/2 z-40 grid min-w-36 max-w-64 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] border border-base-content/15 bg-base-100 px-3 py-2 text-base-content opacity-0 shadow-[0_8px_28px_rgba(0,0,0,0.10)] transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/15 after:bg-base-100 after:content-[''] group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 max-sm:hidden";
           tooltip.role = "tooltip";
 
           const tooltipTitle = document.createElement("strong");
-          tooltipTitle.className = "block overflow-hidden text-ellipsis whitespace-nowrap";
+          tooltipTitle.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-[0.8rem] font-semibold";
           tooltipTitle.dataset.newTabColorTarget = "itemLabel";
           tooltipTitle.textContent = shortcut.title;
 
           const tooltipText = document.createElement("small");
-          tooltipText.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-snug text-base-content/60";
+          tooltipText.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-[0.72rem] leading-snug text-base-content/55";
           tooltipText.textContent = getShortcutSubtitle(shortcut);
 
           tooltip.append(tooltipTitle, tooltipText);
           item.append(icon, itemLabel);
 
-          if (shortcutEditMode) {
-            const itemMenuButton = document.createElement("button");
-            itemMenuButton.className = "btn btn-square btn-ghost btn-xs shortcut-item__menu absolute -right-1 -top-1 z-20 h-[1.15rem] min-h-[1.15rem] w-[1.15rem] rounded-full border border-base-content/15 bg-base-100 p-0 text-base-content/70 opacity-80 transition hover:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 max-sm:h-7 max-sm:min-h-7 max-sm:w-7 max-sm:opacity-100 [&_svg]:h-3 [&_svg]:w-3";
-            itemMenuButton.type = "button";
-            itemMenuButton.title = "item 操作";
-            itemMenuButton.setAttribute("aria-label", `item 操作：${shortcut.title}`);
-            itemMenuButton.innerHTML = getIconMarkup("more");
-            itemMenuButton.addEventListener("click", (event) => {
-              openShortcutContextMenu({
-                event,
-                fallbackElement: itemMenuButton,
-                title: shortcut.title,
-                subtitle: getShortcutSubtitle(shortcut),
-                actions: [
-                  {
-                    label: "修改 item",
-                    icon: "edit",
-                    onSelect: () => {
-                      const form = createShortcutEditForm(group, shortcut);
-                      itemShell.replaceWith(form);
-                      focusFirstInput(form);
-                    },
-                  },
-                  {
-                    label: settingsLabels.removeShortcutLabel ?? "删除 item",
-                    icon: "trash",
-                    danger: true,
-                    onSelect: () => {
-                      const currentShortcutIndex = group.shortcuts.indexOf(shortcut);
-
-                      if (currentShortcutIndex < 0) {
-                        return;
-                      }
-
-                      group.shortcuts.splice(currentShortcutIndex, 1);
-                      persistConfigChange("已删除");
-                    },
-                  },
-                ],
-              });
-            });
-
-            itemShell.append(itemMenuButton);
-          }
-
           itemShell.append(item, tooltip);
           items.append(itemShell);
         });
 
-        if (shortcutEditMode) {
-          const addShortcutButton = document.createElement("button");
-          addShortcutButton.className = "shortcut-item shortcut-item--add group/item relative grid h-11 w-11 place-items-center rounded-[0.45rem] border border-dashed border-base-content/10 bg-transparent p-0 font-[inherit] text-base-content/40 opacity-60 transition-[transform,border-color,background-color,opacity] duration-180 hover:-translate-y-0.5 hover:border-base-content/20 hover:bg-base-100/20 hover:opacity-80 focus-visible:-translate-y-0.5 focus-visible:border-base-content/20 focus-visible:bg-base-100/20 focus-visible:opacity-80 focus-visible:outline-none";
-          addShortcutButton.type = "button";
-          addShortcutButton.title = settingsLabels.addShortcutLabel ?? "添加 item";
-          addShortcutButton.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加 item"}：${group.title}`);
-          const addShortcutIcon = document.createElement("span");
-          addShortcutIcon.className = "shortcut-item__icon relative grid h-[1.7rem] w-[1.7rem] place-items-center overflow-hidden";
-          addShortcutIcon.setAttribute("aria-hidden", "true");
-          addShortcutIcon.innerHTML = getIconMarkup("plus");
+        const addShortcutButton = document.createElement("button");
+        addShortcutButton.className = "shortcut-item shortcut-item--add group/item relative flex h-[5.75rem] w-[5rem] flex-col items-center justify-center gap-[0.4rem] border border-dashed border-base-content/15 bg-transparent p-0 font-[inherit] text-base-content/35 opacity-0 transition-[transform,border-color,color,opacity] duration-200 hover:-translate-y-0.5 hover:border-base-content/35 hover:text-base-content/60 focus-visible:-translate-y-0.5 focus-visible:border-base-content/35 focus-visible:text-base-content/60 focus-visible:opacity-100 focus-visible:outline-none group-hover/section:opacity-100 max-sm:opacity-60 sm:h-[6.2rem] sm:w-[6rem]";
+        addShortcutButton.type = "button";
+        addShortcutButton.title = settingsLabels.addShortcutLabel ?? "添加 item";
+        addShortcutButton.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加 item"}：${group.title}`);
+        addShortcutButton.dataset.canvasKey = `add:${group.title}`;
+        addShortcutButton.dataset.canvasIndex = String(group.shortcuts.length);
+        const addShortcutIcon = document.createElement("span");
+        addShortcutIcon.className = "shortcut-item__icon relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden";
+        addShortcutIcon.setAttribute("aria-hidden", "true");
+        addShortcutIcon.innerHTML = getIconMarkup("plus");
 
-          const addShortcutTooltip = document.createElement("span");
-          addShortcutTooltip.className = "shortcut-item__tooltip shortcut-item__tooltip--action pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 grid min-w-36 max-w-56 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] rounded-[0.45rem] border border-base-content/20 bg-base-100 px-2.5 py-2 text-base-content opacity-0 shadow-xl transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/20 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
-          addShortcutTooltip.role = "tooltip";
-          const addShortcutTooltipTitle = document.createElement("strong");
-          addShortcutTooltipTitle.className = "block overflow-hidden text-ellipsis whitespace-nowrap";
-          addShortcutTooltipTitle.textContent = settingsLabels.addShortcutLabel ?? "添加 item";
-          const addShortcutTooltipText = document.createElement("small");
-          addShortcutTooltipText.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-snug text-base-content/60";
-          addShortcutTooltipText.textContent = `插入到 ${group.title}`;
-          addShortcutTooltip.append(addShortcutTooltipTitle, addShortcutTooltipText);
-          addShortcutButton.append(addShortcutIcon, addShortcutTooltip);
-          addShortcutButton.addEventListener("click", () => {
-            const form = createShortcutAddForm(group);
-            addShortcutButton.replaceWith(form);
-            focusFirstInput(form);
-          });
+        const addShortcutTooltip = document.createElement("span");
+        addShortcutTooltip.className = "shortcut-item__tooltip shortcut-item__tooltip--action pointer-events-none absolute bottom-[calc(100%+0.6rem)] left-1/2 grid min-w-36 max-w-64 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] border border-base-content/15 bg-base-100 px-3 py-2 text-base-content opacity-0 shadow-[0_8px_28px_rgba(0,0,0,0.10)] transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/15 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
+        addShortcutTooltip.role = "tooltip";
+        const addShortcutTooltipTitle = document.createElement("strong");
+        addShortcutTooltipTitle.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-[0.8rem] font-semibold";
+        addShortcutTooltipTitle.textContent = settingsLabels.addShortcutLabel ?? "添加 item";
+        const addShortcutTooltipText = document.createElement("small");
+        addShortcutTooltipText.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-[0.72rem] leading-snug text-base-content/55";
+        addShortcutTooltipText.textContent = `插入到 ${group.title}`;
+        addShortcutTooltip.append(addShortcutTooltipTitle, addShortcutTooltipText);
+        addShortcutButton.append(addShortcutIcon, addShortcutTooltip);
+        addShortcutButton.addEventListener("click", () => {
+          openShortcutAddForm(addShortcutButton);
+        });
 
-          items.append(addShortcutButton);
-        }
+        groupAddTile = addShortcutButton;
+        items.append(addShortcutButton);
 
         section.append(summary, items);
-        stack.append(section);
+        groupSections.push(section);
       });
 
-      if (shortcutEditMode) {
-        if (stack.dataset.groupDropBound !== "true") {
-          stack.addEventListener("dragover", (event) => {
-            const payload = readDragPayload(event);
+      // 弧形/随机是全画布布局：所有分组的 item 拼接进同一张画布（分组标题隐藏，item 的拖拽/右键/添加都保留）
+      if (newTabState.shortcutLayout === "ring" || newTabState.shortcutLayout === "scatter") {
+        const lastGroupIndex = newTabState.shortcutGroups.length - 1;
+        const lastGroup = newTabState.shortcutGroups[lastGroupIndex];
+        const canvasSection = document.createElement("section");
+        canvasSection.className = "shortcut-group shortcut-group--canvas relative flex flex-col gap-2.5 py-1";
+        canvasSection.setAttribute("aria-label", "全部快捷方式");
+        const canvasItems = document.createElement("div");
+        canvasItems.className = "shortcut-group__items relative flex w-full min-w-0 flex-wrap items-start justify-start gap-2 sm:gap-2.5";
 
-            if (!shortcutEditMode || payload?.type !== "group") {
-              return;
-            }
+        canvasItems.addEventListener("dragover", (event) => {
+          const payload = readDragPayload(event);
 
-            event.preventDefault();
-            if (event.dataTransfer) {
-              event.dataTransfer.dropEffect = "move";
-            }
-            clearDropIndicators(stack);
-            setDropContainer(stack);
+          if (payload?.type !== "shortcut") {
+            return;
+          }
+
+          event.preventDefault();
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+          }
+          clearDropIndicators(stack);
+          setDropContainer(canvasItems);
+        });
+        canvasItems.addEventListener("dragleave", () => {
+          clearDropElement(canvasItems);
+        });
+        canvasItems.addEventListener("drop", (event) => {
+          const payload = readDragPayload(event);
+
+          if (payload?.type !== "shortcut") {
+            return;
+          }
+
+          event.preventDefault();
+          clearDropIndicators(stack);
+
+          if (moveShortcutItem(Number(payload.groupIndex), Number(payload.shortcutIndex), lastGroupIndex, lastGroup.shortcuts.length)) {
+            persistConfigChange("已排序");
+          }
+        });
+        canvasItems.addEventListener("contextmenu", (event) => {
+          if (event.target !== canvasItems) {
+            return;
+          }
+
+          event.preventDefault();
+          const addButton = [...canvasItems.querySelectorAll(".shortcut-item--add")].pop();
+
+          if (addButton instanceof HTMLElement && addButton.isConnected) {
+            addButton.click();
+          }
+        });
+
+        groupSections.forEach((section) => {
+          section.querySelectorAll(":scope > .shortcut-group__items > *").forEach((child) => {
+            canvasItems.append(child);
           });
-          stack.addEventListener("dragleave", () => {
-            clearDropElement(stack);
-          });
-          stack.addEventListener("drop", (event) => {
-            const payload = readDragPayload(event);
+        });
 
-            if (!shortcutEditMode || payload?.type !== "group") {
-              return;
-            }
+        canvasSection.append(canvasItems);
 
-            event.preventDefault();
-            clearDropIndicators(stack);
-
-            if (moveArrayItem(newTabState.shortcutGroups, Number(payload.groupIndex), newTabState.shortcutGroups.length)) {
-              persistConfigChange("已排序");
-            }
-          });
-          stack.dataset.groupDropBound = "true";
+        // 弧形是底部弧形坞：画布固定在视口底部、吃满全宽，item 沿弧线贴底排开
+        if (newTabState.shortcutLayout === "ring") {
+          canvasSection.classList.add("new-tab-arc-dock");
         }
 
-        const addGroupButton = document.createElement("button");
-        addGroupButton.className = "shortcut-group shortcut-group--add grid grid-cols-[minmax(5rem,7rem)_minmax(0,1fr)] items-center border-0 bg-transparent px-0 py-1 text-base-content/45 opacity-50 transition duration-180 hover:-translate-y-0.5 hover:text-base-content/65 hover:opacity-75 focus-visible:-translate-y-0.5 focus-visible:text-base-content/65 focus-visible:opacity-75 focus-visible:outline-none max-sm:grid-cols-1";
-        addGroupButton.type = "button";
-        addGroupButton.setAttribute("aria-label", settingsLabels.addGroupLabel ?? "添加分组");
-        const addGroupSummary = document.createElement("span");
-        addGroupSummary.className = "shortcut-group__summary flex w-full items-center justify-between gap-2 text-[0.88rem] font-bold";
-        const addGroupTitle = document.createElement("span");
-        addGroupTitle.textContent = settingsLabels.addGroupLabel ?? "添加分组";
-        const addGroupMark = document.createElement("span");
-        addGroupMark.className = "grid h-5 w-5 place-items-center [&_svg]:h-3.5 [&_svg]:w-3.5";
-        addGroupMark.setAttribute("aria-hidden", "true");
-        addGroupMark.innerHTML = getIconMarkup("plus");
-        addGroupSummary.append(addGroupTitle, addGroupMark);
+        stack.append(canvasSection);
+      } else {
+        groupSections.forEach((section) => {
+          stack.append(section);
+        });
+      }
 
-        addGroupButton.append(addGroupSummary);
-        addGroupButton.addEventListener("click", () => {
+      if (stack.dataset.groupDropBound !== "true") {
+        stack.addEventListener("dragover", (event) => {
+          const payload = readDragPayload(event);
+
+          if (payload?.type !== "group") {
+            return;
+          }
+
+          event.preventDefault();
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+          }
+          clearDropIndicators(stack);
+          setDropContainer(stack);
+        });
+        stack.addEventListener("dragleave", () => {
+          clearDropElement(stack);
+        });
+        stack.addEventListener("drop", (event) => {
+          const payload = readDragPayload(event);
+
+          if (payload?.type !== "group") {
+            return;
+          }
+
+          event.preventDefault();
+          clearDropIndicators(stack);
+
+          if (moveArrayItem(newTabState.shortcutGroups, Number(payload.groupIndex), newTabState.shortcutGroups.length)) {
+            persistConfigChange("已排序");
+          }
+        });
+        stack.addEventListener("contextmenu", (event) => {
+          if (event.target !== stack) {
+            return;
+          }
+
+          event.preventDefault();
+          const addGroupButton = stack.querySelector(".shortcut-group--add");
+
+          if (!(addGroupButton instanceof HTMLElement) || !addGroupButton.isConnected) {
+            return;
+          }
+
           const form = createGroupAddForm();
           addGroupButton.replaceWith(form);
           focusFirstInput(form);
         });
-
-        stack.append(addGroupButton);
+        stack.dataset.groupDropBound = "true";
       }
 
+      const addGroupButton = document.createElement("button");
+      addGroupButton.className = "shortcut-group shortcut-group--add mt-1 flex w-fit items-center gap-2 border border-dashed border-base-content/15 bg-transparent px-3.5 py-2.5 font-[inherit] text-[0.8rem] font-semibold text-base-content/40 opacity-80 transition-[transform,border-color,color,opacity] duration-200 hover:-translate-y-0.5 hover:border-base-content/35 hover:text-base-content/70 hover:opacity-100 focus-visible:-translate-y-0.5 focus-visible:border-base-content/35 focus-visible:text-base-content/70 focus-visible:opacity-100 focus-visible:outline-none";
+      addGroupButton.type = "button";
+      addGroupButton.setAttribute("aria-label", settingsLabels.addGroupLabel ?? "添加分组");
+      const addGroupSummary = document.createElement("span");
+      addGroupSummary.className = "shortcut-group__summary flex items-center gap-2 text-inherit";
+      const addGroupTitle = document.createElement("span");
+      addGroupTitle.textContent = settingsLabels.addGroupLabel ?? "添加分组";
+      const addGroupMark = document.createElement("span");
+      addGroupMark.className = "grid h-4 w-4 place-items-center [&_svg]:h-3.5 [&_svg]:w-3.5";
+      addGroupMark.setAttribute("aria-hidden", "true");
+      addGroupMark.innerHTML = getIconMarkup("plus");
+      addGroupSummary.append(addGroupTitle, addGroupMark);
+
+      addGroupButton.append(addGroupSummary);
+      addGroupButton.addEventListener("click", () => {
+        const form = createGroupAddForm();
+        addGroupButton.replaceWith(form);
+        focusFirstInput(form);
+      });
+
+      stack.append(addGroupButton);
+
+      applyShortcutLayouts(previousPlacements);
       applyTextColors();
     };
 
@@ -2431,6 +3207,72 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
     };
 
+    const compressBackgroundImage = (file) =>
+      new Promise((resolve) => {
+        const reader = new FileReader();
+
+        reader.addEventListener("load", () => {
+          if (typeof reader.result !== "string") {
+            resolve("");
+            return;
+          }
+
+          const originalUrl = reader.result;
+
+          if (file.type === "image/svg+xml" || file.type === "image/gif") {
+            resolve(originalUrl);
+            return;
+          }
+
+          const image = new Image();
+          image.addEventListener("load", () => {
+            const width = image.naturalWidth || 0;
+            const height = image.naturalHeight || 0;
+
+            if (!width || !height) {
+              resolve(originalUrl);
+              return;
+            }
+
+            const maxDimension = 1920;
+            const scale = Math.max(width, height) > maxDimension
+              ? maxDimension / Math.max(width, height)
+              : 1;
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(width * scale));
+            canvas.height = Math.max(1, Math.round(height * scale));
+            const context = canvas.getContext("2d");
+
+            if (!context) {
+              resolve(originalUrl);
+              return;
+            }
+
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+            let compressedUrl = "";
+
+            try {
+              compressedUrl = canvas.toDataURL("image/webp", 0.8);
+            } catch {
+              compressedUrl = "";
+            }
+
+            resolve(
+              compressedUrl && compressedUrl.length < originalUrl.length
+                ? compressedUrl
+                : originalUrl,
+            );
+          });
+          image.addEventListener("error", () => {
+            resolve(originalUrl);
+          });
+          image.src = originalUrl;
+        });
+
+        reader.readAsDataURL(file);
+      });
+
     const syncSettingsControls = () => {
       const nameInput = document.querySelector("[data-config-name]");
       const homeLabelInput = document.querySelector("[data-config-home-label]");
@@ -2441,8 +3283,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const backgroundOpacityValue = document.querySelector("[data-config-background-opacity-value]");
       const backgroundStatus = document.querySelector("[data-config-background-status]");
       const textColorModeInput = document.querySelector("[data-config-text-color-mode]");
-      const navigationColorInput = document.querySelector("[data-config-navigation-color]");
-      const itemLabelColorInput = document.querySelector("[data-config-item-label-color]");
 
       if (nameInput instanceof HTMLInputElement) {
         nameInput.value = newTabState.userName;
@@ -2474,20 +3314,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         backgroundOpacityValue.textContent = `${Math.round(newTabState.backgroundOpacity)}%`;
       }
 
-      const resolvedTextColors = getResolvedTextColors() ?? newTabState.textColors;
-
       if (textColorModeInput instanceof HTMLSelectElement) {
         textColorModeInput.value = newTabState.textColors.mode;
-      }
-
-      if (navigationColorInput instanceof HTMLInputElement) {
-        navigationColorInput.value = resolvedTextColors.navigationColor;
-        navigationColorInput.title = "修改后切换为自定义";
-      }
-
-      if (itemLabelColorInput instanceof HTMLInputElement) {
-        itemLabelColorInput.value = resolvedTextColors.itemLabelColor;
-        itemLabelColorInput.title = "修改后切换为自定义";
       }
 
       if (backgroundStatus instanceof HTMLElement) {
@@ -2500,22 +3328,21 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     };
 
     const persistConfigChange = (message = "已保存") => {
-      writeStoredState();
+      const saved = writeStoredState();
       renderGreeting();
       renderHomeLink();
       renderSearchEngines();
       renderShortcutGroups();
       applyBackground();
       applyTextColors();
-      setStatus(message);
+      setStatus(saved ? message : storageQuotaErrorMessage);
     };
 
     const scheduleTextColorSave = () => {
       window.clearTimeout(textColorSaveTimer);
       applyTextColors();
       textColorSaveTimer = window.setTimeout(() => {
-        writeStoredState();
-        setStatus("已保存");
+        setStatus(writeStoredState() ? "已保存" : storageQuotaErrorMessage);
       }, 500);
     };
 
@@ -2534,6 +3361,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         backgroundLayer.classList.add("hidden");
         backgroundLayer.style.removeProperty("background-image");
         backgroundLayer.style.opacity = "0";
+        delete document.documentElement.dataset.newTabBackground;
         return;
       }
 
@@ -2548,34 +3376,28 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       backgroundLayer.classList.remove("hidden");
       backgroundLayer.style.backgroundImage = `url("${cssUrl}")`;
       backgroundLayer.style.opacity = String(newTabState.backgroundOpacity / 100);
+      document.documentElement.dataset.newTabBackground = "true";
     };
 
     const getResolvedTextColors = () => {
-      const presets = {
-        light: {
-          navigationColor: "#f8fafc",
-          itemLabelColor: "#f8fafc",
-        },
-        dark: {
-          navigationColor: "#111827",
-          itemLabelColor: "#111827",
-        },
-      };
-
       if (newTabState.textColors.mode === "default") {
         return null;
       }
 
-      if (newTabState.textColors.mode === "custom") {
-        return newTabState.textColors;
-      }
+      const color = newTabState.textColors.mode === "dark" ? "#111827" : "#f8fafc";
 
-      return presets[newTabState.textColors.mode] ?? null;
+      return { navigationColor: color, itemLabelColor: color };
     };
 
     const applyTextColors = () => {
       const colors = getResolvedTextColors();
       const colorTargets = document.querySelectorAll("[data-new-tab-color-target]");
+
+      // item 卡片深浅跟随颜色模式：浅色文字配黑卡，深色文字配浅卡，默认跟随主题
+      const itemTone = colors
+        ? (newTabState.textColors.mode === "light" ? "dark" : "light")
+        : (document.documentElement.dataset.theme === "black" ? "dark" : "light");
+      document.documentElement.dataset.itemTone = itemTone;
 
       if (!colors) {
         delete document.documentElement.dataset.newTabTextColors;
@@ -2593,9 +3415,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           return;
         }
 
-        target.style.color = target.dataset.newTabColorTarget === "navigation"
-          ? colors.navigationColor
-          : colors.itemLabelColor;
+        target.style.color = colors.navigationColor;
       });
     };
 
@@ -2606,7 +3426,179 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       renderShortcutGroups();
       applyBackground();
       applyTextColors();
+      applyHeaderState();
+      syncLayoutSwitcher();
       syncSettingsControls();
+    };
+
+    const getHeaderState = () =>
+      newTabState.headerSuspended ? "suspended" : newTabState.headerCollapsed ? "collapsed" : "normal";
+
+    const setHeaderState = (state) => {
+      newTabState.headerSuspended = state === "suspended";
+      newTabState.headerCollapsed = state === "collapsed";
+    };
+
+    const applyHeaderState = () => {
+      const page = document.querySelector("[data-new-tab-page]");
+      const toggle = document.querySelector("[data-header-collapse]");
+      const restore = document.querySelector("[data-header-restore]");
+      const state = getHeaderState();
+
+      if (page instanceof HTMLElement) {
+        if (state === "normal") {
+          delete page.dataset.headerState;
+        } else {
+          page.dataset.headerState = state;
+        }
+      }
+
+      if (toggle instanceof HTMLElement) {
+        const label = state === "normal"
+          ? "收起问候"
+          : state === "collapsed"
+            ? "挂起：屏幕只显示 item"
+            : "展开问候与搜索";
+
+        toggle.title = label;
+        toggle.setAttribute("aria-label", label);
+        toggle.setAttribute("aria-expanded", state === "suspended" ? "false" : "true");
+      }
+
+      if (restore instanceof HTMLElement) {
+        restore.setAttribute("aria-hidden", state === "suspended" ? "false" : "true");
+      }
+    };
+
+    // 收起/展开会改变搜索框的网格区域（独占一行 ↔ 与功能按钮同行），用 FLIP 让位移平滑
+    const applyHeaderStateWithSearchFlip = () => {
+      const search = document.querySelector("[data-new-tab-search]");
+      const beforeRect = search instanceof HTMLElement ? search.getBoundingClientRect() : null;
+      const beforeState = getHeaderState();
+
+      applyHeaderState();
+
+      if (
+        !(search instanceof HTMLElement) ||
+        !beforeRect ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        return;
+      }
+
+      const afterState = getHeaderState();
+      const crossingCollapsed = (beforeState === "collapsed") !== (afterState === "collapsed");
+
+      if (!crossingCollapsed) {
+        return;
+      }
+
+      const afterRect = search.getBoundingClientRect();
+      const dx = beforeRect.left - afterRect.left;
+      const dy = beforeRect.top - afterRect.top;
+
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
+        return;
+      }
+
+      search.style.transition = "none";
+      search.style.transform = `translate(${dx}px, ${dy}px)`;
+      search.getBoundingClientRect();
+      search.style.transition = "";
+      search.style.transform = "";
+    };
+
+    const expandHeaderAndFocusSearch = () => {
+      setHeaderState("normal");
+      writeStoredState();
+      applyHeaderStateWithSearchFlip();
+      document.querySelector("[data-search-query]")?.focus();
+    };
+
+    const syncLayoutSwitcher = () => {
+      document.querySelectorAll("[data-layout-option]").forEach((button) => {
+        if (!(button instanceof HTMLElement)) {
+          return;
+        }
+
+        const active = button.dataset.layoutOption === newTabState.shortcutLayout;
+
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+        button.classList.toggle("bg-base-content", active);
+        button.classList.toggle("text-base-100", active);
+        button.classList.toggle("hover:text-base-100", active);
+        button.classList.toggle("text-base-content/55", !active);
+      });
+    };
+
+    const bindLayoutSwitcher = () => {
+      const switcher = document.querySelector("[data-layout-switcher]");
+
+      if (!(switcher instanceof HTMLElement) || switcher.dataset.layoutBound === "true") {
+        return;
+      }
+
+      switcher.addEventListener("click", (event) => {
+        const button = event.target instanceof Element ? event.target.closest("[data-layout-option]") : null;
+
+        if (!(button instanceof HTMLElement)) {
+          return;
+        }
+
+        const mode = normalizeShortcutLayout(button.dataset.layoutOption);
+        const isScatter = mode === "scatter";
+
+        // 每次点「随机」都重掷 seed，包括从其他模式切进来时
+        if (isScatter) {
+          newTabState.scatterSeed = Math.floor(Math.random() * 1000000000) + 1;
+        }
+
+        if (mode === newTabState.shortcutLayout) {
+          if (isScatter) {
+            writeStoredState();
+            renderShortcutGroups();
+            setStatus("已重新随机");
+          }
+          return;
+        }
+
+        newTabState.shortcutLayout = mode;
+        writeStoredState();
+        syncLayoutSwitcher();
+        renderShortcutGroups();
+      });
+
+      switcher.dataset.layoutBound = "true";
+    };
+
+    const bindHeaderCollapse = () => {
+      const toggle = document.querySelector("[data-header-collapse]");
+
+      if (!(toggle instanceof HTMLElement) || toggle.dataset.collapseBound === "true") {
+        return;
+      }
+
+      toggle.addEventListener("click", () => {
+        const state = getHeaderState();
+
+        // 展开 → 收起（搜索并入功能栏）→ 挂起（只剩 item）→ 展开
+        setHeaderState(state === "normal" ? "collapsed" : state === "collapsed" ? "suspended" : "normal");
+        writeStoredState();
+        applyHeaderStateWithSearchFlip();
+      });
+
+      toggle.dataset.collapseBound = "true";
+    };
+
+    const bindHeaderRestore = () => {
+      const restore = document.querySelector("[data-header-restore]");
+
+      if (!(restore instanceof HTMLElement) || restore.dataset.restoreBound === "true") {
+        return;
+      }
+
+      restore.addEventListener("click", expandHeaderAndFocusSearch);
+      restore.dataset.restoreBound = "true";
     };
 
     const downloadConfig = () => {
@@ -2627,37 +3619,30 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const importConfigFromText = (text) => {
       newTabState = normalizeNewTabState(JSON.parse(text));
-      writeStoredState();
+      const saved = writeStoredState();
       renderAll();
-      setStatus("已导入");
+      setStatus(saved ? "已导入" : storageQuotaErrorMessage);
     };
 
     const bindSearch = () => {
       const form = document.querySelector("[data-new-tab-search]");
       const input = document.querySelector("[data-search-query]");
-      const select = document.querySelector("[data-search-engine]");
 
       if (
         !(form instanceof HTMLFormElement) ||
         !(input instanceof HTMLInputElement) ||
-        !(select instanceof HTMLSelectElement) ||
         form.dataset.searchBound === "true"
       ) {
         return;
       }
 
-      select.addEventListener("change", () => {
-        newTabState.defaultSearchEngineId = select.value;
-        writeStoredState();
-        syncSettingsControls();
-      });
-
       form.addEventListener("submit", (event) => {
         event.preventDefault();
 
         const query = input.value.trim();
-        const selectedOption = select.selectedOptions[0];
-        const searchUrl = selectedOption?.dataset.searchUrl;
+        const searchUrl = newTabState.searchEngines.find(
+          (engine) => engine.id === newTabState.defaultSearchEngineId,
+        )?.searchUrl;
 
         if (!query) {
           input.focus();
@@ -2674,22 +3659,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       form.dataset.searchBound = "true";
     };
 
-    const bindShortcutEditor = () => {
-      const toggle = document.querySelector("[data-shortcut-edit-toggle]");
-
-      if (!(toggle instanceof HTMLButtonElement) || toggle.dataset.shortcutEditBound === "true") {
-        return;
-      }
-
-      toggle.addEventListener("click", () => {
-        shortcutEditMode = !shortcutEditMode;
-        renderShortcutGroups();
-      });
-
-      toggle.dataset.shortcutEditBound = "true";
-      syncShortcutEditToggle();
-    };
-
     const bindSettings = () => {
       const settings = document.querySelector("[data-config-drawer]");
       const openButton = document.querySelector("[data-config-open]");
@@ -2702,11 +3671,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const homeLabelInput = settings.querySelector("[data-config-home-label]");
       const homeHrefInput = settings.querySelector("[data-config-home-href]");
       const shortcutOpenModeInput = settings.querySelector("[data-config-shortcut-open-mode]");
+      const searchEngineInput = settings.querySelector("[data-config-search-engine]");
       const backgroundInput = settings.querySelector("[data-config-background]");
       const backgroundOpacityInput = settings.querySelector("[data-config-background-opacity]");
       const textColorModeInput = settings.querySelector("[data-config-text-color-mode]");
-      const navigationColorInput = settings.querySelector("[data-config-navigation-color]");
-      const itemLabelColorInput = settings.querySelector("[data-config-item-label-color]");
       const backgroundFileInput = settings.querySelector("[data-config-background-file]");
       const backgroundFileTrigger = settings.querySelector("[data-config-background-file-trigger]");
       const fileInput = settings.querySelector("[data-config-file]");
@@ -2795,6 +3763,18 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         syncSettingsControls();
       });
 
+      searchEngineInput?.addEventListener("change", () => {
+        if (!(searchEngineInput instanceof HTMLSelectElement)) {
+          return;
+        }
+
+        if (newTabState.searchEngines.some((engine) => engine.id === searchEngineInput.value)) {
+          newTabState.defaultSearchEngineId = searchEngineInput.value;
+        }
+        persistConfigChange();
+        syncSettingsControls();
+      });
+
       backgroundInput?.addEventListener("input", () => {
         if (!(backgroundInput instanceof HTMLInputElement)) {
           return;
@@ -2819,7 +3799,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           return;
         }
 
-        newTabState.textColors.mode = ["default", "light", "dark", "custom"].includes(textColorModeInput.value)
+        newTabState.textColors.mode = ["default", "light", "dark"].includes(textColorModeInput.value)
           ? textColorModeInput.value
           : "default";
         persistConfigChange();
@@ -2828,38 +3808,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       textColorModeInput?.addEventListener("input", handleTextColorModeChange);
       textColorModeInput?.addEventListener("change", handleTextColorModeChange);
-
-      navigationColorInput?.addEventListener("input", () => {
-        if (!(navigationColorInput instanceof HTMLInputElement)) {
-          return;
-        }
-
-        newTabState.textColors.mode = "custom";
-        newTabState.textColors.navigationColor = normalizeColor(
-          navigationColorInput.value,
-          defaultTextColors.navigationColor,
-        );
-        if (textColorModeInput instanceof HTMLSelectElement) {
-          textColorModeInput.value = "custom";
-        }
-        scheduleTextColorSave();
-      });
-
-      itemLabelColorInput?.addEventListener("input", () => {
-        if (!(itemLabelColorInput instanceof HTMLInputElement)) {
-          return;
-        }
-
-        newTabState.textColors.mode = "custom";
-        newTabState.textColors.itemLabelColor = normalizeColor(
-          itemLabelColorInput.value,
-          defaultTextColors.itemLabelColor,
-        );
-        if (textColorModeInput instanceof HTMLSelectElement) {
-          textColorModeInput.value = "custom";
-        }
-        scheduleTextColorSave();
-      });
 
       backgroundFileTrigger?.addEventListener("click", () => {
         if (backgroundFileInput instanceof HTMLInputElement) {
@@ -2878,19 +3826,17 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           return;
         }
 
-        const reader = new FileReader();
-        reader.addEventListener("load", () => {
-          if (typeof reader.result !== "string") {
+        compressBackgroundImage(file).then((backgroundImage) => {
+          if (!backgroundImage) {
             return;
           }
 
-          newTabState.backgroundImage = reader.result;
-          writeStoredState();
+          newTabState.backgroundImage = backgroundImage;
+          const saved = writeStoredState();
           renderAll();
           backgroundFileInput.value = "";
-          setStatus("背景已保存");
+          setStatus(saved ? "背景已保存" : storageQuotaErrorMessage);
         });
-        reader.readAsDataURL(file);
       });
 
       importButton?.addEventListener("click", () => {
@@ -2951,14 +3897,56 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       settings.dataset.settingsBound = "true";
     };
 
+    let shortcutResizeBound = false;
+    let shortcutKeysBound = false;
+    let themeToneObserverBound = false;
+
     const bindNewTab = () => {
       newTabState = readStoredState();
       shortcutLogoCache = readShortcutLogoCache();
       renderAll();
       bindSearch();
-      bindShortcutEditor();
       bindSettings();
+      bindLayoutSwitcher();
+      bindHeaderCollapse();
+      bindHeaderRestore();
       bindShortcutContextMenuDismissal();
+
+      if (!shortcutResizeBound) {
+        window.addEventListener("resize", scheduleShortcutRelayout);
+        shortcutResizeBound = true;
+      }
+
+      // 默认颜色模式下 item 深浅跟随主题，主题切换时重算
+      if (!themeToneObserverBound) {
+        new MutationObserver(() => applyTextColors()).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["data-theme"],
+        });
+        themeToneObserverBound = true;
+      }
+
+      if (!shortcutKeysBound) {
+        // 挂起状态下按 / 唤回搜索
+        document.addEventListener("keydown", (event) => {
+          if (event.key !== "/" || !newTabState.headerSuspended) {
+            return;
+          }
+
+          const target = event.target;
+
+          if (
+            target instanceof HTMLElement &&
+            (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable)
+          ) {
+            return;
+          }
+
+          event.preventDefault();
+          expandHeaderAndFocusSearch();
+        });
+        shortcutKeysBound = true;
+      }
     };
 
     const clearNewTabBackground = () => {
@@ -2967,6 +3955,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       delete document.documentElement.dataset.newTabBackground;
       delete document.documentElement.dataset.newTabTextColors;
+      delete document.documentElement.dataset.itemTone;
       closeShortcutContextMenu();
 
       if (backgroundBase instanceof HTMLElement) {

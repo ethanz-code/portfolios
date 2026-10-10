@@ -1,0 +1,9 @@
+name = "newtab-meta-proxy"
+main = "newtab-meta-proxy.js"
+compatibility_date = "2026-06-01"
+
+# 自定义域：部署时自动在 itcox.cn zone 创建 DNS 与证书。
+routes = [
+	{ pattern = "meta.itcox.cn", custom_domain = true },
+]
+
