@@ -24,3 +24,7 @@ data/
 
 # Astro
 .astro/
+
+# agent tool dirs
+.serena/
+.zcode/

@@ -3,9 +3,18 @@ FROM --platform=$BUILDPLATFORM oven/bun:1.3.10-alpine AS builder
 ARG BUILDPLATFORM
 ENV ASTRO_TELEMETRY_DISABLED=1
 
-RUN apk add --no-cache python3 make g++ nodejs npm
+# 境内构建时经 .env 的 ALPINE_MIRROR 换 apk 源，默认不动
+ARG ALPINE_MIRROR=""
+
+RUN if [ -n "$ALPINE_MIRROR" ]; then sed -i "s#https://dl-cdn.alpinelinux.org#${ALPINE_MIRROR}#g" /etc/apk/repositories; fi \
+ && apk add --no-cache python3 make g++ nodejs npm
 
 WORKDIR /app
+
+# bun/npm 统一走 npmmirror；sharp 0.32 的 libvips 二进制走 SHARP_DIST_BASE_URL（GitHub releases 境内卡死）。
+# 该变量需自带版本目录，版本号随 lockfile 里 sharp 升级同步改
+ENV NPM_CONFIG_REGISTRY=https://registry.npmmirror.com \
+    SHARP_DIST_BASE_URL=https://registry.npmmirror.com/-/binary/sharp-libvips/v8.14.5/
 
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile

@@ -1,0 +1,3 @@
+# 境内构建/开发走 npmmirror；bun 1.2+ lockfile 不锁 registry host，切换无冲突
+[install]
+registry = "https://registry.npmmirror.com"

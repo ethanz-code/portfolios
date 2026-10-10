@@ -1,0 +1,11 @@
+services:
+  portfolios:
+    container_name: portfolios
+    build:
+      context: .
+      args:
+        ALPINE_MIRROR: ${ALPINE_MIRROR:-}
+    image: portfolios:local
+    ports:
+      - "${PORT_MAPPING:-11002:80}"
+    restart: unless-stopped
