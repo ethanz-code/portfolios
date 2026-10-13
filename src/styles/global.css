@@ -3,6 +3,8 @@
 [data-theme="light"],
 [data-theme="black"],
 :root {
+    /* 全站统一缓动：与 new-tab 同一条曲线（先快后缓的大幅收尾），别再各处各写一套。 */
+    --ease-pop: cubic-bezier(0.22, 1, 0.36, 1);
     --font-sans:
         -apple-system,
         BlinkMacSystemFont,
@@ -168,6 +170,87 @@ body {
 
 .time-line-container>div:last-child .education__time>.education__line {
     display: none;
+}
+
+/* ---------- 全站爽感：统一的过渡语言 ----------
+   缓动曲线与 new-tab 同为 --ease-pop（先冲刺、尾部长收），全站只用这一个。
+   下面三段各自职责：
+   1) 页面转场（View Transitions）
+   2) 滚动入场（data-reveal，JS 打 IntersectionObserver）
+   3) 无障碍兜底（reduced-motion 一律退化） */
+
+/* 页面转场：默认 cross-fade 太"平"，改成新页面从下方浮上来并轻微放大，旧页面淡出。 */
+@media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(root) {
+        animation: ntp-fade-out 0.22s ease both;
+    }
+
+    ::view-transition-new(root) {
+        animation: ntp-rise-in 0.42s var(--ease-pop) both;
+    }
+
+    @keyframes ntp-fade-out {
+        to {
+            opacity: 0;
+        }
+    }
+
+    @keyframes ntp-rise-in {
+        from {
+            opacity: 0;
+            transform: translateY(1.25rem) scale(0.985);
+        }
+    }
+
+    /* 主题切换时只让新快照从点击点扩散，关掉默认的淡入淡出与 plus-lighter 混色，
+       否则圆外面能看到新旧两层叠加的残影。 */
+    html[data-theme-revealing]::view-transition-old(root),
+    html[data-theme-revealing]::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+    }
+}
+
+/* 滚动入场：元素进视口时上浮。属性 [data-reveal] 由 BaseLayout 的
+   IntersectionObserver 翻成 [data-reveal-visible]，未见到前茅点保持在终态位置
+   的下方，见到后才吸附上去——避免"看不见的地区白跑一趟"造成的闪烁。 */
+[data-reveal] {
+    opacity: 0;
+    transform: translateY(1.5rem);
+    transition:
+        opacity 0.55s ease,
+        transform 0.7s var(--ease-pop);
+    transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal][data-reveal-visible] {
+    opacity: 1;
+    transform: none;
+}
+
+/* JS 未接管（禁用脚本 / hydration 失败）时不能让内容永久隐形。 */
+html:not([data-reveal-ready]) [data-reveal] {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        /* 无限循环要让 animation-duration 归零，只砍时长会变成每毫秒刷一次的高频闪烁 */
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 @media (min-width: 640px) {
