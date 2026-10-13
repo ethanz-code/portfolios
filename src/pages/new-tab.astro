@@ -349,6 +349,26 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   <script is:inline type="application/json" id="new-tab-defaults" set:html={serializedDefaultNewTabPayload} />
 
   <style is:inline>
+    /* new-tab 自带 pt-[clamp(2rem,9vh,5.5rem)]，再叠 main 的 pt-6 lg:pt-16 会把内容推得过低，
+       白白吃掉一屏高度、把快捷方式挤到滚动区。这里只去掉垂直方向，左右留白保留。 */
+    main:has([data-new-tab-page]) {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    /* 少数矮视口内容确实放不下时仍要滚动：提前占住滚动条槽位，避免它出现/消失时整页横移。 */
+    html:has([data-new-tab-page]) {
+      scrollbar-gutter: stable;
+    }
+
+    /* 入场动画让快捷方式从下方浮上来（translateY 0.7rem），中间态把文档底部撑高约 160px，
+       在常见笔记本视口下足以让滚动条闪一下。这里只剪掉纵向的瞬时溢出，留 2rem 余量，
+       hover 抬升与 tooltip 都在余量内，不受影响。 */
+    [data-new-tab-page].new-tab-shell {
+      overflow-y: clip;
+      overflow-clip-margin: 2rem;
+    }
+
     /* new-tab 动效（全局样式，绕过 Tailwind purge）：布局补间 / 入场 / 问候与搜索收起、挂起 */
     [data-new-tab-page].new-tab-shell {
       align-items: end;
