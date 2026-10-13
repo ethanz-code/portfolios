@@ -2274,27 +2274,27 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const positions = [];
 
       if (mode === "stack") {
-        // 竖向牌堆：卡片自上而下堆叠，每张露出头部条避免过度遮挡；dataset.fanTransform 存悬停时的向下铺开位
-        const maxColumnHeight = Math.max(tileHeight * 2.4, window.innerHeight * 0.52);
-        const steps = Math.max(0, children.length - 1);
-        const stepY = steps > 0
-          ? Math.min(tileHeight * 0.42, (maxColumnHeight - tileHeight) / steps)
-          : 0;
-        const startX = Math.max(0, (width - tileWidth) / 2);
+        // 横向手牌：卡片沿一行错开、轻微重叠，每张露出左侧一条；一行放不下自动换行。
+        // dataset.fanTransform 存悬停时向右铺开成完整间距的位置。
+        // 每行容量按铺开后的间距算，保证铺开时不会顶出容器。
+        const rowGap = 10;
+        const collapsedStepX = Math.max(tileWidth * 0.6, 1);
+        const expandedStepX = Math.max(tileWidth + rowGap, collapsedStepX);
+        const perRow = Math.max(1, Math.floor((width - tileWidth) / expandedStepX) + 1);
         const random = createScatterRandom(newTabState.scatterSeed + 17);
-        const spreadStep = steps > 0
-          ? Math.min(tileHeight * 0.62, (maxColumnHeight * 1.6 - tileHeight) / steps)
-          : 0;
 
         children.forEach((child, index) => {
+          const column = index % perRow;
+          const row = Math.floor(index / perRow);
+
           positions.push({
-            x: startX + (index === addIndex ? 0 : random() * 10 - 5),
-            y: index * stepY,
+            x: column * collapsedStepX,
+            y: row * (tileHeight + rowGap),
             rot: index === addIndex ? 0 : random() * 3 - 1.5,
             z: index + 1,
           });
 
-          child.dataset.fanTransform = `translate(${startX}px, ${index * spreadStep}px) rotate(0deg)`;
+          child.dataset.fanTransform = `translate(${column * expandedStepX}px, ${row * (tileHeight + rowGap)}px) rotate(0deg)`;
           child.dataset.fanZ = String(40 + index);
         });
       } else if (mode === "ring") {
@@ -2759,7 +2759,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           event.preventDefault();
           openShortcutAddForm(groupAddTile);
         });
-        // 堆叠模式：悬停整组展开成扇面，移开复位（牌堆位来自布局内存）
+        // 堆叠模式：悬停整组向右铺开成完整间距，移开复位（牌堆位来自布局内存）
         items.addEventListener("pointerenter", () => {
           if (newTabState.shortcutLayout !== "stack") {
             return;
