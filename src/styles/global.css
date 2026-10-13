@@ -53,6 +53,22 @@ body {
     --tab-radius: 0;
 }
 
+/* 内容页点按钮不缩放：daisyUI 默认每次点击都先缩到 .95 再弹到 1.02，
+   阅读型页面上这层"手感"会打断注意力。new-tab 是卡片面板，保留它自己的弹跳。 */
+html:not(:has([data-new-tab-page])) {
+    --animation-btn: 0s;
+    --btn-focus-scale: 1;
+}
+
+/* 下拉菜单与弹窗同理：daisyUI 让它们从 0.95 / 0.9 缩着长出来，
+   点主题按钮和点开图片时都算"点一下就放大"，内容页一并改成纯淡入。
+   .modal .modal-box 是为了压过 daisyUI 的 .modal[open] .modal-box。 */
+html:not(:has([data-new-tab-page])) .dropdown:is(:not(details)) .dropdown-content,
+html:not(:has([data-new-tab-page])) .modal .modal-box {
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+}
+
 [data-theme="light"] .theme-image-variant--dark,
 [data-theme="black"] .theme-image-variant--light {
     display: none;
@@ -174,12 +190,14 @@ body {
 
 /* ---------- 全站爽感：统一的过渡语言 ----------
    缓动曲线与 new-tab 同为 --ease-pop（先冲刺、尾部长收），全站只用这一个。
+   内容页只做"位移 + 明暗"（上浮、淡出、滑入），不做缩放：缩放是 new-tab 那张卡片面板的
+   语言，放到阅读型页面上会显得像在"弹"，反而不稳。
    下面三段各自职责：
    1) 页面转场（View Transitions）
-   2) 滚动入场（data-reveal，JS 打 IntersectionObserver）
+   2) 滚动入场（data-reveal，JS 用几何扫描打标记）
    3) 无障碍兜底（reduced-motion 一律退化） */
 
-/* 页面转场：默认 cross-fade 太"平"，改成新页面从下方浮上来并轻微放大，旧页面淡出。 */
+/* 页面转场：默认 cross-fade 太"平"，改成新页面从下方浮上来，旧页面淡出。 */
 @media (prefers-reduced-motion: no-preference) {
     ::view-transition-old(root) {
         animation: ntp-fade-out 0.22s ease both;
@@ -198,7 +216,7 @@ body {
     @keyframes ntp-rise-in {
         from {
             opacity: 0;
-            transform: translateY(1.25rem) scale(0.985);
+            transform: translateY(1.25rem);
         }
     }
 

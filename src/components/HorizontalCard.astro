@@ -17,9 +17,9 @@ const { title, img, imgLight, imgDark, desc, url, target = "_blank", compactMobi
 
 <div
   class:list={[
-    // 按下时整卡微沉并按下去两像素，给一次明确的"点到了"回应；移动端没有 hover，
-    // active 态是唯一的触觉反馈，所以不加 md: 限定。
-    "group/card card w-full min-w-0 overflow-hidden border border-base-300/70 bg-base-100 shadow-sm transition-[transform,box-shadow] duration-200 ease-out md:border-0 md:shadow-none md:duration-300 md:ease-[cubic-bezier(0.22,1,0.36,1)] md:hover:scale-[102%] md:hover:border-base-300 md:hover:shadow-xl active:scale-[99%] active:shadow-none",
+    // 内容页不做 new-tab 那种"点一下弹一下"：悬停和按下都不缩放，只靠边框和阴影回应，
+    // 光标扫过列表时整页不会跟着鼓起来。
+    "card w-full min-w-0 overflow-hidden border border-base-300/70 bg-base-100 shadow-sm transition-[border-color,box-shadow] duration-200 ease-out md:border-0 md:shadow-none md:duration-300 md:ease-[cubic-bezier(0.22,1,0.36,1)] md:hover:border-base-300 md:hover:shadow-xl",
   ]}
 >
   <a class="block min-w-0" href={url} target={target}>
@@ -41,7 +41,7 @@ const { title, img, imgLight, imgDark, desc, url, target = "_blank", compactMobi
               light={imgLight ?? img}
               dark={imgDark}
               alt={title}
-              class="h-full w-full object-cover object-left-top transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:aspect-video md:h-auto md:w-[13rem] md:rounded-lg group-hover/card:scale-[1.04]"
+              class="h-full w-full object-cover object-left-top md:aspect-video md:h-auto md:w-[13rem] md:rounded-lg"
               width={750}
               height={422}
               format="webp"

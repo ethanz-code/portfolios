@@ -93,7 +93,7 @@ const activeTileClasses = previewGrid ? previewTileClasses : tileClasses;
             ]}
           >
             <button
-              class="group relative block h-full w-full cursor-zoom-in overflow-hidden border-0 bg-transparent p-0 text-inherit transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-primary active:scale-[96%]"
+              class="group relative block h-full w-full cursor-zoom-in overflow-hidden border-0 bg-transparent p-0 text-inherit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-primary"
               type="button"
               aria-label={`查看${image.alt}`}
               data-moment-trigger={galleryId}
@@ -105,7 +105,7 @@ const activeTileClasses = previewGrid ? previewTileClasses : tileClasses;
               <Image
                 src={image.src}
                 alt={image.alt}
-                class="h-full w-full object-cover transition duration-[220ms] ease-out group-hover:scale-[1.035] group-hover:saturate-[1.04] group-hover:contrast-[1.03] group-focus-visible:scale-[1.035] group-focus-visible:saturate-[1.04] group-focus-visible:contrast-[1.03]"
+                class="h-full w-full object-cover transition duration-[220ms] ease-out group-hover:saturate-[1.04] group-hover:contrast-[1.03] group-focus-visible:saturate-[1.04] group-focus-visible:contrast-[1.03]"
                 loading={index < 3 ? "eager" : "lazy"}
                 widths={[320, 640, 960]}
                 sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
@@ -185,7 +185,7 @@ const activeTileClasses = previewGrid ? previewTileClasses : tileClasses;
         }
 
         @keyframes lb-content-in {
-          from { opacity: 0; transform: scale(0.94) translateY(0.75rem); }
+          from { opacity: 0; transform: translateY(0.75rem); }
         }
 
         [data-moment-lightbox][open]::backdrop {
@@ -233,8 +233,8 @@ const activeTileClasses = previewGrid ? previewTileClasses : tileClasses;
       // 所以先把关闭动画挂在 dialog 上，跑完再真正 close()。
       const animation = dialog.animate(
         [
-          { opacity: 1, transform: "scale(1)" },
-          { opacity: 0, transform: "scale(0.96)" },
+          { opacity: 1 },
+          { opacity: 0 },
         ],
         { duration: 180, easing: EASE, fill: "both" },
       );
@@ -261,11 +261,9 @@ const activeTileClasses = previewGrid ? previewTileClasses : tileClasses;
       }
 
       image.style.opacity = "0";
-      image.style.transform = "scale(0.985)";
       window.setTimeout(() => {
         mutate();
         image.style.opacity = "";
-        image.style.transform = "";
       }, 140);
     };
 
