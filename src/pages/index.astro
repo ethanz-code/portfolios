@@ -105,7 +105,7 @@ const getProjectUrl = (project: ProjectEntry): string => {
     <div class="w-full min-w-0 max-w-3xl" data-reveal-group="home-projects">
       {
         homeProjects.map((project, index) => (
-          <div data-reveal key={project.id}>
+          <div data-reveal>
             <HorizontalCard
               title={project.data.title}
               imgLight={project.data.heroImageLight ?? project.data.heroImage}
