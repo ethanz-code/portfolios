@@ -287,7 +287,12 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
           });
         };
 
-        const revealNow = (element) => {
+        const revealNow = (element, { instant = false } = {}) => {
+          // 刷新时视口里已有的元素直接落位，不各自上浮，位移统一交给右侧内容区那一层。
+          if (instant) {
+            element.dataset.revealInstant = "true";
+          }
+
           element.dataset.revealVisible = "true";
         };
 
@@ -323,6 +328,12 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
         let cleanupCurrent = null;
 
         const bindReveal = () => {
+          // bindReveal 会被 page-load / after-swap 反复调用，也可能跨页调用；
+          // 任何提前返回之前先摘掉上一组监听，避免旧页的扫描一直挂着。
+          if (cleanupCurrent) {
+            cleanupCurrent();
+          }
+
           const elements = [...document.querySelectorAll("[data-reveal]:not([data-reveal-visible])")];
 
           if (!elements.length) {
@@ -346,18 +357,30 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
             return;
           }
 
+          // 刷新时视口里已有的元素立即落位（不各自上浮），避免和右侧内容区那层整体上浮
+          // 叠成两次位移；视口外的元素保持待命，等滚动到跟前再走上浮。判可见要用首帧几何，
+          // 因此放在 rAF 之前先算一次。
+          const visibleNow = elements.filter((element) => isInView(element, getRootBounds()));
+          visibleNow.forEach((element) => revealNow(element, { instant: true }));
+
+          const pending = elements.filter((element) => !element.dataset.revealVisible);
+
+          if (!pending.length) {
+            return;
+          }
+
           const sweep = () => {
             const bounds = getRootBounds();
-            const pending = elements.filter((element) => !element.dataset.revealVisible);
+            const remaining = pending.filter((element) => !element.dataset.revealVisible);
 
-            pending.forEach((element) => {
+            remaining.forEach((element) => {
               if (isInView(element, bounds)) {
                 revealNow(element);
               }
             });
 
             // 全部就位后摘掉监听，省掉后续滚动的无谓计算。
-            if (!pending.length) {
+            if (!remaining.length) {
               stopListening();
             }
           };
@@ -394,10 +417,6 @@ const enableClientRouter = TRANSITION_API && typeof ClientRouter !== "undefined"
 
           // bindReveal 会被 page-load / after-swap 反复调用，挂载新监听前先摘掉上一组，
           // 否则同一批元素会被多组监听器重复扫描。
-          if (cleanupCurrent) {
-            cleanupCurrent();
-          }
-
           cleanupCurrent = stopListening;
           scrollTargets.forEach((target) => target.addEventListener("scroll", scheduleSweep, { passive: true }));
           window.addEventListener("resize", scheduleSweep);

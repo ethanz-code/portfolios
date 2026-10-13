@@ -158,16 +158,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             </li>
           </ul>
         </div>
-        <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
-          type="button"
-          title="收起问候"
-          aria-label="收起问候"
-          aria-expanded="true"
-          data-header-collapse
-        >
-          <ChevronDown aria-hidden="true" />
-        </button>
         <div>
           <ThemeToggle
             mobile={true}
@@ -201,6 +191,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           data-new-tab-color-target="navigation"
         >
           {newTabConfig.settings.openLabel}
+        </button>
+        <button
+          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+          type="button"
+          title="收起问候"
+          aria-label="收起问候"
+          aria-expanded="true"
+          data-header-collapse
+        >
+          <ChevronDown aria-hidden="true" />
         </button>
       </div>
     </div>
