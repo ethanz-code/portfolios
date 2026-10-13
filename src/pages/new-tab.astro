@@ -44,6 +44,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     class="new-tab-shell relative isolate z-10 grid w-[min(100%,58rem)] gap-[clamp(1.5rem,3.5vh,2.25rem)] pt-[clamp(2rem,9vh,5.5rem)] max-sm:gap-7"
     aria-labelledby="new-tab-title"
     data-new-tab-page
+    data-booting="true"
   >
     <h1 id="new-tab-title" class="sr-only">{newTabConfig.heading}</h1>
 
@@ -378,6 +379,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         "search"
         "stack";
       transition: padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* 首屏 padding 从展开态滑到收起态要 0.45s，而快捷方式正好在这条过渡刚开始时插入，
+       被撑在旧 padding 上把整页顶高约 60px，右侧就闪出滚动条。首帧先不起过渡，
+       等布局落定再放行——入场 keyframe 动画不受影响，只有 padding 补间在首屏被跳过。 */
+    [data-new-tab-page][data-booting="true"].new-tab-shell,
+    [data-new-tab-page][data-booting="true"] .new-tab-search,
+    [data-new-tab-page][data-booting="true"] .new-tab-greeting-block,
+    [data-new-tab-page][data-booting="true"] .new-tab-toolbar {
+      transition: none;
     }
 
     [data-new-tab-page] .new-tab-toolbar {
@@ -2298,27 +2309,70 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           child.dataset.fanZ = String(40 + index);
         });
       } else if (mode === "ring") {
-        // 弧形：沿一条开口向上的圆弧（中间低、两端高），瓦片随切线倾斜，末位是添加瓦片
+        // 弧形：一条开口向上的圆弧（中间低、两端高），瓦片随切线倾斜。
+        // 瓦片多到单环按设计间距排不下时拆成多个环纵向叠放，免得一条弧挤成一团；
+        // 叠起来高度超预算就把半径拉大、弧压平，优先保证瓦片都露在视口里。
         const tileMax = Math.max(tileWidth, tileHeight);
-        const itemTotal = Math.max(0, children.length - 1);
+        // 相邻瓦片沿弧的间距，与单环原有观感一致
+        const arcStep = tileMax * 0.95;
+        const maxArcWidth = Math.max(0, width - tileWidth);
+        const perRingCapacity = Math.max(1, Math.floor(maxArcWidth / arcStep) + 1);
+        const ringCount = Math.max(1, Math.ceil(children.length / perRingCapacity));
+        const perRing = Math.ceil(children.length / ringCount);
+        const ringGap = 12;
         const apexPad = 6;
-        const radius = Math.max(width * 0.72, tileMax * 1.4);
-        const spanFit = 2 * Math.asin(Math.min(1, Math.max(0, width - tileWidth) / (2 * radius)));
-        const spanFull = itemTotal * 2 * Math.asin(Math.min(1, (tileMax * 0.95) / (2 * radius)));
-        const span = Math.min(1.5, spanFull, spanFit);
-        const step = itemTotal > 0 ? span / itemTotal : 0;
-        const endDrop = radius * (1 - Math.cos(span / 2));
+        const heightBudget = Math.max(tileHeight * 2, window.innerHeight * 0.58);
+        const dropLimit = Math.max(
+          0,
+          (heightBudget - apexPad - ringCount * tileHeight - (ringCount - 1) * ringGap) / ringCount,
+        );
+        const baseRadius = Math.max(width * 0.72, tileMax * 1.4);
+        const arcDrop = (r, len) => r * (1 - Math.cos(len / (2 * r)));
+        const longestArc = Math.min(maxArcWidth, (perRing - 1) * arcStep);
 
-        children.forEach((child, index) => {
-          const angle = (index - (children.length - 1) / 2) * step;
+        let radius = baseRadius;
 
-          positions.push({
-            x: width / 2 + Math.sin(angle) * radius - tileWidth / 2,
-            y: apexPad + endDrop - radius * (1 - Math.cos(Math.abs(angle))),
-            rot: Math.max(-26, Math.min(26, (-angle * 180) / Math.PI)),
-            z: index + 1,
-          });
-        });
+        if (arcDrop(radius, longestArc) > dropLimit) {
+          // 半径越大弧越平（弧深越小），二分找刚好把弧深压进预算的半径
+          let low = baseRadius;
+          let high = baseRadius * 64;
+
+          for (let attempt = 0; attempt < 42; attempt += 1) {
+            const mid = (low + high) / 2;
+
+            if (arcDrop(mid, longestArc) > dropLimit) {
+              low = mid;
+            } else {
+              high = mid;
+            }
+          }
+
+          radius = high;
+        }
+
+        let ringTop = apexPad;
+        let placed = 0;
+
+        for (let ring = 0; ring < ringCount && placed < children.length; ring += 1) {
+          const size = Math.min(perRing, children.length - placed);
+          const arcLen = Math.min(maxArcWidth, (size - 1) * arcStep);
+          const half = arcLen / (2 * radius);
+          const step = size > 1 ? arcLen / radius / (size - 1) : 0;
+
+          for (let offset = 0; offset < size; offset += 1) {
+            const angle = (offset - (size - 1) / 2) * step;
+
+            positions.push({
+              x: width / 2 + Math.sin(angle) * radius - tileWidth / 2,
+              y: ringTop + radius * (Math.cos(angle) - Math.cos(half)),
+              rot: Math.max(-26, Math.min(26, (-angle * 180) / Math.PI)),
+              z: placed + offset + 1,
+            });
+          }
+
+          placed += size;
+          ringTop += arcDrop(radius, arcLen) + tileHeight + ringGap;
+        }
       } else {
         // 有机散布：最优采样挑离已放置瓦片最远的候选点，避免规则网格感
         const canvasHeight = Math.max(
@@ -3932,6 +3986,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       bindHeaderCollapse();
       bindHeaderRestore();
       bindShortcutContextMenuDismissal();
+
+      // 首屏布局已落定，放行 padding 补间（之后的收起/挂起切换照常有动画）
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.querySelectorAll("[data-booting]").forEach((el) => el.removeAttribute("data-booting"));
+        });
+      });
 
       if (!shortcutResizeBound) {
         window.addEventListener("resize", scheduleShortcutRelayout);
