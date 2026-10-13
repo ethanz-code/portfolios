@@ -130,8 +130,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         >
           <ChevronDown aria-hidden="true" />
         </button>
-        <div class="[&_button]:h-9 [&_button]:min-h-9 [&_button]:w-9 [&_button]:p-0 [&_svg]:h-[1.05rem] [&_svg]:w-[1.05rem]">
-          <ThemeToggle mobile={true} />
+        <div>
+          <ThemeToggle
+            mobile={true}
+            triggerClass="h-9 min-h-9 w-9 p-0 [&_svg]:h-[1.05rem] [&_svg]:w-[1.05rem]"
+          />
         </div>
         <a
           class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium text-base-content/60 hover:text-base-content"
