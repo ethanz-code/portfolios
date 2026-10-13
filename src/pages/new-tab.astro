@@ -72,53 +72,91 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           data-new-tab-color-target="navigation"
         ></p>
       </div>
-      <div class="new-tab-actions flex flex-wrap items-center justify-end gap-1.5 max-sm:justify-start">
-        <div
-          class="new-tab-layout-switcher flex items-center gap-0.5 border border-base-content/10 bg-base-100/70 p-0.5"
-          role="group"
-          aria-label="item 布局"
-          data-layout-switcher
-        >
+      <div class="new-tab-actions flex items-center justify-end gap-1.5 max-sm:justify-start max-sm:gap-1">
+        <div class="dropdown dropdown-end" data-layout-switcher>
           <button
-            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+            class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
             type="button"
-            title="网格布局"
-            aria-label="网格布局"
-            aria-pressed="true"
-            data-layout-option="grid"
+            tabindex="0"
+            aria-haspopup="menu"
+            aria-label="切换布局"
+            title="切换布局"
+            data-layout-trigger
           >
-            <LayoutGrid aria-hidden="true" />
+            <span data-layout-trigger-icon="grid" class="grid place-items-center">
+              <LayoutGrid aria-hidden="true" />
+            </span>
+            <span data-layout-trigger-icon="stack" class="hidden grid place-items-center">
+              <Layers aria-hidden="true" />
+            </span>
+            <span data-layout-trigger-icon="ring" class="hidden grid place-items-center">
+              <Spline aria-hidden="true" />
+            </span>
+            <span data-layout-trigger-icon="scatter" class="hidden grid place-items-center">
+              <Dices aria-hidden="true" />
+            </span>
           </button>
-          <button
-            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
-            type="button"
-            title="堆叠布局"
-            aria-label="堆叠布局"
-            aria-pressed="false"
-            data-layout-option="stack"
+          <ul
+            tabindex="0"
+            class="menu dropdown-content z-[60] mt-2 w-40 rounded-box border border-base-300 bg-base-100 p-2 shadow [&_button]:justify-start [&_button]:gap-2"
           >
-            <Layers aria-hidden="true" />
-          </button>
-          <button
-            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
-            type="button"
-            title="弧形布局"
-            aria-label="弧形布局"
-            aria-pressed="false"
-            data-layout-option="ring"
-          >
-            <Spline aria-hidden="true" />
-          </button>
-          <button
-            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
-            type="button"
-            title="随机布局（再点一次重新随机）"
-            aria-label="随机布局"
-            aria-pressed="false"
-            data-layout-option="scatter"
-          >
-            <Dices aria-hidden="true" />
-          </button>
+            <li>
+              <button
+                class="layout-option btn btn-ghost btn-sm normal-case font-normal"
+                type="button"
+                aria-pressed="true"
+                data-layout-option="grid"
+              >
+                <LayoutGrid class="h-4 w-4" aria-hidden="true" />
+                <span class="flex-1 text-left">网格</span>
+                <span class="grid h-3.5 w-3.5 place-items-center" data-layout-selected="grid">
+                  <Check class="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="layout-option btn btn-ghost btn-sm normal-case font-normal"
+                type="button"
+                aria-pressed="false"
+                data-layout-option="stack"
+              >
+                <Layers class="h-4 w-4" aria-hidden="true" />
+                <span class="flex-1 text-left">堆叠</span>
+                <span class="hidden grid h-3.5 w-3.5 place-items-center" data-layout-selected="stack">
+                  <Check class="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="layout-option btn btn-ghost btn-sm normal-case font-normal"
+                type="button"
+                aria-pressed="false"
+                data-layout-option="ring"
+              >
+                <Spline class="h-4 w-4" aria-hidden="true" />
+                <span class="flex-1 text-left">弧形</span>
+                <span class="hidden grid h-3.5 w-3.5 place-items-center" data-layout-selected="ring">
+                  <Check class="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="layout-option btn btn-ghost btn-sm normal-case font-normal"
+                type="button"
+                aria-pressed="false"
+                data-layout-option="scatter"
+              >
+                <Dices class="h-4 w-4" aria-hidden="true" />
+                <span class="flex-1 text-left">随机</span>
+                <span class="hidden grid h-3.5 w-3.5 place-items-center" data-layout-selected="scatter">
+                  <Check class="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+              </button>
+            </li>
+          </ul>
         </div>
         <button
           class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
@@ -679,10 +717,45 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       color: rgba(17, 24, 39, 0.6) !important;
     }
 
+    /* 刷新入场：问候/搜索/快捷方式三块作为一体上浮，不再让每个 item 各弹各的。
+       backwards 只在动画期间生效，结束后交还给常规级联，避免盖掉 FLIP 与收起态的行内 transform。 */
+    @keyframes ntab-shell-in {
+      from {
+        opacity: 0;
+        transform: translateY(1.15rem);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    [data-new-tab-page] > .new-tab-toolbar,
+    [data-new-tab-page] > .new-tab-search,
+    [data-new-tab-page] > [data-shortcut-stack] {
+      animation: ntab-shell-in 0.52s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+
+    /* 弧形坞固定在视口底部：容器一旦有 transform 就会变成它的包含块，把坞拽进窄栏。
+       这一档只做明暗过渡，位移交给坞内部元素自己完成。 */
+    [data-new-tab-page][data-shortcut-layout="ring"] > [data-shortcut-stack] {
+      animation-name: ntab-shell-fade;
+    }
+
+    @keyframes ntab-shell-fade {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
     [data-shortcut-stack] .ntab-pop > .shortcut-item,
     [data-shortcut-stack] .shortcut-item.ntab-pop {
       animation: ntab-pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-      animation-delay: var(--ntab-delay, 0ms);
     }
 
     @keyframes ntab-pop-in {
@@ -746,6 +819,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     });
 
     const storageKey = defaultPayload.config?.storageKey ?? "ethanz-new-tab-config";
+    const layoutLabels = {
+      grid: "网格",
+      stack: "堆叠",
+      ring: "弧形",
+      scatter: "随机",
+    };
     const logoCacheStorageKey = `${storageKey}:logo-cache`;
     const logoResolverVersion = 5;
     const settingsLabels = defaultPayload.config?.settings ?? {};
@@ -2563,8 +2642,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
 
       const mode = newTabState.shortcutLayout;
-      const stagger = animate && previousPlacements.size === 0;
-      let globalIndex = 0;
 
       stack.querySelectorAll(".shortcut-group__items").forEach((itemsEl) => {
         if (!(itemsEl instanceof HTMLElement)) {
@@ -2587,11 +2664,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             return;
           }
 
-          const delay = stagger ? Math.min(globalIndex * 24, 360) : 0;
-
-          globalIndex += 1;
-          child.style.setProperty("--ntab-delay", `${delay}ms`);
-
           const previous = animate ? previousPlacements.get(key) : undefined;
 
           if (previous) {
@@ -2613,9 +2685,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             } else {
               child.style.transform = `translate(${target.x}px, ${target.y}px) rotate(${target.rot}deg)`;
             }
-          } else if (animate && !previousPlacements.has(key)) {
+          } else if (animate && previousPlacements.size > 0 && !previousPlacements.has(key)) {
             child.classList.add("ntab-pop");
-            window.setTimeout(() => child.classList.remove("ntab-pop"), delay + 620);
+            window.setTimeout(() => child.classList.remove("ntab-pop"), 620);
           }
         });
 
@@ -2712,6 +2784,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       if (shell instanceof HTMLElement) {
         // 没有分组时工具栏的添加入口无处分派，交给空态引导（见 [data-has-groups] 样式）
         shell.dataset.hasGroups = newTabState.shortcutGroups.length ? "true" : "false";
+        shell.dataset.shortcutLayout = newTabState.shortcutLayout;
       }
 
       const previousPlacements = new Map(shortcutPlacementMemory);
@@ -3674,11 +3747,33 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         const active = button.dataset.layoutOption === newTabState.shortcutLayout;
 
         button.setAttribute("aria-pressed", active ? "true" : "false");
-        button.classList.toggle("bg-base-content", active);
-        button.classList.toggle("text-base-100", active);
-        button.classList.toggle("hover:text-base-100", active);
-        button.classList.toggle("text-base-content/55", !active);
+        button.classList.toggle("bg-base-200", active);
+        button.classList.toggle("font-medium", active);
       });
+
+      document.querySelectorAll("[data-layout-selected]").forEach((mark) => {
+        if (!(mark instanceof HTMLElement)) {
+          return;
+        }
+
+        mark.classList.toggle("hidden", mark.dataset.layoutSelected !== newTabState.shortcutLayout);
+      });
+
+      document.querySelectorAll("[data-layout-trigger-icon]").forEach((icon) => {
+        if (!(icon instanceof HTMLElement)) {
+          return;
+        }
+
+        icon.classList.toggle("hidden", icon.dataset.layoutTriggerIcon !== newTabState.shortcutLayout);
+      });
+
+      const trigger = document.querySelector("[data-layout-trigger]");
+
+      if (trigger instanceof HTMLElement) {
+        const label = layoutLabels[newTabState.shortcutLayout] ?? "网格";
+        trigger.title = `布局：${label}`;
+        trigger.setAttribute("aria-label", `切换布局，当前${label}`);
+      }
     };
 
     const bindShortcutAdd = () => {
@@ -3693,6 +3788,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       });
 
       trigger.dataset.addBound = "true";
+    };
+
+    const closeLayoutMenu = () => {
+      const active = document.activeElement;
+
+      if (active instanceof HTMLElement && active.closest("[data-layout-switcher]")) {
+        active.blur();
+      }
     };
 
     const bindLayoutSwitcher = () => {
@@ -3723,6 +3826,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             renderShortcutGroups();
             setStatus("已重新随机");
           }
+          closeLayoutMenu();
           return;
         }
 
@@ -3730,6 +3834,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         writeStoredState();
         syncLayoutSwitcher();
         renderShortcutGroups();
+        closeLayoutMenu();
       });
 
       switcher.dataset.layoutBound = "true";
