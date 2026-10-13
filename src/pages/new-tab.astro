@@ -658,6 +658,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
   <script>
     // @ts-nocheck
+    import { META_PROXY_ORIGIN } from "../data/meta-proxy";
     const defaultPayloadElement = document.getElementById("new-tab-defaults");
     const defaultPayload = defaultPayloadElement?.textContent
       ? JSON.parse(defaultPayloadElement.textContent)
@@ -1712,7 +1713,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const dragHandleIcon = getIconMarkup("drag");
 
-    const faviconProxyUrl = "https://meta.itcox.cn";
+    const faviconProxyUrl = META_PROXY_ORIGIN;
 
     const getProxyUrl = (url) => `${faviconProxyUrl}?url=${encodeURIComponent(url)}`;
 

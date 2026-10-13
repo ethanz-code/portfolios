@@ -20,7 +20,7 @@ pnpm-debug.log*
 .DS_Store
 
 # data
-data/
+/data/
 
 # Astro
 .astro/

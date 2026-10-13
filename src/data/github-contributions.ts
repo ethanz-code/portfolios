@@ -1,3 +1,5 @@
+import { buildMetaProxyUrl } from "./meta-proxy";
+
 export interface ContributionMonthLabel {
   label: string;
   week: number;
@@ -24,11 +26,9 @@ const monthLabelPattern =
 const dayCellPattern =
   /data-date="(\d{4}-\d{2}-\d{2})" id="(contribution-day-component-(\d)-(\d+))" data-level="([0-4])"/g;
 const tooltipPattern = /<tool-tip[^>]*for="([^"]+)"[^>]*>([^<]+)<\/tool-tip>/g;
-// 走自建的 meta.itcox.cn 代理（Cloudflare Worker），GitHub 贡献页不允许跨域直连
+// GitHub 贡献页不允许跨域直连，走自建代理转发
 export const buildContributionSourceUrl = (username: string) =>
-  `https://meta.itcox.cn/?url=${encodeURIComponent(
-    `https://github.com/users/${username}/contributions`,
-  )}`;
+  buildMetaProxyUrl(`https://github.com/users/${username}/contributions`);
 
 const formatContributionTooltip = (date: string, count: number) => `${date} · ${count} 次提交`;
 
