@@ -24,8 +24,9 @@ const monthLabelPattern =
 const dayCellPattern =
   /data-date="(\d{4}-\d{2}-\d{2})" id="(contribution-day-component-(\d)-(\d+))" data-level="([0-4])"/g;
 const tooltipPattern = /<tool-tip[^>]*for="([^"]+)"[^>]*>([^<]+)<\/tool-tip>/g;
+// 走自建的 meta.itcox.cn 代理（Cloudflare Worker），GitHub 贡献页不允许跨域直连
 export const buildContributionSourceUrl = (username: string) =>
-  `https://proxy.scalar.com/?scalar_url=${encodeURIComponent(
+  `https://meta.itcox.cn/?url=${encodeURIComponent(
     `https://github.com/users/${username}/contributions`,
   )}`;
 
