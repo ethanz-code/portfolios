@@ -143,6 +143,17 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <ArrowUpRight class="h-3.5 w-3.5 opacity-55" aria-hidden="true" />
         </a>
         <button
+          class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium text-base-content/60 hover:text-base-content [&_svg]:h-3.5 [&_svg]:w-3.5"
+          type="button"
+          data-shortcut-add
+          data-new-tab-color-target="navigation"
+          aria-label={newTabConfig.settings.addShortcutLabel}
+          title={newTabConfig.settings.addShortcutLabel}
+        >
+          <Plus aria-hidden="true" />
+          <span class="max-sm:hidden">{newTabConfig.settings.addShortcutLabel}</span>
+        </button>
+        <button
           class="btn btn-ghost btn-sm h-9 min-h-9 px-3.5 text-[0.82rem] font-medium text-base-content/60 hover:text-base-content"
           type="button"
           data-config-open
@@ -525,6 +536,28 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     [data-shortcut-stack] .shortcut-item-shell {
       transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* 还没有分组时工具栏的添加入口先收起来——没有「加进哪个分组」的概念，空态里已有引导按钮 */
+    [data-new-tab-page][data-has-groups="false"] [data-shortcut-add] {
+      display: none;
+    }
+
+    /* 添加站点面板：从快捷方式区顶部落下来，缓动与全站同一条曲线 */
+    [data-new-tab-page] .shortcut-item-add-form {
+      animation: ntab-add-form-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes ntab-add-form-in {
+      from {
+        opacity: 0;
+        transform: translateY(-0.45rem);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* 弧形布局：拼接画布固定为底部弧形坞，吃满视口全宽 */
@@ -1128,13 +1161,49 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       document.documentElement.dataset.newTabContextMenuBound = "true";
     };
 
+    // 记住上次加进哪个分组，下次从工具栏进来默认还是它
+    let lastShortcutAddGroupTitle = "";
+
     const createShortcutAddForm = (group) => {
       const form = document.createElement("form");
       form.className = "shortcut-item-add-form col-span-full grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 border border-base-content/10 bg-base-100/90 p-2 backdrop-blur";
-      form.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加 item"}：${group.title}`);
 
       const fields = document.createElement("div");
       fields.className = "grid min-w-0 gap-1";
+
+      let targetGroup = group;
+      const syncAddTarget = () => {
+        form.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加站点"}：${targetGroup.title}`);
+        lastShortcutAddGroupTitle = targetGroup.title;
+      };
+
+      // 有多个分组时表单自带分组选择：入口在工具栏，得让用户看得见加进哪一组
+      if (newTabState.shortcutGroups.length > 1) {
+        const groupSelectLabel = document.createElement("label");
+        groupSelectLabel.className = "sr-only";
+        groupSelectLabel.textContent = "所属分组";
+
+        const groupSelect = document.createElement("select");
+        groupSelect.className = "select select-bordered select-xs h-8 min-h-8 w-full bg-base-100/80 text-xs";
+        groupSelect.setAttribute("aria-label", "所属分组");
+
+        newTabState.shortcutGroups.forEach((item, index) => {
+          const option = document.createElement("option");
+          option.value = String(index);
+          option.textContent = item.title;
+          groupSelect.append(option);
+        });
+
+        groupSelect.value = String(Math.max(0, newTabState.shortcutGroups.indexOf(group)));
+        groupSelect.addEventListener("change", () => {
+          targetGroup = newTabState.shortcutGroups[Number(groupSelect.value)] ?? targetGroup;
+          syncAddTarget();
+        });
+
+        fields.append(groupSelectLabel, groupSelect);
+      }
+
+      syncAddTarget();
 
       const titleLabel = document.createElement("label");
       titleLabel.className = "sr-only";
@@ -1248,7 +1317,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
         const logo = metadata?.logoUrl;
         const description = metadata?.description;
-        group.shortcuts.push({
+        targetGroup.shortcuts.push({
           title,
           url,
           ...(description ? { description } : {}),
@@ -1278,6 +1347,45 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       form.append(fields, submitButton, cancelButton);
       return form;
+    };
+
+    // 添加入口只有工具栏一处（原先挂在每组末尾、悬停才浮现的「+」瓦片已去掉）：
+    // 表单统一插到快捷方式区顶部，避免在弧形/随机画布里被绝对定位的瓦片压住。
+    const openShortcutAddForm = (group) => {
+      const stack = document.querySelector("[data-shortcut-stack]");
+
+      if (!(stack instanceof HTMLElement)) {
+        return;
+      }
+
+      // 入口常驻，重复点很容易：已经开着就只改目标分组 + 送回焦点，不叠第二份表单
+      const existing = stack.querySelector(".shortcut-item-add-form");
+
+      if (existing instanceof HTMLFormElement) {
+        const targetIndex = group ? newTabState.shortcutGroups.indexOf(group) : -1;
+        const existingSelect = existing.querySelector("select");
+
+        if (targetIndex >= 0 && existingSelect instanceof HTMLSelectElement) {
+          existingSelect.value = String(targetIndex);
+          existingSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        existing.scrollIntoView({ block: "nearest" });
+        focusFirstInput(existing);
+        return;
+      }
+
+      const groups = newTabState.shortcutGroups;
+      const target = group ?? groups.find((item) => item.title === lastShortcutAddGroupTitle) ?? groups[0];
+
+      if (!target) {
+        return;
+      }
+
+      const form = createShortcutAddForm(target);
+      stack.prepend(form);
+      form.scrollIntoView({ block: "nearest" });
+      focusFirstInput(form);
     };
 
     const createShortcutEditForm = (group, shortcut) => {
@@ -2281,7 +2389,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const tileWidth = tileEl.offsetWidth || 96;
       const tileHeight = tileEl.offsetHeight || 88;
       const width = itemsEl.clientWidth || tileWidth;
-      const addIndex = children.length - 1;
       const positions = [];
 
       if (mode === "stack") {
@@ -2301,7 +2408,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           positions.push({
             x: column * collapsedStepX,
             y: row * (tileHeight + rowGap),
-            rot: index === addIndex ? 0 : random() * 3 - 1.5,
+            rot: random() * 3 - 1.5,
             z: index + 1,
           });
 
@@ -2597,6 +2704,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         return;
       }
 
+      const shell = document.querySelector("[data-new-tab-page]");
+
+      if (shell instanceof HTMLElement) {
+        // 没有分组时工具栏的添加入口无处分派，交给空态引导（见 [data-has-groups] 样式）
+        shell.dataset.hasGroups = newTabState.shortcutGroups.length ? "true" : "false";
+      }
+
       const previousPlacements = new Map(shortcutPlacementMemory);
 
       shortcutPlacementMemory.clear();
@@ -2612,7 +2726,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const groupSections = [];
 
       newTabState.shortcutGroups.forEach((group, groupIndex) => {
-        let groupAddTile = null;
         const section = document.createElement("section");
         section.className = "shortcut-group group/section relative flex flex-col gap-2.5 py-1";
         section.setAttribute("aria-label", `${group.title}快捷方式`);
@@ -2640,11 +2753,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           newTabState.shortcutGroups.splice(currentGroupIndex, 1);
           persistConfigChange("已删除");
         };
-        const openShortcutAddForm = (fallbackElement) => {
-          const form = createShortcutAddForm(group);
-          fallbackElement.replaceWith(form);
-          focusFirstInput(form);
-        };
         const openGroupMenu = (event) => {
           openShortcutContextMenu({
             event,
@@ -2653,12 +2761,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             subtitle: "分组操作",
             actions: [
               {
-                label: "添加 item",
+                label: settingsLabels.addShortcutLabel ?? "添加站点",
                 icon: "plus",
                 onSelect: () => {
-                  if (groupAddTile?.isConnected) {
-                    openShortcutAddForm(groupAddTile);
-                  }
+                  openShortcutAddForm(group);
                 },
               },
               {
@@ -2806,12 +2912,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           }
         });
         items.addEventListener("contextmenu", (event) => {
-          if (event.target !== items || !groupAddTile?.isConnected) {
+          if (event.target !== items) {
             return;
           }
 
           event.preventDefault();
-          openShortcutAddForm(groupAddTile);
+          openShortcutAddForm(group);
         });
         // 堆叠模式：悬停整组向右铺开成完整间距，移开复位（牌堆位来自布局内存）
         items.addEventListener("pointerenter", () => {
@@ -3088,36 +3194,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           items.append(itemShell);
         });
 
-        const addShortcutButton = document.createElement("button");
-        addShortcutButton.className = "shortcut-item shortcut-item--add group/item relative flex h-[5.75rem] w-[5rem] flex-col items-center justify-center gap-[0.4rem] border border-dashed border-base-content/15 bg-transparent p-0 font-[inherit] text-base-content/35 opacity-0 transition-[transform,border-color,color,opacity] duration-200 hover:-translate-y-0.5 hover:border-base-content/35 hover:text-base-content/60 focus-visible:-translate-y-0.5 focus-visible:border-base-content/35 focus-visible:text-base-content/60 focus-visible:opacity-100 focus-visible:outline-none group-hover/section:opacity-100 max-sm:opacity-60 sm:h-[6.2rem] sm:w-[6rem]";
-        addShortcutButton.type = "button";
-        addShortcutButton.title = settingsLabels.addShortcutLabel ?? "添加 item";
-        addShortcutButton.setAttribute("aria-label", `${settingsLabels.addShortcutLabel ?? "添加 item"}：${group.title}`);
-        addShortcutButton.dataset.canvasKey = `add:${group.title}`;
-        addShortcutButton.dataset.canvasIndex = String(group.shortcuts.length);
-        const addShortcutIcon = document.createElement("span");
-        addShortcutIcon.className = "shortcut-item__icon relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden";
-        addShortcutIcon.setAttribute("aria-hidden", "true");
-        addShortcutIcon.innerHTML = getIconMarkup("plus");
-
-        const addShortcutTooltip = document.createElement("span");
-        addShortcutTooltip.className = "shortcut-item__tooltip shortcut-item__tooltip--action pointer-events-none absolute bottom-[calc(100%+0.6rem)] left-1/2 grid min-w-36 max-w-64 -translate-x-1/2 translate-y-1.5 gap-[0.18rem] border border-base-content/15 bg-base-100 px-3 py-2 text-base-content opacity-0 shadow-[0_8px_28px_rgba(0,0,0,0.10)] transition duration-150 after:absolute after:left-1/2 after:top-full after:h-2 after:w-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-base-content/15 after:bg-base-100 after:content-[''] group-hover/item:translate-y-0 group-hover/item:opacity-100 group-focus-visible/item:translate-y-0 group-focus-visible/item:opacity-100 max-sm:hidden";
-        addShortcutTooltip.role = "tooltip";
-        const addShortcutTooltipTitle = document.createElement("strong");
-        addShortcutTooltipTitle.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-[0.8rem] font-semibold";
-        addShortcutTooltipTitle.textContent = settingsLabels.addShortcutLabel ?? "添加 item";
-        const addShortcutTooltipText = document.createElement("small");
-        addShortcutTooltipText.className = "block overflow-hidden text-ellipsis whitespace-nowrap text-[0.72rem] leading-snug text-base-content/55";
-        addShortcutTooltipText.textContent = `插入到 ${group.title}`;
-        addShortcutTooltip.append(addShortcutTooltipTitle, addShortcutTooltipText);
-        addShortcutButton.append(addShortcutIcon, addShortcutTooltip);
-        addShortcutButton.addEventListener("click", () => {
-          openShortcutAddForm(addShortcutButton);
-        });
-
-        groupAddTile = addShortcutButton;
-        items.append(addShortcutButton);
-
         section.append(summary, items);
         groupSections.push(section);
       });
@@ -3169,11 +3245,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           }
 
           event.preventDefault();
-          const addButton = [...canvasItems.querySelectorAll(".shortcut-item--add")].pop();
-
-          if (addButton instanceof HTMLElement && addButton.isConnected) {
-            addButton.click();
-          }
+          openShortcutAddForm(lastGroup);
         });
 
         groupSections.forEach((section) => {
@@ -3606,6 +3678,20 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       });
     };
 
+    const bindShortcutAdd = () => {
+      const trigger = document.querySelector("[data-shortcut-add]");
+
+      if (!(trigger instanceof HTMLElement) || trigger.dataset.addBound === "true") {
+        return;
+      }
+
+      trigger.addEventListener("click", () => {
+        openShortcutAddForm();
+      });
+
+      trigger.dataset.addBound = "true";
+    };
+
     const bindLayoutSwitcher = () => {
       const switcher = document.querySelector("[data-layout-switcher]");
 
@@ -3982,6 +4068,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       renderAll();
       bindSearch();
       bindSettings();
+      bindShortcutAdd();
       bindLayoutSwitcher();
       bindHeaderCollapse();
       bindHeaderRestore();
