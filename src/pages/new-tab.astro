@@ -40,6 +40,37 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   showFooter={false}
   showFloatingThemeToggle={false}
 >
+  {/* 布局存在 localStorage、服务端不知道：入场动画要不要为弧形档降级，必须在 shell
+      首次渲染前定下来，所以这里内联读一次，把判据挂到 html 上（CSS 见样式块）。 */}
+  <script
+    is:inline
+    set:html={`(() => {
+  try {
+    const storedLayout = JSON.parse(window.localStorage.getItem(${JSON.stringify(newTabConfig.storageKey)}) ?? "null")?.shortcutLayout;
+    if (storedLayout) {
+      document.documentElement.dataset.newTabLayout = storedLayout;
+    }
+  } catch {
+    // 读不到就按默认网格处理
+  }
+})();`}
+  />
+
+  {/* 背景层挂 shell 外：shell 入场要整体缩放，fixed 元素留在里面会被拽进包含块。
+      外面这层 isolate 容器兜住负 z-index，否则会被 body 的不透明背景色盖住。 */}
+  <div class="pointer-events-none fixed inset-0 isolate z-0" aria-hidden="true" data-new-tab-background-host>
+    <div
+      class="pointer-events-none absolute inset-0 z-[-20] hidden bg-base-100"
+      aria-hidden="true"
+      data-new-tab-background-base
+    ></div>
+    <div
+      class="pointer-events-none absolute inset-0 -z-10 hidden bg-center bg-cover bg-no-repeat opacity-0 transition-opacity duration-200"
+      aria-hidden="true"
+      data-new-tab-background-layer
+    ></div>
+  </div>
+
   <section
     class="new-tab-shell relative isolate z-10 grid w-[min(100%,58rem)] gap-[clamp(1.5rem,3.5vh,2.25rem)] pt-[clamp(2rem,9vh,5.5rem)] max-sm:gap-7"
     aria-labelledby="new-tab-title"
@@ -47,17 +78,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     data-booting="true"
   >
     <h1 id="new-tab-title" class="sr-only">{newTabConfig.heading}</h1>
-
-    <div
-      class="pointer-events-none fixed inset-0 z-[-20] hidden bg-base-100"
-      aria-hidden="true"
-      data-new-tab-background-base
-    ></div>
-    <div
-      class="pointer-events-none fixed inset-0 -z-10 hidden bg-center bg-cover bg-no-repeat opacity-0 transition-opacity duration-200"
-      aria-hidden="true"
-      data-new-tab-background-layer
-    ></div>
 
     <div class="new-tab-toolbar flex items-end justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-3">
       <div class="new-tab-greeting-block grid content-start gap-1.5">
@@ -236,17 +256,18 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </form>
 
     <div class="shortcut-stack grid gap-6 max-sm:gap-5" aria-label="快捷网站" data-shortcut-stack></div>
-
-    <button
-      class="new-tab-restore btn btn-square btn-sm fixed right-4 top-4 z-[70] h-9 min-h-9 w-9 border border-base-content/15 bg-base-100/85 p-0 text-base-content/70 shadow-[0_6px_20px_rgba(0,0,0,0.10)] backdrop-blur hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
-      type="button"
-      aria-label="展开问候与搜索"
-      title="展开问候与搜索（按 / 唤回搜索）"
-      data-header-restore
-    >
-      <ChevronDown aria-hidden="true" />
-    </button>
   </section>
+
+  {/* 恢复按钮同样移出 shell：它是 fixed，留在里面会被 shell 的入场缩放当成包含块。 */}
+  <button
+    class="new-tab-restore btn btn-square btn-sm fixed right-4 top-4 z-[70] h-9 min-h-9 w-9 border border-base-content/15 bg-base-100/85 p-0 text-base-content/70 shadow-[0_6px_20px_rgba(0,0,0,0.10)] backdrop-blur hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+    type="button"
+    aria-label="展开问候与搜索"
+    title="展开问候与搜索（按 / 唤回搜索）"
+    data-header-restore
+  >
+    <ChevronDown aria-hidden="true" />
+  </button>
 
   <div class="new-tab-config fixed inset-0 z-[80] hidden pointer-events-none opacity-0 transition-opacity duration-200" data-config-drawer>
     <button class="new-tab-config__backdrop absolute inset-0 border-0 bg-base-content/20 opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
@@ -424,6 +445,33 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       transition: padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    /* 刷新/首次加载入场：整页像窗口打开一样「突」到眼前（缩放是 new-tab 的语言）。
+       只做 scale 与明暗、不做位移：中间态是缩小，不会把文档顶高闪滚动条，结束即释放 transform。
+       背景层与恢复按钮已移出 shell，不会被当成 fixed 的包含块。 */
+    [data-new-tab-page].new-tab-shell {
+      animation: ntab-page-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+
+    @keyframes ntab-page-in {
+      from {
+        opacity: 0;
+        transform: scale(0.94);
+      }
+    }
+
+    /* 弧形布局的瓦片钉在 fixed 坞上（贴着屏幕底部）：shell 一旦有缩放，坞会被当成包含块
+       参照拽进内容区。这一档退化为纯淡入，缩放交给坞内瓦片自己的弹入。
+       判据挂在 html 上——布局存 localStorage，由 shell 前的内联脚本在首帧前写入。 */
+    html[data-new-tab-layout="ring"] [data-new-tab-page].new-tab-shell {
+      animation-name: ntab-page-fade;
+    }
+
+    @keyframes ntab-page-fade {
+      from {
+        opacity: 0;
+      }
+    }
+
     /* 首屏 padding 从展开态滑到收起态要 0.45s，而快捷方式正好在这条过渡刚开始时插入，
        被撑在旧 padding 上把整页顶高约 60px，右侧就闪出滚动条。首帧先不起过渡，
        等布局落定再放行——入场 keyframe 动画不受影响，只有 padding 补间在首屏被跳过。 */
@@ -491,11 +539,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     }
 
     [data-new-tab-page] [data-header-collapse] svg,
-    [data-new-tab-page] .new-tab-restore svg {
+    html:has([data-new-tab-page]) .new-tab-restore svg {
       transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    [data-new-tab-page] .new-tab-restore {
+    /* 恢复按钮已移出 shell（fixed，免疫入场缩放的包含块），选择器改挂 html:has */
+    html:has([data-new-tab-page]) .new-tab-restore {
       opacity: 0;
       visibility: hidden;
       transform: translateY(-0.4rem);
@@ -556,7 +605,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       border-color: transparent;
     }
 
-    [data-new-tab-page][data-header-state="suspended"] .new-tab-restore {
+    html:has([data-new-tab-page][data-header-state="suspended"]) .new-tab-restore {
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
@@ -2751,6 +2800,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         // 没有分组时工具栏的添加入口无处分派，交给空态引导（见 [data-has-groups] 样式）
         shell.dataset.hasGroups = newTabState.shortcutGroups.length ? "true" : "false";
       }
+
+      // 入场动画的弧形降级判据挂在 html 上（首帧前由内联脚本写入），切换布局后同步保持一致
+      document.documentElement.dataset.newTabLayout = newTabState.shortcutLayout;
 
       const previousPlacements = new Map(shortcutPlacementMemory);
 
