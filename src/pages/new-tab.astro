@@ -445,9 +445,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       transition: padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    /* 刷新/首次加载入场：整页像窗口打开一样「突」到眼前（缩放是 new-tab 的语言）。
-       只做 scale 与明暗、不做位移：中间态是缩小，不会把文档顶高闪滚动条，结束即释放 transform。
-       背景层与恢复按钮已移出 shell，不会被当成 fixed 的包含块。 */
+    /* 刷新/首次加载入场：整页像窗口打开一样「突」到眼前（缩放是 new-tab 的语言），
+       并带一点自下而上的上浮。缩放收底边、上浮压顶边，中间态不会把文档顶高闪滚动条，
+       结束即释放 transform。背景层与恢复按钮已移出 shell，不会被当成 fixed 的包含块。 */
     [data-new-tab-page].new-tab-shell {
       animation: ntab-page-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     }
@@ -455,20 +455,55 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     @keyframes ntab-page-in {
       from {
         opacity: 0;
-        transform: scale(0.94);
+        transform: translateY(0.9rem) scale(0.94);
       }
     }
 
-    /* 弧形布局的瓦片钉在 fixed 坞上（贴着屏幕底部）：shell 一旦有缩放，坞会被当成包含块
-       参照拽进内容区。这一档退化为纯淡入，缩放交给坞内瓦片自己的弹入。
-       判据挂在 html 上——布局存 localStorage，由 shell 前的内联脚本在首帧前写入。 */
-    html[data-new-tab-layout="ring"] [data-new-tab-page].new-tab-shell {
-      animation-name: ntab-page-fade;
+    /* 背景与页面同一口气入场：轻微缩放 + 淡入（宿主在 shell 外，transform 动画不影响任何 fixed 布局）。
+       没配背景图时宿主里只有同色兜底层，动画无感、无副作用。 */
+    [data-new-tab-background-host] {
+      animation: ntab-bg-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     }
 
-    @keyframes ntab-page-fade {
+    @keyframes ntab-bg-in {
       from {
         opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+
+    /* 弧形布局的瓦片钉在 fixed 坞上（贴着屏幕底部）：shell 一旦有 transform，坞会被当成包含块
+       参照拽进内容区，整页缩放/上浮会破坏布局。这一档把动效拆到壳内区块自己做：
+       工具栏/搜索上浮淡入、弧形坞自身从底部略沉淡入、缩放交给坞内瓦片自己的弹入。
+       判据挂在 html 上——布局存 localStorage，由 shell 前的内联脚本在首帧前写入。 */
+    html[data-new-tab-layout="ring"] [data-new-tab-page].new-tab-shell {
+      animation: none;
+    }
+
+    html[data-new-tab-layout="ring"] [data-new-tab-page] .new-tab-toolbar,
+    html[data-new-tab-layout="ring"] [data-new-tab-page] .new-tab-search {
+      animation: ntab-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+
+    html[data-new-tab-layout="ring"] [data-new-tab-page] .new-tab-search {
+      animation-delay: 60ms;
+    }
+
+    @keyframes ntab-rise {
+      from {
+        opacity: 0;
+        transform: translateY(0.7rem);
+      }
+    }
+
+    html[data-new-tab-layout="ring"] [data-new-tab-page] .new-tab-arc-dock {
+      animation: ntab-dock-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+
+    @keyframes ntab-dock-in {
+      from {
+        opacity: 0;
+        transform: translateY(1.4rem);
       }
     }
 
@@ -858,9 +893,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       color: rgba(17, 24, 39, 0.6) !important;
     }
 
-    /* 刷新入场：快捷方式瓦片逐个弹出（序号 × 24ms 错峰，上限 360ms），带轻微缩放——
-       new-tab 的"窗"感来源，别改成整体上浮。backwards 只在动画期间生效，
-       结束后交还给常规级联，避免盖掉 FLIP 与收起态的行内 transform。 */
+    /* 刷新入场：快捷方式瓦片逐个弹出（序号 × 24ms 错峰，上限 360ms），自下而上浮到位并带轻微缩放——
+       new-tab 的"窗"感来源。backwards 只在动画期间生效，结束后交还给常规级联，
+       避免盖掉 FLIP 与收起态的行内 transform。 */
     [data-shortcut-stack] .ntab-pop > .shortcut-item,
     [data-shortcut-stack] .shortcut-item.ntab-pop {
       animation: ntab-pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
@@ -870,7 +905,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     @keyframes ntab-pop-in {
       from {
         opacity: 0;
-        transform: translateY(0.7rem) scale(0.94);
+        transform: translateY(0.9rem) scale(0.94);
       }
     }
 
