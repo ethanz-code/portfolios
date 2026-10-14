@@ -699,8 +699,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       --ntab-card-contact: rgba(15, 23, 42, 0.05);
       --ntab-card-ambient: rgba(15, 23, 42, 0.1);
       --ntab-card-lift: 1;
-      --ntab-card-plate: rgba(255, 255, 255, 0.34);
-      --ntab-card-plate-hover: rgba(255, 255, 255, 0.55);
       --ntab-card-focus: rgba(15, 23, 42, 0.55);
       --ntab-card-label-shadow: none;
 
@@ -736,17 +734,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       transition-duration: 0.09s;
     }
 
-    /* 图标底板：favicon 落在一块嵌在卡面上的底座上，hover 时底板提亮并轻微放大 */
+    /* 图标不加底板：favicon 真实透出（用户定稿），hover 时只放大图标本身 */
     [data-shortcut-stack] .shortcut-item__icon {
-      background-color: var(--ntab-card-plate);
-      transition:
-        background-color 0.2s ease,
-        transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      background-color: transparent;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     [data-shortcut-stack] .shortcut-item:hover .shortcut-item__icon,
     [data-shortcut-stack] .shortcut-item:focus-visible .shortcut-item__icon {
-      background-color: var(--ntab-card-plate-hover);
       transform: scale(1.05);
     }
 
@@ -762,8 +757,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       --ntab-card-edge: rgba(255, 255, 255, 0.1);
       --ntab-card-contact: rgba(0, 0, 0, 0);
       --ntab-card-ambient: rgba(0, 0, 0, 0);
-      --ntab-card-plate: rgba(255, 255, 255, 0.11);
-      --ntab-card-plate-hover: rgba(255, 255, 255, 0.16);
       --ntab-card-focus: rgba(255, 255, 255, 0.6);
     }
 
@@ -782,8 +775,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       --ntab-card-edge: rgba(255, 255, 255, 0.11);
       --ntab-card-contact: rgba(8, 9, 12, 0.16);
       --ntab-card-ambient: rgba(8, 9, 12, 0.26);
-      --ntab-card-plate: rgba(255, 255, 255, 0.13);
-      --ntab-card-plate-hover: rgba(255, 255, 255, 0.18);
       --ntab-card-focus: rgba(8, 9, 12, 0.6);
     }
 
@@ -803,8 +794,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       --ntab-card-edge: rgba(255, 255, 255, 0.12);
       --ntab-card-contact: rgba(0, 0, 0, 0);
       --ntab-card-ambient: rgba(0, 0, 0, 0);
-      --ntab-card-plate: rgba(255, 255, 255, 0.12);
-      --ntab-card-plate-hover: rgba(255, 255, 255, 0.17);
       --ntab-card-focus: rgba(255, 255, 255, 0.6);
     }
 
@@ -829,8 +818,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       --ntab-card-edge: rgba(255, 255, 255, 0.16);
       --ntab-card-contact: rgba(0, 0, 0, 0.28);
       --ntab-card-ambient: rgba(0, 0, 0, 0.34);
-      --ntab-card-plate: rgba(255, 255, 255, 0.14);
-      --ntab-card-plate-hover: rgba(255, 255, 255, 0.2);
       --ntab-card-focus: rgba(255, 255, 255, 0.65);
       --ntab-card-label-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     }
@@ -850,8 +837,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       --ntab-card-edge: rgba(255, 255, 255, 0.9);
       --ntab-card-contact: rgba(15, 23, 42, 0.08);
       --ntab-card-ambient: rgba(15, 23, 42, 0.18);
-      --ntab-card-plate: rgba(255, 255, 255, 0.5);
-      --ntab-card-plate-hover: rgba(255, 255, 255, 0.68);
       --ntab-card-focus: rgba(15, 23, 42, 0.6);
     }
 
@@ -1392,10 +1377,24 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const createShortcutAddForm = (group) => {
       const form = document.createElement("form");
-      form.className = "shortcut-item-add-form col-span-full grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-1.5 border border-base-content/10 bg-base-100/90 p-2 backdrop-blur";
+      form.className = "shortcut-item-add-form col-span-full grid w-full max-w-[min(100%,24rem)] gap-3 border border-base-content/10 bg-base-100/95 p-3.5 shadow-[0_10px_36px_rgba(0,0,0,0.12)] backdrop-blur";
+
+      // 标题栏：一句话说明 + 关闭钮，让这块面板自己会说话
+      const header = document.createElement("div");
+      header.className = "flex items-center justify-between gap-2";
+      const heading = document.createElement("p");
+      heading.className = "m-0 text-[0.82rem] font-semibold leading-tight";
+      heading.textContent = settingsLabels.addShortcutLabel ?? "添加站点";
+      const dismissButton = document.createElement("button");
+      dismissButton.className = "btn btn-square btn-ghost btn-xs h-7 min-h-7 w-7 p-0 text-base-content/50 transition hover:text-base-content";
+      dismissButton.type = "button";
+      dismissButton.setAttribute("aria-label", "取消添加");
+      dismissButton.title = "取消";
+      dismissButton.innerHTML = getIconMarkup("close");
+      header.append(heading, dismissButton);
 
       const fields = document.createElement("div");
-      fields.className = "grid min-w-0 gap-1";
+      fields.className = "grid min-w-0 gap-2.5";
 
       let targetGroup = group;
       const syncAddTarget = () => {
@@ -1410,7 +1409,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         groupSelectLabel.textContent = "所属分组";
 
         const groupSelect = document.createElement("select");
-        groupSelect.className = "select select-bordered select-xs h-8 min-h-8 w-full bg-base-100/80 text-xs";
+        groupSelect.className = "select select-bordered select-sm h-9 min-h-9 w-full bg-base-100/80 text-xs";
         groupSelect.setAttribute("aria-label", "所属分组");
 
         newTabState.shortcutGroups.forEach((item, index) => {
@@ -1431,51 +1430,97 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       syncAddTarget();
 
-      const titleLabel = document.createElement("label");
-      titleLabel.className = "sr-only";
-      titleLabel.textContent = settingsLabels.shortcutTitleLabel ?? "名称";
+      // 图标预览：地址解析出 logo 前先显示站点首字母，拿到后真实透出 favicon
+      const preview = document.createElement("div");
+      preview.className = "flex items-center gap-2.5";
+      const previewIcon = document.createElement("span");
+      previewIcon.className = "shortcut-item__icon relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-md border border-base-content/10 bg-base-200/60";
+      previewIcon.setAttribute("aria-hidden", "true");
+      const previewImage = document.createElement("img");
+      previewImage.className = "hidden h-full w-full object-contain p-[0.3rem]";
+      previewImage.alt = "";
+      previewImage.referrerPolicy = "no-referrer";
+      const previewInitial = document.createElement("span");
+      previewInitial.className = "text-[0.95rem] font-bold leading-none text-base-content/60";
+      previewInitial.textContent = "?";
+      previewIcon.append(previewImage, previewInitial);
+      const previewText = document.createElement("div");
+      previewText.className = "grid min-w-0 gap-0.5";
+      const previewTitle = document.createElement("p");
+      previewTitle.className = "m-0 truncate text-[0.82rem] font-medium leading-tight";
+      previewTitle.textContent = "新站点";
+      const previewHint = document.createElement("p");
+      previewHint.className = "m-0 truncate text-[0.72rem] leading-tight text-base-content/45";
+      previewHint.textContent = "填地址后自动识别名称与图标";
+      previewText.append(previewTitle, previewHint);
+      preview.append(previewIcon, previewText);
+      fields.append(preview);
+
+      const fieldRow = (labelText, inputEl) => {
+        const row = document.createElement("label");
+        row.className = "grid min-w-0 gap-1";
+        const rowLabel = document.createElement("span");
+        rowLabel.className = "text-[0.72rem] font-medium text-base-content/55";
+        rowLabel.textContent = labelText;
+        row.append(rowLabel, inputEl);
+        return row;
+      };
+
       const titleInput = document.createElement("input");
-      titleInput.className = "input input-bordered input-xs h-8 min-w-0 bg-base-100/80 text-xs";
+      titleInput.className = "input input-bordered input-sm h-9 min-h-9 w-full min-w-0 bg-base-100/80 text-xs";
       titleInput.type = "text";
       titleInput.autocomplete = "off";
       titleInput.setAttribute("aria-label", settingsLabels.shortcutTitleLabel ?? "名称");
       titleInput.placeholder = settingsLabels.shortcutTitleLabel ?? "名称";
 
-      const urlLabel = document.createElement("label");
-      urlLabel.className = "sr-only";
-      urlLabel.textContent = settingsLabels.shortcutUrlLabel ?? "地址";
       const urlInput = document.createElement("input");
-      urlInput.className = "input input-bordered input-xs h-8 min-w-0 bg-base-100/80 text-xs";
+      urlInput.className = "input input-bordered input-sm h-9 min-h-9 w-full min-w-0 bg-base-100/80 text-xs";
       urlInput.type = "text";
       urlInput.inputMode = "url";
       urlInput.autocomplete = "off";
       urlInput.setAttribute("aria-label", settingsLabels.shortcutUrlLabel ?? "地址");
-      urlInput.placeholder = settingsLabels.shortcutUrlLabel ?? "地址";
+      urlInput.placeholder = "example.com";
+
+      fields.append(fieldRow(settingsLabels.shortcutTitleLabel ?? "名称", titleInput));
+      fields.append(fieldRow(settingsLabels.shortcutUrlLabel ?? "地址", urlInput));
 
       const error = document.createElement("p");
       error.className = "hidden text-[0.72rem] leading-snug text-error";
 
-      fields.append(titleLabel, titleInput, urlLabel, urlInput, error);
-
-      const submitButton = createIconButton("创建", "check", "text-success/75 hover:text-success");
+      const footer = document.createElement("div");
+      footer.className = "flex items-center justify-end gap-1.5";
+      const cancelButton = document.createElement("button");
+      cancelButton.className = "btn btn-ghost btn-sm h-8 min-h-8 px-3 text-xs text-base-content/60 transition hover:text-base-content";
+      cancelButton.type = "button";
+      cancelButton.textContent = "取消";
+      const submitButton = document.createElement("button");
+      submitButton.className = "btn btn-sm h-8 min-h-8 border-0 bg-base-content px-4 text-xs text-base-100 transition hover:bg-base-content/85 focus-visible:bg-base-content/85";
       submitButton.type = "submit";
-      const cancelButton = createIconButton("取消", "close");
-      let shortcutMetadataRequestId = 0;
-      let shortcutMetadataTimer = 0;
-      let shortcutMetadata = null;
+      submitButton.textContent = "添加";
+      footer.append(cancelButton, submitButton);
 
       const applyShortcutMetadata = (metadata) => {
         shortcutMetadata = metadata;
 
-        if (normalizeText(titleInput.value)) {
-          return;
+        // 图标预览跟随解析结果
+        const logoUrl = metadata?.logoUrl ?? metadata?.candidates?.[0] ?? "";
+        if (logoUrl) {
+          previewImage.src = logoUrl;
+          previewImage.classList.remove("hidden");
+          previewInitial.classList.add("hidden");
         }
 
-        const suggestedTitle = metadata?.title || getShortcutHostname(normalizeShortcutUrlInput(urlInput.value));
+        // 预览标题同步（用户已填名称时不抢）
+        if (!normalizeText(titleInput.value)) {
+          const suggestedTitle = metadata?.title || getShortcutHostname(normalizeShortcutUrlInput(urlInput.value));
 
-        if (suggestedTitle) {
-          titleInput.value = suggestedTitle;
-          clearInlineFormError(error);
+          if (suggestedTitle) {
+            titleInput.value = suggestedTitle;
+            previewTitle.textContent = suggestedTitle;
+            clearInlineFormError(error);
+          }
+        } else {
+          previewTitle.textContent = normalizeText(titleInput.value);
         }
       };
 
@@ -1504,8 +1549,17 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         shortcutMetadataTimer = window.setTimeout(syncShortcutMetadata, 550);
       };
 
-      cancelButton.addEventListener("click", () => {
+      const dismiss = () => {
         renderShortcutGroups();
+      };
+
+      dismissButton.addEventListener("click", dismiss);
+      cancelButton.addEventListener("click", dismiss);
+
+      titleInput.addEventListener("input", () => {
+        previewTitle.textContent = normalizeText(titleInput.value) || "新站点";
+        previewInitial.textContent = getShortcutInitial(titleInput.value) || "?";
+        clearInlineFormError(error);
       });
 
       form.addEventListener("submit", async (event) => {
@@ -1553,25 +1607,40 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       });
 
       [titleInput, urlInput].forEach((input) => {
-        input.addEventListener("input", () => {
-          clearInlineFormError(error);
-        });
         input.addEventListener("keydown", (event) => {
           if (event.key === "Escape") {
             event.preventDefault();
-            renderShortcutGroups();
+            dismiss();
           }
         });
       });
 
+      // 地址框回车：先去补名称（元数据还没到就停在原地），别直接提交半成品
+      urlInput.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") {
+          return;
+        }
+        const url = normalizeShortcutUrlInput(urlInput.value);
+
+        if (url && isValidShortcutUrl(url) && !normalizeText(titleInput.value)) {
+          event.preventDefault();
+          titleInput.focus();
+        }
+      });
+
       urlInput.addEventListener("input", () => {
         shortcutMetadata = null;
+        previewImage.classList.add("hidden");
+        previewImage.removeAttribute("src");
+        previewInitial.classList.remove("hidden");
+        previewInitial.textContent = "?";
+        previewHint.textContent = "填地址后自动识别名称与图标";
         scheduleShortcutMetadataSync();
       });
       urlInput.addEventListener("blur", syncShortcutMetadata);
       urlInput.addEventListener("change", syncShortcutMetadata);
 
-      form.append(fields, submitButton, cancelButton);
+      form.append(header, fields, error, footer);
       return form;
     };
 
