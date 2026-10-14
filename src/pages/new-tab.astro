@@ -409,18 +409,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       padding-bottom: 0;
     }
 
-    /* 少数矮视口内容确实放不下时仍要滚动：提前占住滚动条槽位，避免它出现/消失时整页横移。 */
-    html:has([data-new-tab-page]) {
-      scrollbar-gutter: stable;
-    }
-
-    /* 入场动画让快捷方式从下方浮上来（translateY 0.7rem），中间态把文档底部撑高约 160px，
-       在常见笔记本视口下足以让滚动条闪一下。这里只剪掉纵向的瞬时溢出，留 2rem 余量，
-       hover 抬升与 tooltip 都在余量内，不受影响。 */
-    [data-new-tab-page].new-tab-shell {
-      overflow-y: clip;
-      overflow-clip-margin: 2rem;
-    }
+    /* 滚动条交给浏览器默认行为：内容放不下才出现、能滚，放得下就不出现。
+       不要用 scrollbar-gutter 固定占槽，也不要 overflow: clip 剪掉溢出内容——
+       那会造成"占着滚动条区域却不能滚"。 */
 
     /* new-tab 动效（全局样式，绕过 Tailwind purge）：布局补间 / 入场 / 问候与搜索收起、挂起 */
     [data-new-tab-page].new-tab-shell {
@@ -717,45 +708,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       color: rgba(17, 24, 39, 0.6) !important;
     }
 
-    /* 刷新入场：问候/搜索/快捷方式三块作为一体上浮，不再让每个 item 各弹各的。
-       backwards 只在动画期间生效，结束后交还给常规级联，避免盖掉 FLIP 与收起态的行内 transform。 */
-    @keyframes ntab-shell-in {
-      from {
-        opacity: 0;
-        transform: translateY(1.15rem);
-      }
-
-      to {
-        opacity: 1;
-        transform: none;
-      }
-    }
-
-    [data-new-tab-page] > .new-tab-toolbar,
-    [data-new-tab-page] > .new-tab-search,
-    [data-new-tab-page] > [data-shortcut-stack] {
-      animation: ntab-shell-in 0.52s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-    }
-
-    /* 弧形坞固定在视口底部：容器一旦有 transform 就会变成它的包含块，把坞拽进窄栏。
-       这一档只做明暗过渡，位移交给坞内部元素自己完成。 */
-    [data-new-tab-page][data-shortcut-layout="ring"] > [data-shortcut-stack] {
-      animation-name: ntab-shell-fade;
-    }
-
-    @keyframes ntab-shell-fade {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
+    /* 刷新入场：快捷方式瓦片逐个弹出（序号 × 24ms 错峰，上限 360ms），带轻微缩放——
+       new-tab 的"窗"感来源，别改成整体上浮。backwards 只在动画期间生效，
+       结束后交还给常规级联，避免盖掉 FLIP 与收起态的行内 transform。 */
     [data-shortcut-stack] .ntab-pop > .shortcut-item,
     [data-shortcut-stack] .shortcut-item.ntab-pop {
       animation: ntab-pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+      animation-delay: var(--ntab-delay, 0ms);
     }
 
     @keyframes ntab-pop-in {
@@ -2642,6 +2601,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
 
       const mode = newTabState.shortcutLayout;
+      const stagger = animate && previousPlacements.size === 0;
+      let globalIndex = 0;
 
       stack.querySelectorAll(".shortcut-group__items").forEach((itemsEl) => {
         if (!(itemsEl instanceof HTMLElement)) {
@@ -2664,6 +2625,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             return;
           }
 
+          const delay = stagger ? Math.min(globalIndex * 24, 360) : 0;
+
+          globalIndex += 1;
+          child.style.setProperty("--ntab-delay", `${delay}ms`);
+
           const previous = animate ? previousPlacements.get(key) : undefined;
 
           if (previous) {
@@ -2685,9 +2651,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
             } else {
               child.style.transform = `translate(${target.x}px, ${target.y}px) rotate(${target.rot}deg)`;
             }
-          } else if (animate && previousPlacements.size > 0 && !previousPlacements.has(key)) {
+          } else if (animate && !previousPlacements.has(key)) {
             child.classList.add("ntab-pop");
-            window.setTimeout(() => child.classList.remove("ntab-pop"), 620);
+            window.setTimeout(() => child.classList.remove("ntab-pop"), delay + 620);
           }
         });
 
@@ -2784,7 +2750,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       if (shell instanceof HTMLElement) {
         // 没有分组时工具栏的添加入口无处分派，交给空态引导（见 [data-has-groups] 样式）
         shell.dataset.hasGroups = newTabState.shortcutGroups.length ? "true" : "false";
-        shell.dataset.shortcutLayout = newTabState.shortcutLayout;
       }
 
       const previousPlacements = new Map(shortcutPlacementMemory);
