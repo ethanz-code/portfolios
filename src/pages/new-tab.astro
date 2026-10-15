@@ -2143,7 +2143,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const canProxyUrl = (url) => {
       try {
-        const { hostname } = new URL(url);
+        const { protocol, hostname } = new URL(url);
+
+        // 非 http(s) 地址（如 data: 内置图标）不要往代理送
+        if (protocol !== "http:" && protocol !== "https:") {
+          return false;
+        }
+
         const normalizedHost = hostname.toLowerCase();
 
         if (
@@ -2243,6 +2249,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         "/favicon.svg",
         "/favicon.png",
         "/favicon.ico",
+        "/public/favicon.png",
         "/logo.svg",
         "/logo.png",
         "/icon.svg",
@@ -2269,7 +2276,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       const googleFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=64`;
       const duckDuckGoFavicon = `https://icons.duckduckgo.com/ip3/${hostname}.ico`;
-      const directFavicon = `https://${hostname}/favicon.ico`;
+      // hostname 不含端口：非默认端口站点（如面板 :15660）要补回协议与端口，否则会打到默认端口上
+      const faviconOrigin = originUrl ? new URL(originUrl) : null;
+      const directFavicon = faviconOrigin
+        ? `${faviconOrigin.protocol}//${hostname}${faviconOrigin.port ? `:${faviconOrigin.port}` : ""}/favicon.ico`
+        : "";
 
       pushLogoCandidate(candidates, googleFavicon);
       pushLogoCandidate(candidates, duckDuckGoFavicon);
@@ -2305,6 +2316,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     const isLoadingPageTitle = (value) =>
       /^loading[.\s]*$/i.test(value) || /^(加载中|正在加载|请稍候)[.。\s]*$/.test(value);
 
+    // 1Panel 的图标由前端运行时注入（默认 /public/favicon.png），静态 HTML 里没有图标标签；
+    // 没带安全入口时会收到守卫页，页面里有这条固定命令文案，可据此认出 1Panel 并直接用内置图标。
+    const isOnePanelGuardPage = (html) => html.includes("1pctl user-info");
+
     const collectLogoUrlsFromHtml = (html, baseUrl) => {
       const candidates = [];
       const parser = new DOMParser();
@@ -2315,7 +2330,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         doc.querySelector('meta[name="application-name"]')?.getAttribute("content") ??
         "",
       ));
-      const resolvedTitle = [pageTitle, fallbackTitle].find(
+      const isGuardPage = isOnePanelGuardPage(html);
+      const resolvedTitle = (isGuardPage ? [] : [pageTitle, fallbackTitle]).find(
         (value) => value && !isLoadingPageTitle(value),
       ) ?? "";
       const iconSelector = [
@@ -2362,57 +2378,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       });
 
       return {
-        candidates,
+        candidates: isGuardPage ? [onePanelLogoDataUrl, ...candidates] : candidates,
         title: resolvedTitle,
         description: normalizeText(
           doc.querySelector('meta[name="description"]')?.getAttribute("content") ??
           doc.querySelector('meta[property="og:description"]')?.getAttribute("content"),
         ),
-      };
-    };
-
-    const collectAssetScriptUrlsFromHtml = (html, baseUrl) => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      const urls = [];
-      const selector = [
-        "script[src]",
-        'link[rel="modulepreload"][href]',
-        'link[rel="preload"][as="script"][href]',
-      ].join(",");
-
-      doc.querySelectorAll(selector).forEach((element) => {
-        const rawUrl = element.getAttribute("src") ?? element.getAttribute("href");
-        const scriptUrl = resolveShortcutAssetUrl(rawUrl, baseUrl);
-
-        if (scriptUrl && !urls.includes(scriptUrl)) {
-          urls.push(scriptUrl);
-        }
-      });
-
-      return urls;
-    };
-
-    const collectBundledLogoUrls = async (html, baseUrl, signal) => {
-      const scriptUrls = collectAssetScriptUrlsFromHtml(html, baseUrl).slice(0, 2);
-      const candidates = [];
-
-      for (const scriptUrl of scriptUrls) {
-        try {
-          const response = await fetch(getProxyUrl(scriptUrl), { signal });
-          const script = response.ok ? await response.text() : "";
-
-          if (/assets\/js\/1panel-(?:menu-)?logo-[\w-]+\.js/.test(script)) {
-            candidates.push(onePanelLogoDataUrl);
-          }
-        } catch {
-          // Ignore optional bundle probing and keep the regular favicon chain.
-        }
-      }
-
-      return {
-        logoUrl: candidates[0],
-        candidates: candidates.filter((url, index, items) => items.indexOf(url) === index),
       };
     };
 
@@ -2492,16 +2463,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           }
 
           const discovered = collectLogoUrlsFromHtml(html, shortcut.url);
-          const bundled = discovered.candidates.length
-            ? { candidates: [] }
-            : await collectBundledLogoUrls(html, shortcut.url, controller.signal);
-          if (bundled.logoUrl) {
-            discovered.logoUrl = bundled.logoUrl;
-          }
-          discovered.candidates = [
-            ...discovered.candidates,
-            ...bundled.candidates,
-          ].filter((url, index, items) => url && items.indexOf(url) === index);
           discovered.logoUrl = discovered.logoUrl ?? discovered.candidates[0] ?? "";
 
           if (!discovered.candidates.length && !discovered.title && !discovered.description) {
