@@ -7,6 +7,7 @@ import {
   Dices,
   EllipsisVertical,
   GripVertical,
+  Info,
   Layers,
   LayoutGrid,
   PencilLine,
@@ -215,6 +216,17 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         <button
           class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
           type="button"
+          title="注意事项"
+          aria-label="注意事项"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          data-notes-open
+        >
+          <Info aria-hidden="true" />
+        </button>
+        <button
+          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+          type="button"
           title="收起问候"
           aria-label="收起问候"
           aria-expanded="true"
@@ -394,6 +406,49 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         <button class="btn btn-sm btn-ghost" type="button" data-config-reset>
           {newTabConfig.settings.resetLabel}
         </button>
+      </div>
+    </aside>
+  </div>
+
+  {/* 注意事项弹层：讲清数据存在哪、图标怎么来、缓存怎么清——都是用户遇到
+     「图标不出来/数据丢了」时真正需要的那几句话，顺带把清理指令写成能直接粘贴的。 */}
+  <div class="new-tab-notes fixed inset-0 z-[85] hidden pointer-events-none opacity-0 transition-opacity duration-200" data-notes-panel>
+    <button class="new-tab-notes__backdrop absolute inset-0 border-0 bg-base-content/20 opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.notesPanelTitle} data-notes-close></button>
+    <aside class="new-tab-notes__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] border-l border-base-content/10 bg-base-100 shadow-[-16px_0_48px_rgba(0,0,0,0.10)] translate-x-full transition-transform duration-200" role="dialog" aria-modal="true" aria-label={newTabConfig.settings.notesPanelTitle}>
+      <div class="new-tab-notes__header flex items-center justify-between gap-3 border-b border-base-content/10 p-4">
+        <div class="flex min-w-0 items-center gap-2.5">
+          <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-base-content/[0.06] text-base-content/55 [&_svg]:h-4 [&_svg]:w-4">
+            <Info aria-hidden="true" />
+          </span>
+          <h2 class="m-0 text-[0.95rem] font-bold leading-tight">{newTabConfig.settings.notesPanelTitle}</h2>
+        </div>
+        <button class="btn btn-square btn-ghost btn-sm" type="button" aria-label={newTabConfig.settings.closeLabel} data-notes-close>
+          <X class="h-4 w-4" aria-hidden="true" />
+        </button>
+      </div>
+
+      <div class="new-tab-notes__body grid content-start gap-5 overflow-y-auto p-4 text-[0.8rem] leading-relaxed text-base-content/75">
+        <section class="grid gap-1.5">
+          <h3 class="m-0 text-[0.82rem] font-semibold text-base-content">{newTabConfig.settings.notesLocalTitle}</h3>
+          <p class="m-0">{newTabConfig.settings.notesLocalBody}</p>
+        </section>
+
+        <section class="grid gap-1.5">
+          <h3 class="m-0 text-[0.82rem] font-semibold text-base-content">{newTabConfig.settings.notesLogoTitle}</h3>
+          <p class="m-0">{newTabConfig.settings.notesLogoBody}</p>
+        </section>
+
+        <section class="grid gap-1.5">
+          <h3 class="m-0 text-[0.82rem] font-semibold text-base-content">{newTabConfig.settings.notesLogoCacheTitle}</h3>
+          <p class="m-0">{newTabConfig.settings.notesLogoCacheBody}</p>
+        </section>
+
+        <section class="grid gap-2">
+          <h3 class="m-0 text-[0.82rem] font-semibold text-base-content">{newTabConfig.settings.notesRecoveryTitle}</h3>
+          <p class="m-0">{newTabConfig.settings.notesRecoveryBody}</p>
+          <p class="m-0 text-[0.72rem] leading-snug text-base-content/50">{newTabConfig.settings.notesCommandLabel}</p>
+          <pre class="new-tab-notes__code m-0 overflow-x-auto border border-base-content/10 bg-base-200/40 p-3 text-[0.72rem] leading-relaxed" data-notes-command></pre>
+        </section>
       </div>
     </aside>
   </div>
@@ -4116,6 +4171,119 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       form.dataset.searchBound = "true";
     };
 
+    // 注意事项抽屉的开合：配置抽屉也要能关它（两个抽屉同时只开一个），
+    // 所以 open/close 提到这里共享，绑定只做一次。
+    const getNotesPanel = () => {
+      const panel = document.querySelector("[data-notes-panel]");
+
+      return panel instanceof HTMLElement ? panel : null;
+    };
+
+    const openNotesPanel = () => {
+      const panel = getNotesPanel();
+
+      if (!panel) {
+        return;
+      }
+
+      const sheet = panel.querySelector(".new-tab-notes__sheet");
+      const backdrop = panel.querySelector(".new-tab-notes__backdrop");
+
+      panel.hidden = false;
+      panel.classList.remove("hidden");
+      closeSettingsPanel();
+      document.querySelector("[data-notes-open]")?.setAttribute("aria-expanded", "true");
+      window.requestAnimationFrame(() => {
+        panel.dataset.open = "true";
+        panel.classList.remove("pointer-events-none", "opacity-0");
+        panel.classList.add("pointer-events-auto", "opacity-100");
+        backdrop?.classList.remove("opacity-0");
+        backdrop?.classList.add("opacity-100");
+        sheet?.classList.remove("translate-x-full");
+        sheet?.classList.add("translate-x-0");
+      });
+    };
+
+    const closeNotesPanel = () => {
+      const panel = getNotesPanel();
+
+      if (!panel) {
+        return;
+      }
+
+      const sheet = panel.querySelector(".new-tab-notes__sheet");
+      const backdrop = panel.querySelector(".new-tab-notes__backdrop");
+
+      delete panel.dataset.open;
+      panel.classList.remove("pointer-events-auto", "opacity-100");
+      panel.classList.add("pointer-events-none", "opacity-0");
+      backdrop?.classList.remove("opacity-100");
+      backdrop?.classList.add("opacity-0");
+      sheet?.classList.remove("translate-x-0");
+      sheet?.classList.add("translate-x-full");
+      document.querySelector("[data-notes-open]")?.setAttribute("aria-expanded", "false");
+      window.setTimeout(() => {
+        if (!panel.dataset.open) {
+          panel.hidden = true;
+          panel.classList.add("hidden");
+        }
+      }, 180);
+    };
+
+    const bindNotes = () => {
+      const panel = getNotesPanel();
+      const openButton = document.querySelector("[data-notes-open]");
+      const command = panel?.querySelector("[data-notes-command]");
+
+      if (!panel || panel.dataset.notesBound === "true") {
+        return;
+      }
+
+      // 指令写成单行、可整段复制：键名跟着当前配置走，别让人手打
+      if (command instanceof HTMLElement) {
+        command.textContent = `localStorage.removeItem(${JSON.stringify(logoCacheStorageKey)})`;
+      }
+
+      openButton?.addEventListener("click", openNotesPanel);
+      panel.querySelectorAll("[data-notes-close]").forEach((button) => {
+        button.addEventListener("click", closeNotesPanel);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && panel.dataset.open === "true") {
+          closeNotesPanel();
+        }
+      });
+
+      panel.dataset.notesBound = "true";
+    };
+
+    // 配置抽屉的开合同理提到这里：注意事项开时要能关它
+    const closeSettingsPanel = () => {
+      const settings = document.querySelector("[data-config-drawer]");
+
+      if (!(settings instanceof HTMLElement)) {
+        return;
+      }
+
+      const sheet = settings.querySelector(".new-tab-config__sheet");
+      const backdrop = settings.querySelector(".new-tab-config__backdrop");
+
+      delete settings.dataset.open;
+      settings.classList.remove("pointer-events-auto", "opacity-100");
+      settings.classList.add("pointer-events-none", "opacity-0");
+      backdrop?.classList.remove("opacity-100");
+      backdrop?.classList.add("opacity-0");
+      sheet?.classList.remove("translate-x-0");
+      sheet?.classList.add("translate-x-full");
+      window.setTimeout(() => {
+        if (!settings.dataset.open) {
+          settings.hidden = true;
+          settings.classList.add("hidden");
+        }
+      }, 180);
+    };
+
     const bindSettings = () => {
       const settings = document.querySelector("[data-config-drawer]");
       const openButton = document.querySelector("[data-config-open]");
@@ -4143,6 +4311,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const settingsSheet = settings.querySelector(".new-tab-config__sheet");
 
       const openSettings = () => {
+        closeNotesPanel();
         settings.hidden = false;
         settings.classList.remove("hidden");
         window.requestAnimationFrame(() => {
@@ -4156,30 +4325,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         });
       };
 
-      const closeSettings = () => {
-        delete settings.dataset.open;
-        settings.classList.remove("pointer-events-auto", "opacity-100");
-        settings.classList.add("pointer-events-none", "opacity-0");
-        settingsBackdrop?.classList.remove("opacity-100");
-        settingsBackdrop?.classList.add("opacity-0");
-        settingsSheet?.classList.remove("translate-x-0");
-        settingsSheet?.classList.add("translate-x-full");
-        window.setTimeout(() => {
-          if (!settings.dataset.open) {
-            settings.hidden = true;
-            settings.classList.add("hidden");
-          }
-        }, 180);
-      };
-
       openButton?.addEventListener("click", openSettings);
       settings.querySelectorAll("[data-config-close]").forEach((button) => {
-        button.addEventListener("click", closeSettings);
+        button.addEventListener("click", closeSettingsPanel);
       });
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && settings.dataset.open === "true") {
-          closeSettings();
+          closeSettingsPanel();
         }
       });
 
@@ -4364,6 +4517,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       renderAll();
       bindSearch();
       bindSettings();
+      bindNotes();
       bindShortcutAdd();
       bindLayoutSwitcher();
       bindHeaderCollapse();
