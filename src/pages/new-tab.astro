@@ -93,7 +93,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           data-new-tab-color-target="navigation"
         ></p>
       </div>
-      <div class="new-tab-actions flex items-center justify-end gap-1.5 max-sm:justify-start max-sm:gap-1">
+      {/* 窄屏工具行自动折行：屏幕放不下就分两排，不挤压也不溢出 */}
+      <div class="new-tab-actions flex flex-wrap items-center justify-end gap-1.5 max-sm:justify-start max-sm:gap-1">
         <div class="dropdown dropdown-end" data-layout-switcher>
           <button
             class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
@@ -238,7 +239,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </div>
 
     <form
-      class="new-tab-search flex w-full max-w-[44rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:border-base-content/30"
+      class="new-tab-search flex w-full max-w-[52rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:max-w-none focus-within:border-base-content/30"
       role="search"
       data-new-tab-search
     >
@@ -281,9 +282,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     <ChevronDown aria-hidden="true" />
   </button>
 
-  <div class="new-tab-config fixed inset-0 z-[80] hidden pointer-events-none opacity-0 transition-opacity duration-200" data-config-drawer>
+  {/* 两个抽屉共用一套开合规则：data-open 是唯一开关。
+      进出都走同一条 transition——进场 translate-x-full → 0，出场 0 → translate-x-full，
+      allow-discrete 让 hidden 也能参与过渡，JS 不再需要 setTimeout 兜底延迟隐藏。 */}
+  <div class="new-tab-config fixed inset-0 z-[80] hidden opacity-0 transition-opacity duration-200 [transition-behavior:allow-discrete] [&:not([data-open])]:pointer-events-none" data-config-drawer>
     <button class="new-tab-config__backdrop absolute inset-0 border-0 bg-base-content/20 opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
-    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] border-l border-base-content/10 bg-base-100 shadow-[-16px_0_48px_rgba(0,0,0,0.10)] translate-x-full transition-transform duration-200" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
+    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] translate-x-full border-l border-base-content/10 bg-base-100 shadow-[-16px_0_48px_rgba(0,0,0,0.10)] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
       <div class="new-tab-config__header flex items-center justify-between gap-3 border-b border-base-content/10 p-4">
         <div class="min-w-0">
           <h2 class="m-0 text-[0.95rem] font-bold leading-tight">{newTabConfig.settings.panelTitle}</h2>
@@ -412,9 +416,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
   {/* 注意事项弹层：讲清数据存在哪、图标怎么来、缓存怎么清——都是用户遇到
      「图标不出来/数据丢了」时真正需要的那几句话，顺带把清理指令写成能直接粘贴的。 */}
-  <div class="new-tab-notes fixed inset-0 z-[85] hidden pointer-events-none opacity-0 transition-opacity duration-200" data-notes-panel>
+  <div class="new-tab-notes fixed inset-0 z-[85] hidden opacity-0 transition-opacity duration-200 [transition-behavior:allow-discrete] [&:not([data-open])]:pointer-events-none" data-notes-panel>
     <button class="new-tab-notes__backdrop absolute inset-0 border-0 bg-base-content/20 opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.notesPanelTitle} data-notes-close></button>
-    <aside class="new-tab-notes__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] border-l border-base-content/10 bg-base-100 shadow-[-16px_0_48px_rgba(0,0,0,0.10)] translate-x-full transition-transform duration-200" role="dialog" aria-modal="true" aria-label={newTabConfig.settings.notesPanelTitle}>
+    <aside class="new-tab-notes__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] translate-x-full border-l border-base-content/10 bg-base-100 shadow-[-16px_0_48px_rgba(0,0,0,0.10)] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]" role="dialog" aria-modal="true" aria-label={newTabConfig.settings.notesPanelTitle}>
       <div class="new-tab-notes__header flex items-center justify-between gap-3 border-b border-base-content/10 p-4">
         <div class="flex min-w-0 items-center gap-2.5">
           <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-base-content/[0.06] text-base-content/55 [&_svg]:h-4 [&_svg]:w-4">
@@ -500,6 +504,22 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       transition: padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    /* 展开态（normal）：问候语在左、功能按钮在右同一行，搜索框紧随其下并撑满整行。
+       原来三行各占一格、搜索框还被 44rem 卡住，右侧留一大片死白，是「顶目栏目乱」的来源。 */
+    @media (min-width: 640px) {
+      [data-new-tab-page]:not([data-header-state]).new-tab-shell {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "toolbar toolbar"
+          "search search"
+          "stack stack";
+      }
+
+      [data-new-tab-page]:not([data-header-state]) .new-tab-toolbar {
+        align-items: end;
+      }
+    }
+
     /* 刷新/首次加载入场：整页像窗口打开一样「突」到眼前（缩放是 new-tab 的语言），
        并带一点自下而上的上浮。缩放收底边、上浮压顶边，中间态不会把文档顶高闪滚动条，
        结束即释放 transform。背景层与恢复按钮已移出 shell，不会被当成 fixed 的包含块。 */
@@ -525,6 +545,44 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         opacity: 0;
         transform: scale(0.96);
       }
+    }
+
+    /* ── 抽屉（配置 / 注意事项）开合 ─────────────────────────────────
+       唯一开关是宿主上的 data-open。hidden 也进了过渡列表（allow-discrete），
+       所以进场：hidden 摘掉 → 遮罩淡入 + 抽屉从右滑到位；出场：反向走完再落 hidden，
+       不再靠 JS setTimeout 猜时长。duration 280ms 比原 200ms 稍长，滑动手感更完整。 */
+    [data-config-drawer],
+    [data-notes-panel] {
+      transition:
+        opacity 0.2s ease,
+        display 0.28s allow-discrete;
+    }
+
+    [data-config-drawer][data-open],
+    [data-notes-panel][data-open] {
+      opacity: 1;
+    }
+
+    [data-config-drawer] .new-tab-config__backdrop,
+    [data-notes-panel] .new-tab-notes__backdrop {
+      opacity: 0;
+      transition: opacity 0.24s ease;
+    }
+
+    [data-config-drawer][data-open] .new-tab-config__backdrop,
+    [data-notes-panel][data-open] .new-tab-notes__backdrop {
+      opacity: 1;
+    }
+
+    [data-config-drawer] .new-tab-config__sheet,
+    [data-notes-panel] .new-tab-notes__sheet {
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-config-drawer][data-open] .new-tab-config__sheet,
+    [data-notes-panel][data-open] .new-tab-notes__sheet {
+      transform: translateX(0);
     }
 
     /* 弧形布局的瓦片钉在 fixed 坞上（贴着屏幕底部）：shell 一旦有 transform，坞会被当成包含块
@@ -584,6 +642,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       grid-area: stack;
     }
 
+    /* 展开态（normal）：搜索框吃掉整行，右侧不留死白 */
+    [data-new-tab-page]:not([data-header-state]) .new-tab-search {
+      max-width: none;
+    }
+
     /* 一段收起：搜索框上移，与功能按钮同一行（桌面宽度起） */
     @media (min-width: 640px) {
       [data-new-tab-page][data-header-state="collapsed"].new-tab-shell {
@@ -591,6 +654,19 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         grid-template-areas:
           "search toolbar"
           "stack stack";
+        transition:
+          padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+          grid-template-columns 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      /* 聚焦即撑满：搜索格从 22rem 展开到整行，功能按钮被推到下一行，
+         列宽同步补间，搜索框平滑吃掉剩余空间而不是硬跳。
+         注意 grid-template-areas 每行必须是同形矩形：这里每行都写 2 个 token
+         （前两行同名重复表示各占满整行），写成 "search" "toolbar" "stack stack"
+         这种前两行单 token 的形状，部分浏览器会整条判定非法而丢弃规则。 */
+      [data-new-tab-page][data-header-state="collapsed"]:has(.new-tab-search:focus-within).new-tab-shell {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-areas: "search search" "toolbar toolbar" "stack stack";
       }
 
       [data-new-tab-page][data-header-state="collapsed"] .new-tab-toolbar {
@@ -657,8 +733,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       pointer-events: none;
     }
 
-    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search {
-      max-width: 22rem;
+    /* 聚焦即撑满：收起态定的 22rem 与默认 52rem 上限都在 focus-within 时作废，
+       搜索框吃掉整行（或收起态整格）的剩余宽度。 */
+    [data-new-tab-page] .new-tab-search:focus-within,
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search:focus-within {
+      max-width: none;
     }
 
     [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__input {
@@ -4179,6 +4258,26 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       return panel instanceof HTMLElement ? panel : null;
     };
 
+    // 出场动画结束后补落 hidden：opacity 过渡完只是看不见，hidden 才真正把它
+    // 移出可访问性树、也不再占布局。transitionend 只认 opacity（display 那一项
+    // 由 allow-discrete 静默收尾，不会派发事件）。
+    const hideDrawerAfterExit = (panel) => {
+      if (panel.hidden) {
+        return;
+      }
+
+      const finish = () => {
+        if (!panel.dataset.open) {
+          panel.hidden = true;
+          panel.classList.add("hidden");
+        }
+
+        panel.removeEventListener("transitionend", finish);
+      };
+
+      panel.addEventListener("transitionend", finish);
+    };
+
     const openNotesPanel = () => {
       const panel = getNotesPanel();
 
@@ -4186,21 +4285,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         return;
       }
 
-      const sheet = panel.querySelector(".new-tab-notes__sheet");
-      const backdrop = panel.querySelector(".new-tab-notes__backdrop");
-
+      closeSettingsPanel();
+      // 先摘 hidden 让元素回到过渡起点，下一帧再置 data-open 触发滑入
       panel.hidden = false;
       panel.classList.remove("hidden");
-      closeSettingsPanel();
       document.querySelector("[data-notes-open]")?.setAttribute("aria-expanded", "true");
       window.requestAnimationFrame(() => {
         panel.dataset.open = "true";
-        panel.classList.remove("pointer-events-none", "opacity-0");
-        panel.classList.add("pointer-events-auto", "opacity-100");
-        backdrop?.classList.remove("opacity-0");
-        backdrop?.classList.add("opacity-100");
-        sheet?.classList.remove("translate-x-full");
-        sheet?.classList.add("translate-x-0");
       });
     };
 
@@ -4211,23 +4302,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         return;
       }
 
-      const sheet = panel.querySelector(".new-tab-notes__sheet");
-      const backdrop = panel.querySelector(".new-tab-notes__backdrop");
-
       delete panel.dataset.open;
-      panel.classList.remove("pointer-events-auto", "opacity-100");
-      panel.classList.add("pointer-events-none", "opacity-0");
-      backdrop?.classList.remove("opacity-100");
-      backdrop?.classList.add("opacity-0");
-      sheet?.classList.remove("translate-x-0");
-      sheet?.classList.add("translate-x-full");
       document.querySelector("[data-notes-open]")?.setAttribute("aria-expanded", "false");
-      window.setTimeout(() => {
-        if (!panel.dataset.open) {
-          panel.hidden = true;
-          panel.classList.add("hidden");
-        }
-      }, 180);
+      hideDrawerAfterExit(panel);
     };
 
     const bindNotes = () => {
@@ -4266,22 +4343,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         return;
       }
 
-      const sheet = settings.querySelector(".new-tab-config__sheet");
-      const backdrop = settings.querySelector(".new-tab-config__backdrop");
-
       delete settings.dataset.open;
-      settings.classList.remove("pointer-events-auto", "opacity-100");
-      settings.classList.add("pointer-events-none", "opacity-0");
-      backdrop?.classList.remove("opacity-100");
-      backdrop?.classList.add("opacity-0");
-      sheet?.classList.remove("translate-x-0");
-      sheet?.classList.add("translate-x-full");
-      window.setTimeout(() => {
-        if (!settings.dataset.open) {
-          settings.hidden = true;
-          settings.classList.add("hidden");
-        }
-      }, 180);
+      hideDrawerAfterExit(settings);
     };
 
     const bindSettings = () => {
@@ -4307,8 +4370,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const exportButton = settings.querySelector("[data-config-export]");
       const clearBackgroundButton = settings.querySelector("[data-config-clear-background]");
       const resetButton = settings.querySelector("[data-config-reset]");
-      const settingsBackdrop = settings.querySelector(".new-tab-config__backdrop");
-      const settingsSheet = settings.querySelector(".new-tab-config__sheet");
 
       const openSettings = () => {
         closeNotesPanel();
@@ -4316,12 +4377,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         settings.classList.remove("hidden");
         window.requestAnimationFrame(() => {
           settings.dataset.open = "true";
-          settings.classList.remove("pointer-events-none", "opacity-0");
-          settings.classList.add("pointer-events-auto", "opacity-100");
-          settingsBackdrop?.classList.remove("opacity-0");
-          settingsBackdrop?.classList.add("opacity-100");
-          settingsSheet?.classList.remove("translate-x-full");
-          settingsSheet?.classList.add("translate-x-0");
         });
       };
 
