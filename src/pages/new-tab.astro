@@ -1487,6 +1487,10 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       const error = document.createElement("p");
       error.className = "hidden text-[0.72rem] leading-snug text-error";
 
+      let shortcutMetadataRequestId = 0;
+      let shortcutMetadataTimer = 0;
+      let shortcutMetadata = null;
+
       const footer = document.createElement("div");
       footer.className = "flex items-center justify-end gap-1.5";
       const cancelButton = document.createElement("button");
@@ -2317,8 +2321,9 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       /^loading[.\s]*$/i.test(value) || /^(加载中|正在加载|请稍候)[.。\s]*$/.test(value);
 
     // 1Panel 的图标由前端运行时注入（默认 /public/favicon.png），静态 HTML 里没有图标标签；
-    // 没带安全入口时会收到守卫页，页面里有这条固定命令文案，可据此认出 1Panel 并直接用内置图标。
-    const isOnePanelGuardPage = (html) => html.includes("1pctl user-info");
+    // 没带安全入口时会收到守卫页，页面里有固定命令文案（安全入口未配置或域名绑定不符两种变体），
+    // 可据此认出 1Panel 并直接用内置图标。
+    const isOnePanelGuardPage = (html) => html.includes("1pctl user-info") || html.includes("1pctl reset domain");
 
     const collectLogoUrlsFromHtml = (html, baseUrl) => {
       const candidates = [];
