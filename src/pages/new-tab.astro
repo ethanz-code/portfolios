@@ -73,7 +73,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   </div>
 
   <section
-    class="new-tab-shell relative isolate z-10 grid w-[min(100%,58rem)] gap-[clamp(1.5rem,3.5vh,2.25rem)] pt-[clamp(2rem,9vh,5.5rem)] max-sm:gap-7"
+    class="new-tab-shell relative isolate z-10 mx-auto grid w-[min(100%,70rem)] gap-[clamp(1.5rem,3.5vh,2.25rem)] pt-[clamp(2rem,9vh,5.5rem)] max-sm:gap-7"
     aria-labelledby="new-tab-title"
     data-new-tab-page
     data-booting="true"
@@ -97,7 +97,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       <div class="new-tab-actions flex flex-wrap items-center justify-end gap-1.5 max-sm:justify-start max-sm:gap-1">
         <div class="dropdown dropdown-end" data-layout-switcher>
           <button
-            class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
+            class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
             type="button"
             tabindex="0"
             aria-haspopup="menu"
@@ -184,12 +184,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         <div>
           <ThemeToggle
             mobile={true}
-            triggerClass="h-9 min-h-9 w-9 p-0 [&_svg]:h-[1.05rem] [&_svg]:w-[1.05rem]"
+            triggerClass="h-8 min-h-8 w-8 p-0 [&_svg]:h-[1.05rem] [&_svg]:w-[1.05rem]"
             colorTarget="navigation"
           />
         </div>
         <a
-          class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium transition-colors"
+          class="btn btn-ghost btn-sm h-8 min-h-8 gap-1.5 px-3 text-[0.82rem] font-medium transition-colors"
           href={newTabConfig.homeLink.href}
           data-home-link
           data-new-tab-color-target="navigation"
@@ -198,7 +198,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <ArrowUpRight class="h-3.5 w-3.5 opacity-55" aria-hidden="true" />
         </a>
         <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium transition-colors [&_svg]:h-3.5 [&_svg]:w-3.5"
+          class="btn btn-ghost btn-sm h-8 min-h-8 gap-1.5 px-3 text-[0.82rem] font-medium transition-colors [&_svg]:h-3.5 [&_svg]:w-3.5"
           type="button"
           data-shortcut-add
           data-new-tab-color-target="navigation"
@@ -209,7 +209,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <span class="max-sm:hidden">{newTabConfig.settings.addShortcutLabel}</span>
         </button>
         <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 px-3.5 text-[0.82rem] font-medium transition-colors"
+          class="btn btn-ghost btn-sm h-8 min-h-8 px-3.5 text-[0.82rem] font-medium transition-colors"
           type="button"
           data-config-open
           data-new-tab-color-target="navigation"
@@ -217,7 +217,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           {newTabConfig.settings.openLabel}
         </button>
         <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
+          class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
           type="button"
           title="注意事项"
           aria-label="注意事项"
@@ -229,7 +229,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <Info aria-hidden="true" />
         </button>
         <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
+          class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
           type="button"
           title="收起问候"
           aria-label="收起问候"
@@ -243,26 +243,26 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </div>
 
     <form
-      class="new-tab-search flex w-full min-w-[16rem] max-w-[52rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:max-w-none focus-within:border-base-content/30"
+      class="new-tab-search flex w-full min-w-[16rem] max-w-[70rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:max-w-none focus-within:border-base-content/30"
       role="search"
       data-new-tab-search
     >
       <label class="sr-only" for="new-tab-query">搜索关键词</label>
-      <span class="grid w-11 shrink-0 place-items-center pl-3 text-base-content/35" aria-hidden="true">
+      <span class="grid w-10 shrink-0 place-items-center pl-3 text-base-content/35" aria-hidden="true">
         <Search class="h-[1.05rem] w-[1.05rem]" />
       </span>
       <input
         id="new-tab-query"
-        class="new-tab-search__input h-[3.3rem] min-w-0 flex-1 border-0 bg-transparent px-2.5 text-base text-base-content outline-none placeholder:text-base-content/30 sm:text-[0.95rem]"
+        class="new-tab-search__input h-12 min-w-0 flex-1 border-0 bg-transparent px-2.5 text-base text-base-content outline-none placeholder:text-base-content/30 sm:text-[0.95rem]"
         type="search"
         name="q"
         autocomplete="off"
         placeholder={newTabConfig.search.placeholder}
         data-search-query
       />
-      <span class="new-tab-search__divider my-[0.85rem] w-px shrink-0 bg-base-content/10" aria-hidden="true"></span>
+      <span class="new-tab-search__divider my-[0.7rem] w-px shrink-0 bg-base-content/10" aria-hidden="true"></span>
       <button
-        class="btn h-auto min-h-0 w-[3.3rem] shrink-0 rounded-none border-0 bg-base-content text-base-100 hover:bg-base-content/85 focus-visible:bg-base-content/85 sm:w-auto sm:px-5"
+        class="btn h-auto min-h-0 w-12 shrink-0 rounded-none border-0 bg-base-content text-base-100 hover:bg-base-content/85 focus-visible:bg-base-content/85 sm:w-auto sm:px-5"
         type="submit"
         aria-label={newTabConfig.search.submitLabel}
         title={newTabConfig.search.submitLabel}
@@ -277,7 +277,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
   {/* 恢复按钮同样移出 shell：它是 fixed，留在里面会被 shell 的入场缩放当成包含块。 */}
   <button
-    class="new-tab-restore btn btn-square btn-sm fixed right-4 top-4 z-[70] h-9 min-h-9 w-9 border border-base-content/15 bg-base-100/85 p-0 text-base-content/70 shadow-[0_6px_20px_rgba(0,0,0,0.10)] backdrop-blur hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+    class="new-tab-restore btn btn-square btn-sm fixed right-4 top-4 z-[70] h-8 min-h-8 w-8 border border-base-content/15 bg-base-100/85 p-0 text-base-content/70 shadow-[0_6px_20px_rgba(0,0,0,0.10)] backdrop-blur hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
     type="button"
     aria-label="展开问候与搜索"
     title="展开问候与搜索（按 / 唤回搜索）"
@@ -486,11 +486,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
   <script is:inline type="application/json" id="new-tab-defaults" set:html={serializedDefaultNewTabPayload} />
 
   <style is:inline>
-    /* new-tab 自带 pt-[clamp(2rem,9vh,5.5rem)]，再叠 main 的 pt-6 lg:pt-16 会把内容推得过低，
-       白白吃掉一屏高度、把快捷方式挤到滚动区。这里只去掉垂直方向，左右留白保留。 */
+    /* new-tab 是单屏工具页，不走 BaseLayout 的阅读宽度：main 的 max-w-5xl 会把 shell
+       自己的 70rem 卡回 928px，lg:px-12 又会再吃掉左右各 48px——用户要「左右空隙少一点」。
+       注意 max-width 不能设成 none：main 靠 mx-auto + max-width 居中，置 none 会让它
+       贴左（1512 屏实测 x=0、右侧空 392px）。改成 100% 保持弹性宽度，居中交给 shell 自己。 */
     main:has([data-new-tab-page]) {
-      padding-top: 0;
-      padding-bottom: 0;
+      padding: 0;
+      max-width: 100%;
     }
 
     /* 滚动条交给浏览器默认行为：内容放不下才出现、能滚，放得下就不出现。
@@ -557,6 +559,25 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         grid-area: actions;
         align-self: center;
         justify-content: flex-end;
+      }
+
+      /* 聚焦即撑满：展开态同样要把功能行推到搜索框下面，否则壳宽放到 70rem 后
+         搜索框仍被第一列 minmax(0, 1fr) 卡在 660px，撑不到整行 1120px。
+         必须切成单列 grid：写成两列 minmax(0,1fr) 会被等分成两个 545px，
+         search 那行照样只有一半宽（实测踩过）。单列下矩形约束仍要满足，
+         每行都写 2 个同名 token 表示跨满。 */
+      [data-new-tab-page]:not([data-header-state]):has(.new-tab-search:focus-within).new-tab-shell {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+          "greeting greeting"
+          "search search"
+          "actions actions"
+          "stack stack";
+      }
+
+      /* 功能行独占一行时改成贴左，否则会留在原右对齐位置、和搜索框右边空一大片 */
+      [data-new-tab-page]:not([data-header-state]):has(.new-tab-search:focus-within) .new-tab-actions {
+        justify-content: flex-start;
       }
     }
 
@@ -803,7 +824,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       pointer-events: none;
     }
 
-    /* 聚焦即撑满：收起态定的 22rem 与默认 52rem 上限都在 focus-within 时作废，
+    /* 聚焦即撑满：收起态定的 22rem 与默认 70rem 上限都在 focus-within 时作废，
        搜索框吃掉整行（或收起态整格）的剩余宽度。 */
     [data-new-tab-page] .new-tab-search:focus-within,
     [data-new-tab-page][data-header-state="collapsed"] .new-tab-search:focus-within {
