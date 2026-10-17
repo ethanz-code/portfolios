@@ -243,7 +243,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </div>
 
     <form
-      class="new-tab-search flex w-full min-w-[16rem] max-w-[70rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:max-w-none focus-within:border-base-content/30"
+      class="new-tab-search flex w-full min-w-[16rem] max-w-[70rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:border-base-content/30"
       role="search"
       data-new-tab-search
     >
@@ -570,22 +570,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         justify-content: flex-end;
       }
 
-      /* 聚焦即撑满：搜索格从第一列展开到整行，功能按钮被推到下一行。
-         这里必须切成单列 grid：写成两列 minmax(0,1fr) 会被等分成两个 545px，
-         search 那行照样只有一半宽（实测踩过）。单列下矩形约束仍要满足，
-         每行都写 2 个同名 token 表示跨满。 */
-      [data-new-tab-page]:has(.new-tab-search:focus-within).new-tab-shell {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas:
-          "greeting greeting"
-          "search search"
-          "actions actions"
-          "stack stack";
-      }
-
-      /* 功能行独占一行时改成贴左，否则会留在原右对齐位置、和搜索框右边空一大片 */
-      [data-new-tab-page]:has(.new-tab-search:focus-within) .new-tab-actions {
-        justify-content: flex-start;
+      /* 聚焦即撑满，但功能按钮不许换行：搜索框在自己的格子里从 22rem 过渡到 100%，
+         按钮留在第二列原位。这里刻意不切单列网格——切成单列 actions 会被推到下一行
+         （用户原话「不要让右侧功能换行」），而且 areas 变形不补间、位置是瞬移。 */
+      [data-new-tab-page]:has(.new-tab-search:focus-within) .new-tab-search {
+        max-width: 100%;
       }
     }
 
@@ -727,9 +716,41 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       filter: brightness(1.6);
     }
 
-    /* 展开态（normal）：搜索框吃掉整行，右侧不留死白 */
+    /* 常态（normal）搜索框就是短的：22rem 上限，右侧功能按钮留在原位不换行。
+       聚焦时由上面的 :focus-within 规则过渡到 100%，两端都是长度值所以能逐帧补间。
+       之前这里写 max-width: none 让常态就顶满整列，用户原话
+       「我其实希望输入框本来很短的，然后点击后就有过渡撑满当前宽度」。
+       分档与列宽对齐：第一列比 22rem 还窄的档位（640~899px 实测 316~437px）
+       若沿用 22rem，常态就已顶满、聚焦时看不出过渡，所以按第一列可用宽度逐档收窄，
+       保证每一档都有「短 → 撑满」的可见过程。 */
     [data-new-tab-page]:not([data-header-state]) .new-tab-search {
-      max-width: none;
+      max-width: 22rem;
+    }
+
+    @media (min-width: 640px) and (max-width: 899px) {
+      [data-new-tab-page]:not([data-header-state]) .new-tab-search {
+        max-width: 18rem;
+      }
+    }
+
+    @media (min-width: 640px) and (max-width: 979px) {
+      [data-new-tab-page]:not([data-header-state]) .new-tab-search {
+        max-width: 20rem;
+      }
+    }
+
+    /* 700 这一档第一列只剩 316px，20rem(320px) 会逼得常态就顶满、看不出过渡；
+       收到 18rem(288px)，给聚焦留出可见的撑满过程。 */
+    @media (min-width: 640px) and (max-width: 759px) {
+      [data-new-tab-page]:not([data-header-state]) .new-tab-search {
+        max-width: 18rem;
+      }
+    }
+
+    @media (min-width: 640px) and (max-width: 699px) {
+      [data-new-tab-page]:not([data-header-state]) .new-tab-search {
+        max-width: 16rem;
+      }
     }
 
     /* 一段收起：问候语缩到 0 让位，搜索框吃掉它空出来的宽度。
@@ -749,15 +770,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       [data-new-tab-page][data-header-state="collapsed"] .new-tab-actions {
         justify-content: flex-start;
-      }
-
-      /* 聚焦即撑满：搜索格从第一列展开到整行，功能按钮被推到下一行。
-         注意 grid-template-areas 每行必须是同形矩形：这里每行都写 2 个 token
-         （前两行同名重复表示各占满整行），写成 "search" "toolbar" "stack stack"
-         这种前两行单 token 的形状，部分浏览器会整条判定非法而丢弃规则。 */
-      [data-new-tab-page][data-header-state="collapsed"]:has(.new-tab-search:focus-within).new-tab-shell {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas: "greeting greeting" "search search" "actions actions" "stack stack";
       }
     }
 
@@ -823,11 +835,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       pointer-events: none;
     }
 
-    /* 聚焦即撑满：收起态定的 22rem 与默认 70rem 上限都在 focus-within 时作废，
-       搜索框吃掉整行（或收起态整格）的剩余宽度。 */
-    [data-new-tab-page] .new-tab-search:focus-within,
+    /* 聚焦即撑满：收起态定的 22rem 在 focus-within 时作废，搜索框在自己的格子里
+       过渡到 100%，功能按钮留在第二列原位不换行（与展开态同一套做法）。
+       注意这里不能写 max-width: none——none 不是长度值，浏览器不插值，
+       实测 max-width: 22rem → none 直接一步跳到终值，没有过渡。 */
     [data-new-tab-page][data-header-state="collapsed"] .new-tab-search:focus-within {
-      max-width: none;
+      max-width: 100%;
     }
 
     [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__input {
