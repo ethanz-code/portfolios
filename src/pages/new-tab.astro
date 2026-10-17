@@ -2580,10 +2580,19 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         pushLogoCandidate(candidates, unwrapProxyUrl(cachedLogo.logoUrl), false);
       }
 
+      // 页面自己声明的图标（<link rel="icon">、og:image 等）排在猜测路径之前：
+      // 站点说了自己的图标在哪，就没有理由再拿 7 条通用路径去猜。SPA 兜底站点
+      // （任何不存在路径都返 200 text/html）上这些猜测注定全败，声明是唯一可靠来源。
+      // collectLogoUrlsFromHtml 已把页面声明的地址收进 candidates，这里只做排序前置。
       if (canUseCachedLogo && Array.isArray(cachedLogo?.candidates)) {
         pushLogoCandidates(candidates, cachedLogo.candidates.map(unwrapProxyUrl));
       }
 
+      // 只留实测有命中可能的路径。用生产配置里四个真实站点逐条 curl 过：
+      // /icon.*、/apple-touch-icon*、/assets/*、/images/* 这 12 条全部是 404 或 SPA 的
+      // HTML 兜底（200 text/html），零命中，只会白烧请求——而每个路径经代理还会裂成
+      // 代理+直连两条候选，等于 24 次注定失败的往返。apple-touch-icon 类的能力没有丢：
+      // 页面真声明了 <link rel="apple-touch-icon"> 时，collectLogoUrlsFromHtml 会收进来。
       const commonPaths = [
         "/favicon.svg",
         "/favicon.png",
@@ -2595,18 +2604,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         "/logo.svg",
         "/logo.png",
         "/logo.webp",
-        "/icon.svg",
-        "/icon.png",
-        "/apple-touch-icon.png",
-        "/apple-touch-icon-precomposed.png",
-        "/assets/logo.svg",
-        "/assets/logo.png",
-        "/assets/favicon.svg",
-        "/assets/favicon.png",
-        "/images/logo.svg",
-        "/images/logo.png",
-        "/images/logo-blue.png",
-        "/images/logo-light.png",
       ];
 
       // 1Panel v2 的图标固定在 /public/favicon.png：静态 HTML 里没有图标标签，
@@ -2642,8 +2639,18 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
       // 带路径的站点（安全入口 /ccd1a10224/、子目录应用）图标可能在应用目录下。
       // 放在最后：这类请求大多被守卫页挡下返回 HTML 兜底，提前只会白发一批请求。
+      // 只有目录真的比 origin 深才探测：根路径站点（https://host/）算出来的目录与
+      // origin 只差一个尾斜杠，不去掉就会让每块瓦片都多跑一整轮通用路径。
       const directoryUrl = resolveShortcutDirectoryUrl(shortcut.url);
-      if (directoryUrl && directoryUrl !== originUrl) {
+      const isDeeperThanOrigin = (() => {
+        if (!directoryUrl || !originUrl) {
+          return false;
+        }
+
+        return new URL(directoryUrl).pathname.replace(/\/$/, "") !== "";
+      })();
+
+      if (directoryUrl && isDeeperThanOrigin) {
         commonPaths.forEach((path) => {
           pushLogoCandidate(candidates, new URL(path.slice(1), directoryUrl).href);
         });
