@@ -219,8 +219,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         <button
           class="btn btn-ghost btn-sm h-8 min-h-8 w-8 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
           type="button"
-          title="注意事项"
-          aria-label="注意事项"
+          title={newTabConfig.settings.notesLabel}
+          aria-label={newTabConfig.settings.notesLabel}
           aria-haspopup="dialog"
           aria-expanded="false"
           data-notes-open
@@ -291,7 +291,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       allow-discrete 让 hidden 也能参与过渡，JS 不再需要 setTimeout 兜底延迟隐藏。 */}
   <div class="new-tab-config fixed inset-0 z-[80] hidden opacity-0 transition-opacity duration-200 [transition-behavior:allow-discrete] [&:not([data-open])]:pointer-events-none" data-config-drawer>
     <button class="new-tab-config__backdrop absolute inset-0 border-0 bg-base-content/20 opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.closeLabel} data-config-close></button>
-    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] translate-x-full border-l border-base-content/10 bg-base-100 shadow-[-16px_0_48px_rgba(0,0,0,0.10)] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
+    <aside class="new-tab-config__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] rounded-l-2xl border-l border-base-content/10 bg-base-100/95 shadow-[-1px_0_2px_-1px_rgba(15,23,42,0.08),-8px_0_16px_-8px_rgba(15,23,42,0.10),-20px_0_40px_-20px_rgba(15,23,42,0.14)] grid-rows-[auto_minmax(0,1fr)_auto] backdrop-blur-sm translate-x-full transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]" aria-label={newTabConfig.settings.panelTitle} aria-modal="true" role="dialog">
       <div class="new-tab-config__header flex items-center justify-between gap-3 border-b border-base-content/10 p-4">
         <div class="min-w-0">
           <h2 class="m-0 text-[0.95rem] font-bold leading-tight">{newTabConfig.settings.panelTitle}</h2>
@@ -418,11 +418,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </aside>
   </div>
 
-  {/* 注意事项弹层：讲清数据存在哪、图标怎么来、缓存怎么清——都是用户遇到
+  {/* 图标与数据说明抽屉：讲清数据存在哪、图标怎么来、缓存怎么清——都是用户遇到
      「图标不出来/数据丢了」时真正需要的那几句话，顺带把清理指令写成能直接粘贴的。 */}
   <div class="new-tab-notes fixed inset-0 z-[85] hidden opacity-0 transition-opacity duration-200 [transition-behavior:allow-discrete] [&:not([data-open])]:pointer-events-none" data-notes-panel>
     <button class="new-tab-notes__backdrop absolute inset-0 border-0 bg-base-content/20 opacity-0 transition-opacity duration-200" type="button" aria-label={newTabConfig.settings.notesPanelTitle} data-notes-close></button>
-    <aside class="new-tab-notes__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] grid-rows-[auto_minmax(0,1fr)_auto] translate-x-full border-l border-base-content/10 bg-base-100 shadow-[-16px_0_48px_rgba(0,0,0,0.10)] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]" role="dialog" aria-modal="true" aria-label={newTabConfig.settings.notesPanelTitle}>
+    <aside class="new-tab-notes__sheet absolute right-0 top-0 grid h-dvh w-[min(100vw,31rem)] max-sm:w-[min(100vw,24rem)] rounded-l-2xl border-l border-base-content/10 bg-base-100/95 shadow-[-1px_0_2px_-1px_rgba(15,23,42,0.08),-8px_0_16px_-8px_rgba(15,23,42,0.10),-20px_0_40px_-20px_rgba(15,23,42,0.14)] grid-rows-[auto_minmax(0,1fr)_auto] backdrop-blur-sm transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]" role="dialog" aria-modal="true" aria-label={newTabConfig.settings.notesPanelTitle}>
       <div class="new-tab-notes__header flex items-center justify-between gap-3 border-b border-base-content/10 p-4">
         <div class="flex min-w-0 items-center gap-2.5">
           <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-base-content/[0.06] text-base-content/55 [&_svg]:h-4 [&_svg]:w-4">
@@ -455,7 +455,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <h3 class="m-0 text-[0.82rem] font-semibold text-base-content">{newTabConfig.settings.notesRecoveryTitle}</h3>
           <p class="m-0">{newTabConfig.settings.notesRecoveryBody}</p>
           <p class="m-0 text-[0.72rem] leading-snug text-base-content/50">{newTabConfig.settings.notesCommandLabel}</p>
-          <pre class="new-tab-notes__code m-0 overflow-x-auto border border-base-content/10 bg-base-200/40 p-3 text-[0.72rem] leading-relaxed" data-notes-command></pre>
+          <pre class="new-tab-notes__code m-0 overflow-x-auto rounded-lg border border-base-content/10 bg-base-200/40 p-3 text-[0.72rem] leading-relaxed" data-notes-command></pre>
         </section>
       </div>
     </aside>
@@ -605,7 +605,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       }
     }
 
-    /* ── 抽屉（配置 / 注意事项）开合 ─────────────────────────────────
+    /* ── 抽屉（配置 / 图标说明）开合 ─────────────────────────────────
        唯一开关是宿主上的 data-open。hidden 也进了过渡列表（allow-discrete），
        所以进场：hidden 摘掉 → 遮罩淡入 + 抽屉从右滑到位；出场：反向走完再落 hidden，
        不再靠 JS setTimeout 猜时长。duration 280ms 比原 200ms 稍长，滑动手感更完整。 */
@@ -4694,7 +4694,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       form.dataset.searchBound = "true";
     };
 
-    // 注意事项抽屉的开合：配置抽屉也要能关它（两个抽屉同时只开一个），
+    // 图标说明抽屉的开合：配置抽屉也要能关它（两个抽屉同时只开一个），
     // 所以 open/close 提到这里共享，绑定只做一次。
     const getNotesPanel = () => {
       const panel = document.querySelector("[data-notes-panel]");
@@ -4779,7 +4779,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       panel.dataset.notesBound = "true";
     };
 
-    // 配置抽屉的开合同理提到这里：注意事项开时要能关它
+    // 配置抽屉的开合同理提到这里：图标说明抽屉开时要能关它
     const closeSettingsPanel = () => {
       const settings = document.querySelector("[data-config-drawer]");
 
