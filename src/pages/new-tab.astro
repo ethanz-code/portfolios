@@ -97,13 +97,14 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       <div class="new-tab-actions flex flex-wrap items-center justify-end gap-1.5 max-sm:justify-start max-sm:gap-1">
         <div class="dropdown dropdown-end" data-layout-switcher>
           <button
-            class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+            class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
             type="button"
             tabindex="0"
             aria-haspopup="menu"
             aria-label="切换布局"
             title="切换布局"
             data-layout-trigger
+            data-new-tab-color-target="navigation"
           >
             <span data-layout-trigger-icon="grid" class="grid place-items-center">
               <LayoutGrid aria-hidden="true" />
@@ -184,10 +185,11 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <ThemeToggle
             mobile={true}
             triggerClass="h-9 min-h-9 w-9 p-0 [&_svg]:h-[1.05rem] [&_svg]:w-[1.05rem]"
+            colorTarget="navigation"
           />
         </div>
         <a
-          class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium text-base-content/60 hover:text-base-content"
+          class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium transition-colors"
           href={newTabConfig.homeLink.href}
           data-home-link
           data-new-tab-color-target="navigation"
@@ -196,7 +198,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <ArrowUpRight class="h-3.5 w-3.5 opacity-55" aria-hidden="true" />
         </a>
         <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium text-base-content/60 hover:text-base-content [&_svg]:h-3.5 [&_svg]:w-3.5"
+          class="btn btn-ghost btn-sm h-9 min-h-9 gap-1.5 px-3 text-[0.82rem] font-medium transition-colors [&_svg]:h-3.5 [&_svg]:w-3.5"
           type="button"
           data-shortcut-add
           data-new-tab-color-target="navigation"
@@ -207,7 +209,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           <span class="max-sm:hidden">{newTabConfig.settings.addShortcutLabel}</span>
         </button>
         <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 px-3.5 text-[0.82rem] font-medium text-base-content/60 hover:text-base-content"
+          class="btn btn-ghost btn-sm h-9 min-h-9 px-3.5 text-[0.82rem] font-medium transition-colors"
           type="button"
           data-config-open
           data-new-tab-color-target="navigation"
@@ -215,23 +217,25 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           {newTabConfig.settings.openLabel}
         </button>
         <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
           type="button"
           title="注意事项"
           aria-label="注意事项"
           aria-haspopup="dialog"
           aria-expanded="false"
           data-notes-open
+          data-new-tab-color-target="navigation"
         >
           <Info aria-hidden="true" />
         </button>
         <button
-          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 text-base-content/55 transition-colors hover:text-base-content [&_svg]:h-4 [&_svg]:w-4"
+          class="btn btn-ghost btn-sm h-9 min-h-9 w-9 p-0 transition-colors [&_svg]:h-4 [&_svg]:w-4"
           type="button"
           title="收起问候"
           aria-label="收起问候"
           aria-expanded="true"
           data-header-collapse
+          data-new-tab-color-target="navigation"
         >
           <ChevronDown aria-hidden="true" />
         </button>
@@ -239,7 +243,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     </div>
 
     <form
-      class="new-tab-search flex w-full max-w-[52rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:max-w-none focus-within:border-base-content/30"
+      class="new-tab-search flex w-full min-w-[16rem] max-w-[52rem] items-stretch border border-base-content/10 bg-base-100 transition-colors duration-200 focus-within:max-w-none focus-within:border-base-content/30"
       role="search"
       data-new-tab-search
     >
@@ -504,19 +508,55 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       transition: padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    /* 展开态（normal）：问候语在左、功能按钮在右同一行，搜索框紧随其下并撑满整行。
-       原来三行各占一格、搜索框还被 44rem 卡住，右侧留一大片死白，是「顶目栏目乱」的来源。 */
+    /* 展开态（normal）宽屏（≥640px）：问候语与日期独占最顶一行，搜索框与功能按钮并排第二行，
+       快捷区垫底——用户原话「搜索栏和操作的那几个功能在一行内，那个 xx好，Ethanz888 再往上移」。
+       做法是此档把工具栏拆开（display: contents），让 greeting-block 与 actions 直接参与 shell
+       网格；收起/挂起态不拆，那时工具栏回到 flex，max-height 折叠与互斥布局才照常生效。
+       第二列用 fit-content 而不是 auto：auto 会按 max-content 给足宽度（七个按钮全撑开不折行），
+       在 640px 附近把搜索框压到 114px。封顶值分两档：宽屏 28rem（七个按钮带文字全展开约 446px）
+       常规桌面单行放得下；640~900px 的中等屏收到 22rem，逼 flex-wrap 折成两行，
+       否则搜索框被挤到和功能行重叠（实测 640px 重叠 110px、700px 重叠 50px）。
+       提醒：grid-template-areas 每行 token 数必须等于列数（这里是 2），写成单 token 的
+       跨行形状会被浏览器整条静默丢弃。 */
     @media (min-width: 640px) {
       [data-new-tab-page]:not([data-header-state]).new-tab-shell {
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) fit-content(28rem);
         grid-template-areas:
-          "toolbar toolbar"
-          "search search"
+          "greeting greeting"
+          "search actions"
           "stack stack";
       }
+    }
 
+    @media (min-width: 640px) and (max-width: 899px) {
+      [data-new-tab-page]:not([data-header-state]).new-tab-shell {
+        grid-template-columns: minmax(0, 1fr) fit-content(22rem);
+      }
+    }
+
+    /* 640 这一档 shell 只有约 592px：搜索框保底 16rem(256px) + 列间距 32px 后，
+       功能行只剩约 300px。22rem(352px) 还会重叠 16px，收到 18rem(288px) 刚好放下
+       四个图标钮，带文字的按钮折到第二行。 */
+    @media (min-width: 640px) and (max-width: 699px) {
+      [data-new-tab-page]:not([data-header-state]).new-tab-shell {
+        grid-template-columns: minmax(0, 1fr) fit-content(18rem);
+      }
+    }
+
+    @media (min-width: 640px) {
       [data-new-tab-page]:not([data-header-state]) .new-tab-toolbar {
-        align-items: end;
+        display: contents;
+        gap: 0;
+      }
+
+      [data-new-tab-page]:not([data-header-state]) .new-tab-greeting-block {
+        grid-area: greeting;
+      }
+
+      [data-new-tab-page]:not([data-header-state]) .new-tab-actions {
+        grid-area: actions;
+        align-self: center;
+        justify-content: flex-end;
       }
     }
 
@@ -630,16 +670,46 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       transition: none;
     }
 
-    [data-new-tab-page] .new-tab-toolbar {
+    /* 宽屏展开态工具栏被 display: contents 拆开、不再占 grid-area，
+       其余状态（窄屏 flex、收起、挂起）才落到 toolbar 格 */
+    [data-new-tab-page][data-header-state] .new-tab-toolbar {
       grid-area: toolbar;
     }
 
-    [data-new-tab-page] .new-tab-search {
+    [data-new-tab-page][data-header-state] .new-tab-search {
       grid-area: search;
+    }
+
+    @media (max-width: 639px) {
+      [data-new-tab-page]:not([data-header-state]) .new-tab-toolbar {
+        grid-area: toolbar;
+      }
+
+      [data-new-tab-page]:not([data-header-state]) .new-tab-search {
+        grid-area: search;
+      }
     }
 
     [data-new-tab-page] [data-shortcut-stack] {
       grid-area: stack;
+    }
+
+    /* 工具栏图标与文字统一跟一个基准色走：默认模式用 55% 不透明度的正文色，
+       选了颜色模式（浅色/深色文字）时 applyTextColors 会给每个带
+       data-new-tab-color-target 的元素内联写 color，图标用 currentColor 自然跟上。
+       之前图标各自写死 text-base-content/55、文字写 /60，两档灰度不一致；
+       背景图 + 颜色模式组合下图标还会比文字暗一截，用户反馈「图标看不到」。
+       hover 提亮用 filter 而不是 color，避免覆盖内联色让颜色模式失效。 */
+    [data-new-tab-page] .new-tab-actions .btn {
+      color: color-mix(in oklab, currentColor 55%, transparent);
+    }
+
+    [data-new-tab-page] .new-tab-actions .btn:hover {
+      filter: brightness(1.6);
+    }
+
+    [data-new-tab-page] .new-tab-actions .btn[aria-expanded="true"] {
+      filter: brightness(1.6);
     }
 
     /* 展开态（normal）：搜索框吃掉整行，右侧不留死白 */
