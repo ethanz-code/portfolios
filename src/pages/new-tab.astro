@@ -1164,7 +1164,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
   <script>
     // @ts-nocheck
-    import { META_PROXY_ORIGIN } from "../data/meta-proxy";
+    import { buildMetaProxyUrl, META_PROXY_ORIGIN } from "../data/meta-proxy";
     const defaultPayloadElement = document.getElementById("new-tab-defaults");
     const defaultPayload = defaultPayloadElement?.textContent
       ? JSON.parse(defaultPayloadElement.textContent)
@@ -1303,41 +1303,6 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       return normalized.length ? normalized : cloneValue(fallback);
     };
 
-    // 历史配置里 shortcut.logo 可能存的是代理地址（v5 及以前写坏的），
-    // 导入时直接还原成裸址，否则每次渲染都会再套一层代理。
-    // 按 host 判定而不是前缀字符串，缓存里可能是 /?url=（带斜杠）也可能不是。
-    const normalizeShortcutLogo = (logo) => {
-      const value = normalizeMaybeText(logo);
-
-      if (!value) {
-        return value;
-      }
-
-      let current = value;
-
-      for (let round = 0; round < 4; round += 1) {
-        let parsed;
-        try {
-          parsed = new URL(current);
-        } catch {
-          return current;
-        }
-
-        if (parsed.origin !== META_PROXY_ORIGIN || parsed.pathname !== "/") {
-          return current;
-        }
-
-        const inner = normalizeMaybeText(parsed.searchParams.get("url"));
-        if (!inner) {
-          return current;
-        }
-
-        current = inner;
-      }
-
-      return current;
-    };
-
     const normalizeShortcutGroups = (groups, fallback) => {
       if (!Array.isArray(groups)) {
         return cloneValue(fallback);
@@ -1352,7 +1317,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
                   title: normalizeText(shortcut?.title),
                   url: normalizeText(shortcut?.url),
                   description: normalizeMaybeText(shortcut?.description),
-                  logo: normalizeShortcutLogo(shortcut?.logo),
+                  logo: normalizeMaybeText(shortcut?.logo),
                 }))
                 .filter((shortcut) => shortcut.title && shortcut.url)
             : [],
@@ -2425,15 +2390,13 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     const dragHandleIcon = getIconMarkup("drag");
 
-    const faviconProxyUrl = META_PROXY_ORIGIN;
-
-    const getProxyUrl = (url) => `${faviconProxyUrl}?url=${encodeURIComponent(url)}`;
+    // 代理地址固定带斜杠，与 unwrapProxyUrl 的 pathname === "/" 判定保持一致
+    const getProxyUrl = (url) => buildMetaProxyUrl(url);
 
     // 旧版本把「当前成功加载的地址」原样写进了缓存，而候选链第一条本来就是代理地址，
     // 于是缓存里存的是代理地址；下次读出来再 pushLogoCandidate 就又套一层代理，
     // 代理请求代理自身域名，Worker 侧固定 522。这里统一剥掉代理前缀再进候选链。
-    // 判定用 host 而不是前缀字符串：缓存里可能是 /?url=（带斜杠）也可能不是，
-    // 前缀比对会漏；循环剥到不再是本站地址为止，历史数据可能叠了两层。
+    // 按 host + pathname 判定，字符串前缀比对会因带不带斜杠而漏。
     const unwrapProxyUrl = (url) => {
       if (!url) {
         return url;
@@ -2449,7 +2412,7 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           return current;
         }
 
-        const isProxySelf = parsed.origin === faviconProxyUrl && parsed.pathname === "/";
+        const isProxySelf = parsed.origin === META_PROXY_ORIGIN && parsed.pathname === "/";
         const inner = isProxySelf ? parsed.searchParams.get("url") : null;
 
         if (!inner) {
