@@ -3,7 +3,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import {
   ArrowUpRight,
   Check,
-  ChevronDown,
   ChevronUp,
   Dices,
   EllipsisVertical,
@@ -513,21 +512,25 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
 
     /* 宽屏（≥640px）：问候语与日期独占最顶一行，搜索框与功能按钮并排第二行，快捷区垫底——
        用户原话「搜索栏和操作的那几个功能在一行内，那个 xx好，Ethanz888 再往上移」。
-       工具栏常驻 flex 占满整行，问候语贴左、功能按钮贴右；收起时问候语自己缩到 0，
-       工具栏高度随之塌下去，搜索框那一行顶上来。
-       这里刻意不用 display: contents 把工具栏拆开：contents 与 flex 之间不能补间，
-       折叠第一帧工具栏会从「没有盒」突变成「446px 宽的盒」，用户原话「折叠过程中操作栏区域
-       过渡有一点卡顿僵硬」——实测就是这一下（t=0 帧 tool=[0,0,0,0] → [870,81,446,97]）。
-       常驻 flex 后两种状态只有 grid-template-columns 与子元素 max-height 在变，全程可补间。
-       第二列用 fit-content 而不是 auto：auto 会按 max-content 给足宽度（七个按钮全撑开不折行），
-       在 640px 附近把搜索框压到 114px。封顶值分三档：宽屏 28rem（七个按钮带文字全展开约 446px）
-       常规桌面单行放得下；640~899px 收 22rem、640~699px 再收 18rem，逼 flex-wrap 折成两行，
+       工具栏在宽屏始终 display: contents，让 greeting-block 与 actions 各自成为 shell 的
+       直接网格项。关键是「始终」：以前只有展开态拆、收起态收回 flex，折叠第一帧
+       display 从 contents 跳成 flex，工具栏凭空长出 446px 的盒，用户原话
+       「折叠过程中操作栏区域过渡有一点卡顿僵硬」——实测就是这一下。
+
+       列宽一律写 minmax(0, Xrem)，不用 fit-content：fit-content 与 minmax 是不同类型的
+       轨道，二者之间 transition: grid-template-columns 不生效，浏览器直接一步跳到终值
+       （实测 t=56ms cols=734px → t=63ms cols=352px，actions 同步从 x=763 瞬移到 x=380）。
+       同类型轨道才能逐帧补间。areas 也全程不变，同理——areas 变了元素的行列映射立即重算，
+       同样不补间（实测 search 宽度 658 → 1120 一步跳）。
+       收起态靠问候语自己的 max-height 归零让位，搜索框与功能按钮的位置都不动。
+       封顶值分三档：宽屏 28rem（七个按钮带文字全展开约 446px）常规桌面单行放得下；
+       640~899px 收 22rem、640~699px 再收 18rem，逼 flex-wrap 折成两行，
        否则搜索框被挤到和功能行重叠（实测 640px 重叠 110px、700px 重叠 50px）。
        提醒：grid-template-areas 每行 token 数必须等于列数（这里是 2），写成单 token 的
        跨行形状会被浏览器整条静默丢弃。 */
     @media (min-width: 640px) {
       [data-new-tab-page].new-tab-shell {
-        grid-template-columns: minmax(0, 1fr) fit-content(28rem);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 28rem);
         grid-template-areas:
           "greeting greeting"
           "search actions"
@@ -536,29 +539,22 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
           padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
           grid-template-columns 0.45s cubic-bezier(0.22, 1, 0.36, 1);
       }
-    }
 
-    @media (min-width: 640px) and (max-width: 899px) {
-      [data-new-tab-page].new-tab-shell {
-        grid-template-columns: minmax(0, 1fr) fit-content(22rem);
+      @media (min-width: 640px) and (max-width: 899px) {
+        [data-new-tab-page].new-tab-shell {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+        }
       }
-    }
 
-    /* 640 这一档 shell 只有约 592px：搜索框保底 16rem(256px) + 列间距 32px 后，
-       功能行只剩约 300px。22rem(352px) 还会重叠 16px，收到 18rem(288px) 刚好放下
-       四个图标钮，带文字的按钮折到第二行。 */
-    @media (min-width: 640px) and (max-width: 699px) {
-      [data-new-tab-page].new-tab-shell {
-        grid-template-columns: minmax(0, 1fr) fit-content(18rem);
+      /* 640 这一档 shell 只有约 592px：搜索框保底 16rem(256px) + 列间距 32px 后，
+         功能行只剩约 300px。22rem(352px) 还会重叠 16px，收到 18rem(288px) 刚好放下
+         四个图标钮，带文字的按钮折到第二行。 */
+      @media (min-width: 640px) and (max-width: 699px) {
+        [data-new-tab-page].new-tab-shell {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
+        }
       }
-    }
 
-    @media (min-width: 640px) {
-      /* 工具栏在宽屏始终拆开（display: contents），greeting-block 与 actions 各自
-         成为 shell 的直接网格项。关键是「始终」：以前只有展开态拆、收起态收回 flex，
-         折叠第一帧 display 从 contents 跳成 flex，工具栏凭空长出 446px 的盒，
-         这就是用户说的「折叠过程中操作栏区域过渡有一点卡顿僵硬」。
-         现在两种状态都拆，display 不变，剩下的列宽与问候语高度全部可补间。 */
       [data-new-tab-page] .new-tab-toolbar {
         display: contents;
         gap: 0;
@@ -574,9 +570,8 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
         justify-content: flex-end;
       }
 
-      /* 聚焦即撑满：搜索格从第一列展开到整行，功能按钮被推到下一行，
-         列宽同步补间，搜索框平滑吃掉剩余空间而不是硬跳。
-         必须切成单列 grid：写成两列 minmax(0,1fr) 会被等分成两个 545px，
+      /* 聚焦即撑满：搜索格从第一列展开到整行，功能按钮被推到下一行。
+         这里必须切成单列 grid：写成两列 minmax(0,1fr) 会被等分成两个 545px，
          search 那行照样只有一半宽（实测踩过）。单列下矩形约束仍要满足，
          每行都写 2 个同名 token 表示跨满。 */
       [data-new-tab-page]:has(.new-tab-search:focus-within).new-tab-shell {
@@ -737,41 +732,32 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       max-width: none;
     }
 
-    /* 一段收起：问候语缩到 0，工具栏整行高度随之塌下去，搜索框与功能按钮那一行顶上来。
-       行结构与展开态逐行对齐（toolbar / search+actions / stack），
-       变的只有第一列宽度（fit-content(28rem) → 22rem）与问候语高度，
-       两者都可补间，所以整段是连续的而不是两段跳。
-       第一列之所以要收窄：收起后功能按钮搬进了工具栏行，第二行只剩搜索框，
-       但列宽仍决定搜索框能有多宽——22rem 是实测能同时放下搜索框与按钮折行的值。 */
+    /* 一段收起：问候语缩到 0 让位，搜索框吃掉它空出来的宽度。
+       刻意不改 areas、也不改列数——areas 一变，元素的行列映射立即重算、不补间
+       （实测 search 宽度 658 → 1120 一步跳，actions 从 x=886 瞬移到 x=580）。
+       这里只把第二列从 28rem 收到 22rem，与展开态同为 minmax 轨道，
+       列宽补间照常生效，搜索框与功能按钮的位置连续变化。
+       收起态功能按钮改贴左：第一行问候语已归零，第二行按钮与搜索框同行，
+       贴左才和搜索框左边缘对齐，不会孤零零挂在右边。 */
     @media (min-width: 640px) {
       [data-new-tab-page][data-header-state="collapsed"].new-tab-shell {
-        grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-    /* 一段收起：问候语缩到 0 腾出第一行，功能按钮搬上第一行，搜索框独占第二行。
-       第一行始终是 greeting 与 actions 两个格子，只是 collapsed 时 greeting 宽度归零、
-       actions 改成跨满整行（"actions actions"）——所以 actions 是从"右侧一列"滑到"整行"，
-       而不是瞬移到另一个位置。第二行只剩搜索框，列宽收到 22rem。
-       行结构与展开态逐行对齐（greeting+actions / search / stack），
-       全程只有列宽、宽度、max-height 在补间。 */
-    @media (min-width: 640px) {
-      [data-new-tab-page][data-header-state="collapsed"].new-tab-shell {
-        grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-        grid-template-areas:
-          "greeting actions"
-          "search search"
-          "stack stack";
+        grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
         transition:
           padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
           grid-template-columns 0.45s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
-      /* 聚焦即撑满：搜索格从 22rem 展开到整行，功能按钮被推到下一行，
-         列宽同步补间，搜索框平滑吃掉剩余空间而不是硬跳。
+      [data-new-tab-page][data-header-state="collapsed"] .new-tab-actions {
+        justify-content: flex-start;
+      }
+
+      /* 聚焦即撑满：搜索格从第一列展开到整行，功能按钮被推到下一行。
          注意 grid-template-areas 每行必须是同形矩形：这里每行都写 2 个 token
          （前两行同名重复表示各占满整行），写成 "search" "toolbar" "stack stack"
          这种前两行单 token 的形状，部分浏览器会整条判定非法而丢弃规则。 */
       [data-new-tab-page][data-header-state="collapsed"]:has(.new-tab-search:focus-within).new-tab-shell {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-areas: "greeting actions" "search search" "actions actions" "stack stack";
+        grid-template-areas: "greeting greeting" "search search" "actions actions" "stack stack";
       }
     }
 
@@ -826,19 +812,15 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
     }
 
     [data-new-tab-page][data-header-state="collapsed"] .new-tab-greeting-block {
+      /* 只压高度，不压宽度。一旦同时把 max-width 也归零，overflow: hidden 里内部 grid
+         子元素会按极窄宽度重新换行，盒子反而被撑高（实测 62px → 97px），
+         把第二行在折叠第一帧顶下去 36px。宽度让位交给 grid 列宽自己过渡，
+         问候语跨满整行、宽度根本不参与折叠。 */
       max-height: 0;
-      max-width: 0;
       opacity: 0;
       overflow: hidden;
       transform: translateY(-0.75rem);
       pointer-events: none;
-    }
-
-    /* 收起态第一行只剩功能按钮，从右对齐改成贴左，与搜索框左边缘对齐 */
-    @media (min-width: 640px) {
-      [data-new-tab-page][data-header-state="collapsed"] .new-tab-actions {
-        justify-content: flex-start;
-      }
     }
 
     /* 聚焦即撑满：收起态定的 22rem 与默认 70rem 上限都在 focus-within 时作废，
