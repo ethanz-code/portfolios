@@ -761,14 +761,16 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
        收起态功能按钮改贴左：第一行问候语已归零，第二行按钮与搜索框同行，
        贴左才和搜索框左边缘对齐，不会孤零零挂在右边。 */
     @media (min-width: 640px) {
-      [data-new-tab-page][data-header-state="collapsed"].new-tab-shell {
+      [data-new-tab-page][data-header-state="collapsed"].new-tab-shell,
+      [data-new-tab-page][data-header-state="suspended"].new-tab-shell {
         grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
         transition:
           padding-top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
           grid-template-columns 0.45s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
-      [data-new-tab-page][data-header-state="collapsed"] .new-tab-actions {
+      [data-new-tab-page][data-header-state="collapsed"] .new-tab-actions,
+      [data-new-tab-page][data-header-state="suspended"] .new-tab-actions {
         justify-content: flex-start;
       }
     }
@@ -823,7 +825,12 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       padding-top: clamp(1.25rem, 4vh, 2.25rem);
     }
 
-    [data-new-tab-page][data-header-state="collapsed"] .new-tab-greeting-block {
+    /* 挂起态沿用收起态的问候语压缩：suspended 是 collapsed 的下一级，
+       第一行必须继续是 0 高。之前这条只写 collapsed，suspended 下问候语回到
+       自然高度，第二行被顶下去、搜索框跟着位移——用户原话「第二次折叠的时候
+       那个大的搜索框闪了一下」。 */
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-greeting-block,
+    [data-new-tab-page][data-header-state="suspended"] .new-tab-greeting-block {
       /* 只压高度，不压宽度。一旦同时把 max-width 也归零，overflow: hidden 里内部 grid
          子元素会按极窄宽度重新换行，盒子反而被撑高（实测 62px → 97px），
          把第二行在折叠第一帧顶下去 36px。宽度让位交给 grid 列宽自己过渡，
@@ -843,16 +850,23 @@ const serializedDefaultNewTabPayload = JSON.stringify(defaultNewTabPayload).repl
       max-width: 100%;
     }
 
-    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__input {
+    /* 挂起态沿用收起态的搜索框压缩：高度、分隔线边距、文字标签都不许弹回完整尺寸。
+       这些是 collapsed 专属的「变小」规则，漏了 suspended 就会在第二次折叠时
+       把大号搜索框的内容重新铺开（搜索框正处于 max-height: 0 的折叠过程中，
+       内容反而被撑出来闪一下）。 */
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__input,
+    [data-new-tab-page][data-header-state="suspended"] .new-tab-search__input {
       height: 2.5rem;
     }
 
-    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__divider {
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__divider,
+    [data-new-tab-page][data-header-state="suspended"] .new-tab-search__divider {
       margin-top: 0.55rem;
       margin-bottom: 0.55rem;
     }
 
-    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__submit-label {
+    [data-new-tab-page][data-header-state="collapsed"] .new-tab-search__submit-label,
+    [data-new-tab-page][data-header-state="suspended"] .new-tab-search__submit-label {
       display: none;
     }
 
